@@ -38,6 +38,11 @@ export default {
   computed: {
     isFocused () { return this.$store.state.appState === 'addCard' },
   }, 
+  watch: {
+    isFocused (newFocus) {
+      if (newFocus) this.$nextTick(() => this.$refs.front.focus())
+		}
+  },
   mounted () {
 		window.addEventListener('keydown', this.keyDown)
 		window.addEventListener('keyup', this.keyUp)

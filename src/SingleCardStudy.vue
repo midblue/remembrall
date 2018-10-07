@@ -2,7 +2,7 @@
   <div>
 		<div class="card">
 			<div class="front">{{
-				 front
+				 reverse ? back : front
 			}}</div>
 			<div 
 				class="back"
@@ -11,10 +11,12 @@
 					:class="{hideanswer: !showBack}"
 				>
 					<div>{{
-						back
+						reverse ? front : back
 					}}</div>
 					<div class="sub">
-						<a target="_blank" :href="pronunciationLink">Pronunciation</a>
+						<a target="_blank" :href="pronunciationLink">Pronunciation</a><br />
+						<a target="_blank" :href="translationLink">Translation</a>
+
 					</div>
 				</div>
 			</div>
@@ -29,35 +31,20 @@
 				v-if="timeBonuses.again !== undefined"
 				@click="answer('again')"
 			>
-				Again ({{ formattedTimeBonuses.again }})
+				Wrong
 				<div class="sub">(1)</div>
-			</button><!--<button
-				v-if="timeBonuses.hard"
-				@click="answer('hard')"
-			>
-				Hard ({{ formattedTimeBonuses.hard }})
-				<div class="sub">(2)</div>
-			</button>--><button
+			</button><button
 				v-if="timeBonuses.ok"
 				@click="answer('ok')"
 			>
-			  Next ({{ formattedTimeBonuses.ok }})
+			  Right
 				<div class="sub">(2/Space)</div>
-			</button><!--<button
-				v-if="timeBonuses.easy"
-				@click="answer('easy')"
-			>
-			  Easy ({{ formattedTimeBonuses.easy }})
-				<div class="sub">(4)</div>
-			</button>-->
+			</button>
 		</div>
 		<template>
 			<div class="extraoptions">
 				<button
-					@click="
-						$store.commit('setAppState', 'editCard');
-						$store.commit('cardToEditId', id);
-					"
+					@click="editCard"
 				>
 					Edit Card
 				</button><button
@@ -83,6 +70,7 @@ const timeIgnoreCutoff = [300, 30 * 1000] // .3s / 30s
 
 export default {
   props: {
+		reverse: {},
     front: {},
 		back: {},
 		id: {},
@@ -120,8 +108,14 @@ export default {
 		pronunciationLink () {
 			let linebreakPos = this.back.indexOf('\n')
 			if (linebreakPos === -1)
-				return `https://forvo.com/word/${ this.back }/#es`
+				linebreakPos = this.back.length
 			return `https://forvo.com/word/${ this.back.substring(0, linebreakPos) }/#es`
+		},
+		translationLink () {
+			let linebreakPos = this.back.indexOf('\n')
+			if (linebreakPos === -1)
+				linebreakPos = this.back.length
+			return `https://translate.google.com/#es/en/${ this.back.substring(0, linebreakPos) }`
 		},
 		timeBonuses () {
 			let bonuses = {
@@ -153,9 +147,11 @@ export default {
 	},
 	mounted () {
 		window.addEventListener('keydown', this.keyDown)
+		window.addEventListener('keyup', this.keyUp)
 	},
 	beforeDestroy () {
 		window.removeEventListener('keydown', this.keyDown)
+		window.removeEventListener('keyup', this.keyUp)
 	},
   methods: {
     answer (difficulty) {
@@ -178,6 +174,7 @@ export default {
 			// depending on time taken, can up to double the push back
 			if (!ignoreTime)
 				newTimeMod += cardTimeNormalized * this.timeBonuses[difficulty]
+			// depending on the length of the answer vs the length of the prompt, can affect timeMod
 
 			// calc interval until next review
 			const newNextReview = new Date(Date.now() + newTimeMod)
@@ -196,7 +193,7 @@ export default {
 			})
 
 			// request new card from StudyFrame
-			this.$emit('done')
+			this.$emit('done', newTimeMod)
 		},
 		getTimeBonus ( difficulty ) {
 			let newTimeMod = this.timeMod * difficultyModifiers[difficulty]
@@ -217,8 +214,20 @@ export default {
 			else if (event.key === '2') this.answer('ok')
 			// else if (event.key === '4') this.answer('easy')
 		},
+		keyUp (event) {
+			if (!this.isFocused) return
+			if (event.key === 'e') this.editCard()
+			if (event.key === 'a' || event.key === 'Tab') this.addCard()
+		},
+		addCard () {
+			this.$store.commit('setAppState', 'addCard')
+		},
 		deleteCard () {
 			this.$store.commit('deleteCard', this.id)
+		},
+		editCard () {
+			this.$store.commit('setAppState', 'editCard')
+			this.$store.commit('cardToEditId', this.id)
 		},
   }
 }

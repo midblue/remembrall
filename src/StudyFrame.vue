@@ -3,6 +3,10 @@
     class="studyframe"
     :class="{ focus: appState === 'study' }"
   >
+    <input type="checkbox" v-model="reverse" />Study Back/Front
+    <div class="floatnumber" v-if="displayTimeMod">
+      {{ displayTimeMod }}
+    </div>
     <template v-if="!done">
       <div class="sub centertext">
         <b>{{ currentlyReviewing.length }}</b> cards left to review
@@ -17,6 +21,7 @@
       </div>
       <SingleCardStudy
         v-bind="currentlyReviewing[0]"
+        :reverse="reverse"
         @done="nextCard"
       />
     </template>
@@ -30,6 +35,7 @@
 
 <script>
 import SingleCardStudy from './SingleCardStudy'
+import { msToString } from './assets/commonFunctions'
 
 export default {
   props: {
@@ -44,6 +50,8 @@ export default {
       toReview: [],
       currentlyReviewing: [],
       startedWith: this.cards.length,
+      displayTimeMod: null,
+      reverse: false,
     }
   },
   computed: {
@@ -87,7 +95,9 @@ export default {
     clearInterval(this.checkForReviewsTimer)
   },
   methods: {
-    nextCard () {
+    nextCard (timeMod) {
+      this.displayTimeMod = null
+      this.$nextTick(() => this.displayTimeMod = '+' + msToString(timeMod))
       this.currentlyReviewing.shift()
       this.$nextTick(this.checkForReviews)
     },
@@ -104,11 +114,24 @@ export default {
 <style lang="scss" scoped>
 
 .studyframe {
+  position: relative;
   opacity: .3;
   transition: all .5s;
 
   &.focus {
     opacity: 1;
+  }
+
+  .floatnumber {
+    // transform: translateX(25%);
+    z-index: 100;
+    width: 100%;
+    position: absolute;
+    text-align: center;
+    user-select: none;
+    pointer-events: none;
+    animation: pointsscroll 1.5s normal forwards ease-out;
+    color: green;
   }
 }
 
@@ -124,6 +147,21 @@ export default {
     height: 100%;
   }
 }
+
+@keyframes pointsscroll {
+  from {
+    opacity: 0;
+    bottom: 15%;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    bottom: 30%;
+  }
+}
+
 
 </style>
 

@@ -1,6 +1,6 @@
 <template>
   <div class="setview">
-    <h2>{{ set.name }}</h2>
+    <h2>{{ set.name }} <button>Stats</button></h2>
     <div class="setelements">
       <StudyFrame
         v-bind="set"
@@ -30,6 +30,10 @@ export default {
     CardEditor,
     CardCreator,
     StudyFrame,
+  },
+  data () {
+    return {
+    }
   },
   computed: {
     appState () { return this.$store.state.appState },
