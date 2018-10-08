@@ -64,7 +64,7 @@ html, body {
 
 button {
   margin: 0;
-  border: none;
+  border: 1px solid #eee; 
   background: white;
   font-size: 0.85rem;
   font-weight: 400;
@@ -76,6 +76,7 @@ button {
 
   &:hover {
     background: #f8f8f8;
+    border: 1px solid transparent;
   }
 }
 
@@ -87,6 +88,20 @@ button {
 	button {
 		flex: 1;
     border-radius: 0;
+
+    &:last-of-type {
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    &:first-of-type {
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+    
+    &:not(:last-of-type) {
+      border-right: none;
+    }
 	}
 }
 
