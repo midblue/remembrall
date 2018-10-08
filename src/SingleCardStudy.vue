@@ -9,6 +9,7 @@
 			/>
 			<div 
 				class="back"
+				:class="{pointer: showBack === false}"
 				@click="showBack = true"
 			>
 				<div
@@ -21,31 +22,41 @@
 						@endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
 					/>
 					<div class="sub">
-						<a target="_blank" :href="pronunciationLink">Pronunciation</a><br />
+						<a target="_blank" :href="pronunciationLink">Pronunciation</a> ・ 
 						<a target="_blank" :href="translationLink">Translation</a>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<button class="showback" v-if="!showBack" @click="showBack = true">
-			Show Back
-			<div class="sub">(Space)</div>
-		</button>
-		<div v-if="showBack" class="buttonlist">
-			<button
-				v-if="timeBonuses.again !== undefined"
-				@click="answer('again')"
-			>
-				Wrong
-				<div class="sub">(1)</div>
-			</button><button
-				v-if="timeBonuses.ok"
-				@click="answer('ok')"
-			>
-			  Right
-				<div class="sub">(2/Space)</div>
+		
+		<div class="buttonlist">
+			<button class="showback" v-if="!showBack" @click="showBack = true">
+				Show Back
+				<div>
+					<span class="keyicon">Space</span>
+				</div>
 			</button>
+			<template v-else>
+				<button
+					v-if="timeBonuses.again !== undefined"
+					@click="answer('again')"
+				>
+					Wrong
+					<div>
+						<span class="keyicon">1</span>
+					</div>
+				</button><button
+					v-if="timeBonuses.ok"
+					@click="answer('ok')"
+				>
+					Right
+					<div>
+						<span class="keyicon">2</span>
+						<span class="keyicon">Space</span>
+					</div>
+				</button>
+			</template>
 		</div>
 		<div class="extraoptions">
 			<button
@@ -260,11 +271,35 @@ export default {
 .textfield {
 	padding: 50px 20px;
 	white-space: pre-wrap;
+
+	&.editabletextediting {
+		background: rgba(0, 0, 0, .05);
+	}
+
+	&:hover:not(.editabletextediting) {
+		position: relative;
+		background: rgba(0, 0, 0, .05);
+
+		&:after {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			content: 'CLICK TO EDIT';
+			font-weight: 600;
+			font-size: .7em;
+			opacity: .5;
+		}
+	}
 }
 
 .back {
 	border-top: 1px solid #ddd;
 	padding-bottom: 20px;
+	transition: .2s;
+
+	&.pointer {
+		cursor: pointer;
+	}
 
 	.hideanswer {
 		user-select: none;
@@ -272,21 +307,6 @@ export default {
 		opacity: .2;
 		filter: blur(5px);
 	}
-}
-
-.buttonlist {
-	display: flex;
-}
-
-button {
-	flex: 1;
-	margin: 0;
-	border: 1px solid #ddd;
-	background: #eee;
-	font-size: 0.9rem;
-	padding: 10px;
-  font-family: 'Avenir', sans-serif;
-	cursor: pointer;
 }
 
 .showback {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="editabletext"
-    :class="{ editing: isEditing, }"
+    :class="{ editabletextediting: isEditing, }"
     :contenteditable="isEditing"
     @focus="startEdit"
     @click="startEdit"
@@ -90,11 +90,11 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .editabletext {
     cursor: pointer;
 
-    &.editing {
+    &.editabletextediting {
       cursor: text;
     }
   }

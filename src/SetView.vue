@@ -6,11 +6,16 @@
 				@startEdit="startEditName"
 				@endEdit="saveEditedName"
       />
+      <div class="sub">
+        ({{ set.cards.length }} card{{ set.cards.length === 1 ? '' : 's' }})
+      </div>
     </h2>
-    <div>
-      <button>Add Card</button>
+    <div class="buttonlist">
+      <button>+ Add Cards</button>
       <button>Stats</button>
+      <button>Powerups (2)</button>
     </div>
+    <br />
     <div class="setelements">
       <StudyFrame
         v-bind="set"
@@ -57,6 +62,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+h2 {
+  margin-bottom: .75rem;
+
+  div {
+    display: inline-block;
+  }
+}
 
 .setview {
   width: 500px;

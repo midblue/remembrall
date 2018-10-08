@@ -11,9 +11,6 @@
       <div class="sub centertext">
         <b>{{ currentlyReviewing.length }}</b> cards left to review
       </div>
-      <div class="sub centertext">
-        ({{ cards.length }} total in this set)
-      </div>
       <div class="progressbar">
         <div 
           :style="{ width: (100 - ((currentlyReviewing.length / startedWith) * 100)) + '%' }"
