@@ -19,6 +19,10 @@ export default () => {
       loadSet (state, id) {
         state.currentSet = loadSetById(id)
       },
+      updateSetName (state, newName) {
+        Vue.set(state.currentSet, 'name', newName)
+        saveSet(state.currentSet)
+      },
 
       addCard (state, card) {
         state.currentSet.cards.push({

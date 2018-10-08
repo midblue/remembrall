@@ -1,7 +1,7 @@
 <template>
   <div
     class="studyframe"
-    :class="{ focus: appState === 'study' }"
+    :class="{ focus: appState === 'study' || appState === 'editCard' || appState === 'addCard' }"
   >
     <input type="checkbox" v-model="reverse" />Study Back/Front
     <div class="floatnumber" v-if="displayTimeMod">
@@ -27,13 +27,14 @@
     </template>
     <template v-else>
       <h3>Done for now!</h3>
-      <div>Next review in {{ nextReview }}</div>
+      <div v-if="nextReview">Next review in {{ nextReview }}</div>
       <div class="sub">Cards in this set: {{ cards.length }}</div>
     </template>
   </div>
 </template>
 
 <script>
+const debug = true
 import SingleCardStudy from './SingleCardStudy'
 import { msToString } from './assets/commonFunctions'
 
@@ -104,7 +105,7 @@ export default {
     checkForReviews () {
       const now = new Date()
       this.toReview = this.sortedCards.filter(card => {
-        return !card.nextReview || new Date(card.nextReview) <= now
+        return debug || !card.nextReview || new Date(card.nextReview) <= now
       })
     }
   }
