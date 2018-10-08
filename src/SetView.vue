@@ -13,7 +13,7 @@
     <div class="buttonlist">
       <button>+ Add Cards</button>
       <button>Stats</button>
-      <button>Powerups (2)</button>
+      <button>Powerups(2) ▾</button>
     </div>
     <br />
     <div class="setelements">

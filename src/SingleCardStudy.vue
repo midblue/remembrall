@@ -1,6 +1,6 @@
 <template>
   <div>
-		<div class="card">
+		<div class="card roundframe">
 			<EditableTextField
 				class="front textfield"
 				:text="reverse ? back : front"
@@ -287,7 +287,7 @@ export default {
 			content: 'CLICK TO EDIT';
 			font-weight: 600;
 			font-size: .7em;
-			opacity: .5;
+			opacity: .2;
 		}
 	}
 }

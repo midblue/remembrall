@@ -58,7 +58,7 @@ html, body {
   padding: 1px 5px;
   text-align: center;
   min-width: 18px;
-  border-radius: 5px;
+  border-radius: 4px;
   box-shadow: 0 2px 0px rgba(black, .2);
 }
 

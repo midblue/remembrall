@@ -136,13 +136,12 @@ export default {
 .progressbar {
   position: relative;
   width: 100%;
-  height: 5px;
-  background: #eee;
+  height: 0px;
 
   div {
     background: #ccc;
     transition: .2s;
-    height: 100%;
+    height: 5px;
   }
 }
 
