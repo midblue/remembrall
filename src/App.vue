@@ -1,21 +1,25 @@
 <template>
   <section class="app">
-    <SetView
-      v-if="currentSet"
-      :set="currentSet"
-    />
+    <UserAndSetPicker />
+    <div class="content">
+      <SetView
+        v-if="currentSet"
+        :set="currentSet"
+      />
+    </div>
   </section>
 </template>
 
 <script>
+import UserAndSetPicker from './UserAndSetPicker.vue'
 import SetView from './SetView.vue'
 
 export default {
   components: {
-    SetView,
+    SetView, UserAndSetPicker,
   },
   computed: {
-    currentSet () { return this.$store.state.currentSet },
+    currentSet () { return this.$store.state.setList[this.$store.state.currentSetId] },
   }
 }
 </script>
@@ -33,7 +37,11 @@ html, body {
 
 .app {
   min-height: 100vh;
+}
+
+.content {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -74,7 +82,7 @@ button {
   cursor: pointer;
   transition: .2s;
 
-  &:hover {
+  &:hover, &.active {
     background: #f8f8f8;
     border: 1px solid transparent;
   }

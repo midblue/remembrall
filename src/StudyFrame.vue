@@ -22,6 +22,10 @@
         @done="nextCard"
       />
     </template>
+    <template v-else-if="cards.length === 0">
+      <h3>No cards yet!</h3>
+      <div>Add some below.</div>
+    </template>
     <template v-else>
       <h3>Done for now!</h3>
       <div v-if="nextReview">Next review in {{ nextReview }}</div>
@@ -54,6 +58,7 @@ export default {
   },
   computed: {
     appState () { return this.$store.state.appState },
+    currentSetId () { return this.$store.state.currentSetId },
     sortedCards () {
       return this.cards.sort((a, b) => a.nextReview > b.nextReview ? 1 : -1)
     },
@@ -70,6 +75,13 @@ export default {
     }
   },
   watch: {
+    currentSetId () {
+      this.currentlyReviewing = []
+      this.startedWith = this.cards.length
+      this.reverse = false
+      this.toReview = []
+      this.checkForReviews()
+    },
     sortedCards () {
       this.checkForReviews()
     },

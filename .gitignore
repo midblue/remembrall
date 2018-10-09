@@ -4,6 +4,8 @@ dist/
 npm-debug.log
 yarn-error.log
 
+keys.js
+
 # Editor directories and files
 .idea
 *.suo

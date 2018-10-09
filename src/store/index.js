@@ -1,73 +1,113 @@
 import Vuex from 'vuex'
 import Vue from 'vue';
-const { get, set } = require('../assets/storage')
+const storage = require('../assets/storage')
+const firestore = require('../assets/firestore')
 
 Vue.use(Vuex)
 
 export default () => {
   return new Vuex.Store({
     state: {
-      currentSet: loadFirstSet(),
+      currentUser: null,
+      setList: [],
+      currentSetId: null,
       appState: 'study',
       editingCard: null,
     },
     mutations: {
+      // global vars
+      setUsername (state, newUsername) {
+        state.currentUser = newUsername
+        storage.set('currentUser', newUsername)
+      },
+      setSetList (state, newSetList) {
+        state.setList = newSetList
+      },
+      setCurrentSetId (state, newSetId) {
+        state.currentSetId = newSetId
+        storage.set('currentSetId', newSetId)
+      },
+      logOut (state) {
+        state.currentUser = null
+        state.setList = []
+        state.currentSetId = null
+      },
+
+      // app state
       setAppState (state, newState) {
         state.appState = newState || 'deckList'
       },
 
-      loadSet (state, id) {
-        state.currentSet = loadSetById(id)
-      },
+      // sets
       updateSetName (state, newName) {
-        Vue.set(state.currentSet, 'name', newName)
-        saveSet(state.currentSet)
+        Vue.set(state.setList[state.currentSetId], 'name', newName)
+        firestore.saveSet(state.currentUser, state.setList[state.currentSetId])
+      },
+      addSet (state) {
+        const newSet = blankSet()
+        state.setList[newSet.id] = newSet
+        state.currentSetId = newSet.id
+        firestore.saveSet(state.currentUser, state.setList[state.currentSetId])
+      },
+      deleteSet (state, setId) {
+        Vue.delete(state.setList, setId)
+        firestore.deleteSet(state.currentUser, setId)
       },
 
+      // cards
       addCard (state, card) {
-        state.currentSet.cards.push({
+        state.setList[state.currentSetId].cards.push({
           ...card,
           id: Date.now()
         })
-        saveSet(state.currentSet)
+        firestore.saveSet(state.currentUser, state.setList[state.currentSetId])
       },
       cardToEditId (state, id) {
         if (!id) state.editingCard = null
-        state.editingCard = state.currentSet.cards.find(c => c.id === id)
+        state.editingCard = state.setList[state.currentSetId].cards.find(c => c.id === id)
       },
       updateCard (state, card) {
-        const foundCardIndex = state.currentSet.cards.findIndex(c => c.id === card.id)
+        const foundCardIndex = state.setList[state.currentSetId].cards.findIndex(c => c.id === card.id)
         if (foundCardIndex !== undefined)
           for (let param in card)
-            Vue.set(state.currentSet.cards[foundCardIndex], param, card[param])
-        saveSet(state.currentSet)
+            Vue.set(state.setList[state.currentSetId].cards[foundCardIndex], param, card[param])
+        firestore.saveSet(state.currentUser, state.setList[state.currentSetId])
       },
       deleteCard (state, id) {
-        const newCards = state.currentSet.cards.filter(card => card.id !== id)
-        Vue.set(state.currentSet, 'cards', newCards)
-        saveSet(state.currentSet)
+        const newCards = state.setList[state.currentSetId].cards.filter(card => card.id !== id)
+        Vue.set(state.setList[state.currentSetId], 'cards', newCards)
+        firestore.saveSet(state.currentUser, state.setList[state.currentSetId])
       }
     },
     actions: {
-      nuxtServerInit({ commit }, context) {
-
-      }
+      logInAs ({ commit }, username) {
+        firestore.getAllSets(username)
+          .then(({docs, empty}) => {
+            const setObject = {}
+            docs.forEach(doc => {
+              const set = doc.data()
+              setObject[set.id] = set
+            })
+            commit('setUsername', username)
+            commit('setSetList', setObject)
+          })
+      },
     }
   })
 }
 
 function loadSetById (id) {
-  return loadSetsFromStorage()[id]
+  return loadSetsFromLocalStorage()[id]
 }
 
 function loadFirstSet () {
-  const allSets = loadSetsFromStorage()
+  const allSets = loadSetsFromLocalStorage()
   const firstKey = Object.keys( allSets )[0]
   return allSets[firstKey]
 }
 
-function loadSetsFromStorage () {
-  const loadedSets = get('sets')
+function loadSetsFromLocalStorage () {
+  const loadedSets = storage.get('sets')
   if (loadedSets && loadedSets !== '') {
     let loadedSetsAsObject = JSON.parse(loadedSets)
     if (loadedSetsAsObject)
@@ -76,14 +116,14 @@ function loadSetsFromStorage () {
   return newSetList()
 }
 
-function saveSet (newSet) {
-  let loadedSets = get('sets')
+function saveSetToLocalStorage (newSet) {
+  let loadedSets = storage.get('sets')
   if (loadedSets !== '')
     loadedSets = JSON.parse(loadedSets)
   if (loadedSets === null || loadedSets === '' || Array.isArray(loadedSets))
     loadedSets = {}
   loadedSets[newSet.id] = newSet
-  set('sets', JSON.stringify(loadedSets))
+  starage.set('sets', JSON.stringify(loadedSets))
 }
 
 function newSetList () {

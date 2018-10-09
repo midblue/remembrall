@@ -14,6 +14,7 @@
       <button>+ Add Cards</button>
       <button>Stats</button>
       <button>Powerups(2) ▾</button>
+      <button @click="deleteSet">Delete Set</button>
     </div>
     <br />
     <div class="setelements">
@@ -47,7 +48,6 @@ export default {
   },
   computed: {
     appState () { return this.$store.state.appState },
-    editingCard () { return this.$store.state.editingCard },
   },
   methods: {
     startEditName () {
@@ -57,6 +57,10 @@ export default {
       this.$store.commit('updateSetName', newName)
       this.$store.commit('setAppState', 'study')
     },
+    deleteSet () {
+      if (confirm(`Do you really want to delete the set "${ this.set.name }"?`))
+        this.$store.commit('deleteSet', this.set.id)
+    }
   }
 }
 </script>
