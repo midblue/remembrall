@@ -47,6 +47,7 @@ export default () => {
         const newSet = blankSet()
         state.setList[newSet.id] = newSet
         state.currentSetId = newSet.id
+        storage.set('currentSetId', newSet.id)
         firestore.saveSet(state.currentUser, state.setList[state.currentSetId])
       },
       deleteSet (state, setId) {
@@ -89,6 +90,7 @@ export default () => {
               const set = doc.data()
               setObject[set.id] = set
             })
+            commit('setCurrentSetId', Object.keys(setObject)[0])
             commit('setUsername', username)
             commit('setSetList', setObject)
           })

@@ -1,14 +1,27 @@
 <template>
   <div 
 		class="userandsetpicker"
-		:class="{fullscreen: !currentUser || isLoading}"
+		:class="{
+			fullscreen: !currentUser || isLoading,
+			vertical: !currentUser,
+		}"
 	>
 		<template v-if="!currentUser && !isLoading">
-			<b>Enter your username.</b>
-			<input v-model="inputUsername" placeholder="username" />
-			<button
-				@click="logInAs"
-			>Go</button>
+			<div>
+				<b>Enter your username.</b>
+			</div>
+			<div>
+				<input
+					v-model="inputUsername"
+					placeholder="username"
+					ref="usernameInput"
+				/>
+			</div>
+			<div>
+				<button
+					@click="logInAs"
+				>Go</button>
+			</div>
 		</template>
 		<template v-else-if="isLoading">
 			<div class="sub">Loading...</div>
@@ -57,12 +70,13 @@ export default {
 		currentSetId () { return this.$store.state.currentSetId },
   },
 	watch: {
-		currentUser () {
+		currentUser (newUser) {
 			this.isLoading = false
 			const savedSetId = get('currentSetId')
 			if (savedSetId && savedSetId !== '') {
 				this.$store.commit('setCurrentSetId', savedSetId)
 			}
+			if (!newUser) this.$nextTick(this.focusInput)
 		},
 		setList () {
 			this.isLoading = false
@@ -70,15 +84,21 @@ export default {
 		currentSetId () {
 			this.isLoading = false
 		},
-		
 	},
 	mounted () {
+		window.addEventListener('keydown', this.keyDown)
 		const savedUsername = get('currentUser')
 		if (savedUsername && savedUsername !== '') {
 			this.$store.dispatch('logInAs', savedUsername)
 			this.isLoading = true
 		}
+		else {
+			this.$nextTick(this.focusInput)
+		}
 	},
+	beforeDestroy () {
+		window.removeEventListener('keydown', this.keyDown)
+  },
   methods: {
 		logInAs () {
 			if (this.inputUserName === '') return
@@ -87,6 +107,14 @@ export default {
 		},
 		logOut () {
 			this.$store.commit('logOut')
+		},
+		keyDown (event) {
+			if (this.currentUser) return
+			if (event.key === 'Enter')
+				this.logInAs()
+		},
+		focusInput () {
+			this.$refs.usernameInput.focus()
 		}
   }
 }
@@ -108,6 +136,14 @@ export default {
 	&.fullscreen {
 		height: 100vh;
 		justify-content: center;
+	}
+
+	&.vertical {
+		flex-direction: column;
+		
+		& > * {
+			margin-bottom: 20px;
+		}
 	}
 }
 
