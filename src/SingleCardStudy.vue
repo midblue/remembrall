@@ -52,7 +52,7 @@
 				>
 					Right
 					<div>
-						<span class="keyicon">2</span>
+						<span class="keyicon">2</span> / 
 						<span class="keyicon">Space</span>
 					</div>
 				</button>
@@ -190,6 +190,8 @@ export default {
 			if (!ignoreTime)
 				newTimeMod += cardTimeNormalized * this.timeBonuses[difficulty]
 			// depending on the length of the answer vs the length of the prompt, can affect timeMod
+			const lengthRatio = (this.front.replace(/\n.*/g, '').length + 5) / (this.back.replace(/\n.*/g, '').length + 5)
+			console.log(lengthRatio)
 
 			// calc interval until next review
 			const newNextReview = new Date(Date.now() + newTimeMod)
@@ -304,8 +306,8 @@ export default {
 	.hideanswer {
 		user-select: none;
 		pointer-events: none;
-		opacity: .2;
-		filter: blur(5px);
+		opacity: .15;
+		filter: blur(7px);
 	}
 }
 

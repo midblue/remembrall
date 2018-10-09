@@ -1,7 +1,7 @@
 <template>
   <div 
 		class="userandsetpicker"
-		:class="{fullscreen: !currentUser && !isLoading}"
+		:class="{fullscreen: !currentUser || isLoading}"
 	>
 		<template v-if="!currentUser && !isLoading">
 			<b>Enter your username.</b>
@@ -14,9 +14,11 @@
 			<div class="sub">Loading...</div>
 		</template>
 		<template v-else>
-			<span>Logged in as <b>{{ currentUser }}</b></span>
-			<button @click="logOut">Log out</button>
-			<span>
+			<div>
+				<span>Logged in as <b>{{ currentUser }}</b></span>
+				<button @click="logOut">Log out</button>
+			</div>
+			<div>
 				Sets:
 				<button
 					v-for="set in setList"
@@ -32,7 +34,7 @@
 				>
 					+ New Set
 				</button>
-			</span>
+			</div>
 		</template>
   </div>
 </template>
@@ -82,6 +84,7 @@ export default {
   methods: {
 		logInAs () {
 			if (this.inputUserName === '') return
+			this.isLoading = true
 			this.$store.dispatch('logInAs', this.inputUsername)
 		},
 		logOut () {
@@ -97,6 +100,7 @@ export default {
 	padding: 0 50px;
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	width: 100%;
 	background: #eee;
 	margin-bottom: 30px;

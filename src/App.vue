@@ -68,6 +68,7 @@ html, body {
   min-width: 18px;
   border-radius: 4px;
   box-shadow: 0 2px 0px rgba(black, .2);
+  margin-bottom: 2px;
 }
 
 button {

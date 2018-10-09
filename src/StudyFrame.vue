@@ -29,13 +29,12 @@
     <template v-else>
       <h3>Done for now!</h3>
       <div v-if="nextReview">Next review in {{ nextReview }}</div>
-      <div class="sub">Cards in this set: {{ cards.length }}</div>
     </template>
   </div>
 </template>
 
 <script>
-const debug = true
+const debug = false
 import SingleCardStudy from './SingleCardStudy'
 import { msToString } from './assets/commonFunctions'
 
@@ -133,7 +132,7 @@ export default {
   }
 
   .floatnumber {
-    transform: translateX(25%);
+    // transform: translateX(25%);
     z-index: 100;
     width: 100%;
     position: absolute;
@@ -160,14 +159,14 @@ export default {
 @keyframes pointsscroll {
   from {
     opacity: 0;
-    bottom: 15%;
+    bottom: 25%;
   }
   50% {
     opacity: 1;
   }
   to {
     opacity: 0;
-    bottom: 30%;
+    bottom: 40%;
   }
 }
 
