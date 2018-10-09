@@ -14,12 +14,7 @@
 			<div class="sub">Loading...</div>
 		</template>
 		<template v-else>
-			<div>
-				<span>Logged in as <b>{{ currentUser }}</b></span>
-				<button @click="logOut">Log out</button>
-			</div>
-			<div>
-				Sets:
+			<div class="buttonlist inlineblock">
 				<button
 					v-for="set in setList"
 					:key="set.id"
@@ -28,12 +23,15 @@
 				>
 					{{ set.name }}
 					<span class="sub">({{ set.cards.length }})</span>
-				</button>
-				<button
+				</button><button
 					@click="$store.commit('addSet')"
 				>
 					+ New Set
 				</button>
+			</div>
+			<div>
+				<span>Logged in as <b>{{ currentUser }}</b></span>
+				<button @click="logOut">Log out</button>
 			</div>
 		</template>
   </div>
@@ -111,6 +109,10 @@ export default {
 		height: 100vh;
 		justify-content: center;
 	}
+}
+
+.inlineblock {
+	display: inline-block;
 }
 
 </style>

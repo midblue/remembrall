@@ -51,6 +51,7 @@ export default () => {
       },
       deleteSet (state, setId) {
         Vue.delete(state.setList, setId)
+        state.currentSetId = Object.keys(state.setList)[0]
         firestore.deleteSet(state.currentUser, setId)
       },
 

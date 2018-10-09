@@ -97,6 +97,7 @@ button {
 	button {
 		flex: 1;
     border-radius: 0;
+    outline:0;
 
     &:last-of-type {
       border-top-right-radius: 10px;
