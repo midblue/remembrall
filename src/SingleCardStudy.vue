@@ -60,6 +60,7 @@
 		</div>
 		<div class="extraoptions">
 			<button
+				ref="deleteButton"
 				@click="deleteCard"
 			>
 				Delete Card
@@ -190,11 +191,14 @@ export default {
 			if (!ignoreTime)
 				newTimeMod += cardTimeNormalized * this.timeBonuses[difficulty]
 			// depending on the length of the answer vs the length of the prompt, can affect timeMod
-			const lengthRatio = (this.front.replace(/\n.*/g, '').length + 5) / (this.back.replace(/\n.*/g, '').length + 5)
+			const lengthRatio = (this.front.replace(/\n.*/g, '').length + 10) / (this.back.replace(/\n.*/g, '').length + 10)
 			console.log(lengthRatio)
 
 			// calc interval until next review
 			const newNextReview = new Date(Date.now() + newTimeMod)
+
+			// normalize to ms
+			newTimeMod = Math.floor(newTimeMod)
 
 			console.log(cardTime, ignoreTime, cardTimeNormalized, this.timeMod, this.timeBonuses[difficulty], newTimeMod)
 
@@ -243,6 +247,7 @@ export default {
 		deleteCard () {
 			this.$store.commit('deleteCard', this.id)
 			this.$emit('done')
+			this.$nextTick(() => this.$refs.deleteButton.blur())
 		},
 		startEdit () {
 			this.$store.commit('setAppState', 'editCard')

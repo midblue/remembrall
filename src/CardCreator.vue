@@ -6,21 +6,18 @@
     <h4>Add Card</h4>
     <textarea
       ref="front"
-      placeholder="front"
+      placeholder="Front"
       v-model="front"
       @focus="focus"
-      @blur="blur"
     ></textarea>
     <textarea
-      placeholder="back"
+      placeholder="Back"
       v-model="back"
       @focus="focus"
-      @blur="blur"
     ></textarea>
     <button
       @click="newCard"
       @focus="focus"
-      @blur="blur"
     >
       <div>Add Card</div>
       <div class="keyicon">⌘-Enter</div>
@@ -91,7 +88,7 @@ export default {
 <style lang="scss" scoped>
 
 .cardcreator {
-  margin: 50px auto;
+  margin: 0 auto;
   opacity: .3;
   transition: all .5s;
 
@@ -107,6 +104,10 @@ export default {
     width: 100%;
     height: 100px;
     font-size: 1rem;
+  }
+
+  button {
+    width: 100%;
   }
 }
 </style>

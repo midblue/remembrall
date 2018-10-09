@@ -1,6 +1,6 @@
 <template>
   <div class="setview">
-    <h2>
+    <h1>
       <EditableTextField
         :text="set.name"
         :lineBreaksAllowed="false"
@@ -10,19 +10,29 @@
       <div class="sub">
         ({{ set.cards.length }} card{{ set.cards.length === 1 ? '' : 's' }})
       </div>
-    </h2>
+    </h1>
     <div class="buttonlist">
-      <button>+ Add Cards</button>
-      <button>Powerups(2) ▾</button>
+      <button 
+        v-if="appState !== 'addCard'"
+        @click="$store.commit('setAppState', 'addCard')"
+      >+ Add Cards</button>
+      <button
+        v-else
+        @click="$store.commit('setAppState', 'study')"
+      >Study</button>
+      <button>Powerups(3) ▾</button>
       <button>Stats</button>
       <button @click="deleteSet">Delete Set</button>
     </div>
     <br />
     <div class="setelements">
+      <CardCreator 
+        v-if="appState === 'addCard'"
+      />
       <StudyFrame
         v-bind="set"
+        v-else
       />
-      <CardCreator />
     </div>
   </div>
 </template>
@@ -68,7 +78,7 @@ export default {
 
 <style lang="scss" scoped>
 
-h2 {
+h1 {
   margin-bottom: .75rem;
 
   div {
@@ -77,7 +87,9 @@ h2 {
 }
 
 .setview {
-  width: 500px;
+  width: 550px;
+  max-width: 100vw;
+  padding: 0 20px;
 }
 
 .setelements {

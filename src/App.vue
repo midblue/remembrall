@@ -20,6 +20,15 @@ export default {
   },
   computed: {
     currentSet () { return this.$store.state.setList[this.$store.state.currentSetId] },
+  },
+  mounted () {
+    window.addEventListener('resize', this.checkWidth)
+    this.checkWidth()
+  },
+  methods: {
+    checkWidth () {
+      this.$store.commit('setAppWidth', window.innerWidth)
+    },
   }
 }
 </script>
@@ -29,7 +38,6 @@ html, body {
   margin: 0;
   font-family: 'Avenir', sans-serif;
 }
-
 
 * {
   box-sizing: border-box;

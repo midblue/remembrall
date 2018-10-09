@@ -13,6 +13,7 @@ export default () => {
       currentSetId: null,
       appState: 'study',
       editingCard: null,
+      isMobile: false,
     },
     mutations: {
       // global vars
@@ -31,6 +32,9 @@ export default () => {
         state.currentUser = null
         state.setList = []
         state.currentSetId = null
+      },
+      setAppWidth (state, newWidth) {
+        state.isMobile = parseInt(newWidth) <= 768
       },
 
       // app state
