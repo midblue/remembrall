@@ -1,5 +1,8 @@
 <template>
-  <div class="userandsetpicker">
+  <div 
+		class="userandsetpicker"
+		:class="{fullscreen: !currentUser && !isLoading}"
+	>
 		<template v-if="!currentUser && !isLoading">
 			<b>Enter your username.</b>
 			<input v-model="inputUsername" placeholder="username" />
@@ -91,10 +94,19 @@ export default {
 <style lang="scss" scoped>
 
 .userandsetpicker {
-	padding: 15px 50px;
+	padding: 0 50px;
+	display: flex;
+	align-items: center;
 	width: 100%;
 	background: #eee;
 	margin-bottom: 30px;
+	height: 70px;
+	transition: .5s;
+
+	&.fullscreen {
+		height: 100vh;
+		justify-content: center;
+	}
 }
 
 </style>
