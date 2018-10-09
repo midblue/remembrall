@@ -1,7 +1,7 @@
 <template>
   <div
     class="studyframe"
-    :class="{ focus: appState === 'study' }"
+    :class="{ focus: appState === 'study' || appState === 'editCard' || appState === 'addCard' }"
   >
     <input type="checkbox" v-model="reverse" />Study Back/Front
     <div class="floatnumber" v-if="displayTimeMod">
@@ -10,9 +10,6 @@
     <template v-if="!done">
       <div class="sub centertext">
         <b>{{ currentlyReviewing.length }}</b> cards left to review
-      </div>
-      <div class="sub centertext">
-        ({{ cards.length }} total in this set)
       </div>
       <div class="progressbar">
         <div 
@@ -27,13 +24,14 @@
     </template>
     <template v-else>
       <h3>Done for now!</h3>
-      <div>Next review in {{ nextReview }}</div>
+      <div v-if="nextReview">Next review in {{ nextReview }}</div>
       <div class="sub">Cards in this set: {{ cards.length }}</div>
     </template>
   </div>
 </template>
 
 <script>
+const debug = true
 import SingleCardStudy from './SingleCardStudy'
 import { msToString } from './assets/commonFunctions'
 
@@ -104,7 +102,7 @@ export default {
     checkForReviews () {
       const now = new Date()
       this.toReview = this.sortedCards.filter(card => {
-        return !card.nextReview || new Date(card.nextReview) <= now
+        return debug || !card.nextReview || new Date(card.nextReview) <= now
       })
     }
   }
@@ -138,13 +136,12 @@ export default {
 .progressbar {
   position: relative;
   width: 100%;
-  height: 5px;
-  background: #eee;
+  height: 0px;
 
   div {
     background: #ccc;
     transition: .2s;
-    height: 100%;
+    height: 5px;
   }
 }
 

@@ -1,63 +1,76 @@
 <template>
   <div>
-		<div class="card">
-			<div class="front">{{
-				 reverse ? back : front
-			}}</div>
+		<div class="card roundframe">
+			<EditableTextField
+				class="front textfield"
+				:text="reverse ? back : front"
+				@startEdit="startEdit"
+				@endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
+			/>
 			<div 
 				class="back"
+				:class="{pointer: showBack === false}"
+				@click="showBack = true"
 			>
 				<div
 					:class="{hideanswer: !showBack}"
 				>
-					<div>{{
-						reverse ? front : back
-					}}</div>
+					<EditableTextField
+						class="textfield"
+						:text="reverse ? front : back"
+						@startEdit="startEdit"
+						@endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
+					/>
 					<div class="sub">
-						<a target="_blank" :href="pronunciationLink">Pronunciation</a><br />
+						<a target="_blank" :href="pronunciationLink">Pronunciation</a> ・ 
 						<a target="_blank" :href="translationLink">Translation</a>
-
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<button class="showback" v-if="!showBack" @click="showBack = true">
-			Show Back
-			<div class="sub">(Space)</div>
-		</button>
-		<div v-if="showBack" class="buttonlist">
+		
+		<div class="buttonlist">
+			<button class="showback" v-if="!showBack" @click="showBack = true">
+				Show Back
+				<div>
+					<span class="keyicon">Space</span>
+				</div>
+			</button>
+			<template v-else>
+				<button
+					v-if="timeBonuses.again !== undefined"
+					@click="answer('again')"
+				>
+					Wrong
+					<div>
+						<span class="keyicon">1</span>
+					</div>
+				</button><button
+					v-if="timeBonuses.ok"
+					@click="answer('ok')"
+				>
+					Right
+					<div>
+						<span class="keyicon">2</span>
+						<span class="keyicon">Space</span>
+					</div>
+				</button>
+			</template>
+		</div>
+		<div class="extraoptions">
 			<button
-				v-if="timeBonuses.again !== undefined"
-				@click="answer('again')"
+				@click="deleteCard"
 			>
-				Wrong
-				<div class="sub">(1)</div>
-			</button><button
-				v-if="timeBonuses.ok"
-				@click="answer('ok')"
-			>
-			  Right
-				<div class="sub">(2/Space)</div>
+				Delete Card
 			</button>
 		</div>
-		<template>
-			<div class="extraoptions">
-				<button
-					@click="editCard"
-				>
-					Edit Card
-				</button><button
-					@click="deleteCard"
-				>
-					Delete Card
-				</button>
-			</div>
-		</template>
   </div>
 </template>
 
 <script>
+import EditableTextField from './EditableTextField'
+
 const minimumTimeMod = 10 * 60 * 1000 // 10m
 const difficultyModifiers = {
 	easy: 4,
@@ -94,6 +107,7 @@ export default {
 		},
   },
   components: {
+		EditableTextField,
   },
   data () {
     return {
@@ -104,7 +118,8 @@ export default {
     }
   },
   computed: {
-    isFocused () { return this.$store.state.appState === 'study' },
+    isStudying () { return this.$store.state.appState === 'study' },
+    isEditing () { return this.$store.state.appState === 'editCard' },
 		pronunciationLink () {
 			let linebreakPos = this.back.indexOf('\n')
 			if (linebreakPos === -1)
@@ -141,8 +156,8 @@ export default {
 		id () {
 			this.startedCardTime = new Date()
 		},
-		isFocused (newFocus) {
-			if (newFocus) this.showBack = false
+		isStudying (newFocus) {
+			// if (newFocus) this.showBack = false
 		}
 	},
 	mounted () {
@@ -204,19 +219,20 @@ export default {
 			return newTimeMod
 		},
 		keyDown (event) {
-			if (!this.isFocused) return
+			if (!this.isStudying) return
 			if (event.key === '1') this.answer('again')
 			// else if (event.key === '2') this.answer('hard')
-			else if (event.key === ' ') !this.showBack ? 
-				this.showBack = true : this.answer('ok')
+			else if (event.key === ' ') {
+				event.preventDefault()
+				!this.showBack ? this.showBack = true : this.answer('ok')
+			}
 			else if (event.key === 'Enter') !this.showBack ? 
 				this.showBack = true : this.answer('ok')
 			else if (event.key === '2') this.answer('ok')
 			// else if (event.key === '4') this.answer('easy')
 		},
 		keyUp (event) {
-			if (!this.isFocused) return
-			if (event.key === 'e') this.editCard()
+			if (!this.isStudying) return
 			if (event.key === 'a' || event.key === 'Tab') this.addCard()
 		},
 		addCard () {
@@ -225,9 +241,16 @@ export default {
 		deleteCard () {
 			this.$store.commit('deleteCard', this.id)
 		},
-		editCard () {
+		startEdit () {
 			this.$store.commit('setAppState', 'editCard')
-			this.$store.commit('cardToEditId', this.id)
+		},
+		saveEditedCard (side, newValue) {
+			this.$store.commit('setAppState', 'study')
+			if (this[side] === newValue) return
+			this.$store.commit('updateCard', {
+				id: this.id,
+				[side]: newValue,
+      })
 		},
   }
 }
@@ -237,38 +260,53 @@ export default {
 
 .card {
 	background: #f8f8f8;
-	margin: 20px 0;
+	margin-bottom: 20px;
+	text-align: center;
 }
 
 .front, .back {
-	white-space: pre-wrap;
-	padding: 50px 20px;
-	text-align: center;
 	transition: .2s;
+}
+
+.textfield {
+	padding: 50px 20px;
+	white-space: pre-wrap;
+
+	&.editabletextediting {
+		background: rgba(0, 0, 0, .05);
+	}
+
+	&:hover:not(.editabletextediting) {
+		position: relative;
+		background: rgba(0, 0, 0, .05);
+
+		&:after {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			content: 'CLICK TO EDIT';
+			font-weight: 600;
+			font-size: .7em;
+			opacity: .2;
+		}
+	}
 }
 
 .back {
 	border-top: 1px solid #ddd;
+	padding-bottom: 20px;
+	transition: .2s;
+
+	&.pointer {
+		cursor: pointer;
+	}
 
 	.hideanswer {
 		user-select: none;
+		pointer-events: none;
 		opacity: .2;
 		filter: blur(5px);
 	}
-}
-
-.buttonlist {
-	display: flex;
-}
-
-button {
-	flex: 1;
-	margin: 0;
-	border: 1px solid #ddd;
-	background: #eee;
-	font-size: 0.9rem;
-	padding: 10px;
-  font-family: 'Avenir', sans-serif;
 }
 
 .showback {
@@ -277,6 +315,12 @@ button {
 
 .extraoptions {
 	margin-top: 30px;
+	width: 100%;
+
+	button {
+		display: block;
+		margin: 0 auto;
+	}
 }
 
 </style>
