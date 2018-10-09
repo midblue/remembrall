@@ -3,6 +3,7 @@
     <h2>
       <EditableTextField
         :text="set.name"
+        :lineBreaksAllowed="false"
 				@startEdit="startEditName"
 				@endEdit="saveEditedName"
       />
@@ -12,8 +13,8 @@
     </h2>
     <div class="buttonlist">
       <button>+ Add Cards</button>
-      <button>Stats</button>
       <button>Powerups(2) ▾</button>
+      <button>Stats</button>
       <button @click="deleteSet">Delete Set</button>
     </div>
     <br />

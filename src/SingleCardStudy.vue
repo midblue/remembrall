@@ -242,6 +242,7 @@ export default {
 		},
 		deleteCard () {
 			this.$store.commit('deleteCard', this.id)
+			this.$emit('done')
 		},
 		startEdit () {
 			this.$store.commit('setAppState', 'editCard')

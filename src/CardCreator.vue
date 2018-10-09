@@ -21,7 +21,10 @@
       @click="newCard"
       @focus="focus"
       @blur="blur"
-    >+</button>
+    >
+      <div>Add Card</div>
+      <div class="keyicon">⌘-Enter</div>
+    </button>
   </div>
 </template>
 

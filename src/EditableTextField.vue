@@ -19,6 +19,11 @@ export default {
       default: '',
       type: String,
     },
+    lineBreaksAllowed: {
+      required: false,
+      default: true,
+      type: Boolean,
+    },
   },
   components: {
   },
@@ -65,6 +70,8 @@ export default {
     keyDown (event) {
       if (!this.isEditing) return
       if (event.key === 'Meta') this.metaDown = true
+      if (event.key === 'Enter' && !this.lineBreaksAllowed)
+        this.commitEdit()
 			if (event.key === 'Enter' && this.metaDown)
         this.commitEdit()
     },

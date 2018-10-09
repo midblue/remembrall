@@ -105,8 +105,10 @@ export default {
   },
   methods: {
     nextCard (timeMod) {
-      this.displayTimeMod = null
-      this.$nextTick(() => this.displayTimeMod = '+' + msToString(timeMod))
+      if (timeMod) {
+        this.displayTimeMod = null
+        this.$nextTick(() => this.displayTimeMod = '+' + msToString(timeMod))
+      }
       this.currentlyReviewing.shift()
       this.$nextTick(this.checkForReviews)
     },
