@@ -2,27 +2,25 @@
   <div
     class="cardeditor"
     :class="{ focus: isFocused }"
-		@focus="focus"
-		@blur="blur"
   >
     <h4>Edit Card</h4>
     <textarea
 			ref="front"
       placeholder="front"
       v-model="newFront"
-      @focus="focus"
-      @blur="blur"
+			@focus="focus"
+			@blur="blur"
     ></textarea>
     <textarea
       placeholder="back"
-      v-model="newBack"
-      @focus="focus"
-      @blur="blur"
+			v-model="newBack"
+			@focus="focus"
+			@blur="blur"
     ></textarea>
     <button
       @click="commitEdit"
-      @focus="focus"
-      @blur="blur"
+			@focus="focus"
+			@blur="blur"
     >Done</button>
   </div>
 </template>
@@ -75,7 +73,6 @@ export default {
 			const back = this.newBack
 				.replace(/^[\s\n]*/g, '')
 				.replace(/[\s\n]*$/g, '')
-			console.log(front, back)
       this.$store.commit('updateCard', {
 				id: this.id,
 				front,
@@ -84,14 +81,12 @@ export default {
 			this.$store.commit('cardToEditId')
 			this.$store.commit('setAppState', 'study')
     },
-    focus () {
+    focus (e) {
       this.$store.commit('setAppState', 'editCard')
-			console.log('focus')
     },
-    blur () {
+    blur (e) {
 			this.$store.commit('cardToEditId')
       this.$store.commit('setAppState', 'study')
-			console.log('blur')
     },
     keyDown (event) {
       if (!this.isFocused) return

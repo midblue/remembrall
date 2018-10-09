@@ -28,6 +28,7 @@ export default () => {
         saveSet(state.currentSet)
       },
       cardToEditId (state, id) {
+        if (!id) state.editingCard = null
         state.editingCard = state.currentSet.cards.find(c => c.id === id)
       },
       updateCard (state, card) {
