@@ -31,19 +31,27 @@
 				<button
 					v-for="set in setList"
 					:key="set.id"
-					:class="{active: parseInt(currentSetId) === set.id}"
+					:class="{
+						active: parseInt(currentSetId) === set.id,
+						duecards: dueReviews[set.id] > 0,
+					}"
 					@click="$store.commit('setCurrentSetId', set.id)"
 				>
 					{{ set.name }}
-					<span class="sub">({{ set.cards.length }})</span>
+					<span
+						v-if="!isMobile && dueReviews[set.id] > 0 && parseInt(currentSetId) !== set.id"
+						class="sub"
+					>
+						({{ dueReviews[set.id] }})
+					</span>
 				</button><button
 					@click="$store.commit('addSet')"
 				>
-					+ New Set
+					+<span v-if="!isMobile"> New Set</span>
 				</button>
 			</div>
 			<div>
-				<span>Logged in as <b>{{ currentUser }}</b></span>
+				<span><span v-if="!isMobile">Logged in as </span><b>{{ currentUser }}</b></span>
 				<button @click="logOut">Log out</button>
 			</div>
 		</template>
@@ -62,12 +70,14 @@ export default {
     return {
 			isLoading: false,
 			inputUsername: '',
+			dueReviews: {},
     }
   },
   computed: {
     currentUser () { return this.$store.state.currentUser },
 		setList () { return this.$store.state.setList },
 		currentSetId () { return this.$store.state.currentSetId },
+		isMobile () { return this.$store.state.isMobile },
   },
 	watch: {
 		currentUser (newUser) {
@@ -80,13 +90,17 @@ export default {
 		},
 		setList () {
 			this.isLoading = false
+			this.updateDueReviews()
 		},
 		currentSetId () {
 			this.isLoading = false
+			this.updateDueReviews()
 		},
 	},
 	mounted () {
 		window.addEventListener('keydown', this.keyDown)
+		this.updateDueReviews()
+		window.setInterval(this.updateDueReviews, 2 * 60 * 1000)
 		const savedUsername = get('currentUser')
 		if (savedUsername && savedUsername !== '') {
 			this.$store.dispatch('logInAs', savedUsername)
@@ -115,8 +129,31 @@ export default {
 		},
 		focusInput () {
 			this.$refs.usernameInput.focus()
-		}
+		},
+		updateDueReviews () {
+			const now = new Date()
+			this.dueReviews = {}
+			for (let set in this.setList) {
+				if (parseDate(this.setList[set].lastStudied).getDate() !== now.getDate()) {
+					this.$store.commit('resetSetDay', set)
+				}
+				const maxNewAndReviews = this.setList[set].maxReviewsPerDay + this.setList[set].maxNewPerDay
+				const dueInDeck = this.setList[set].cards.reduce((dueCount, card) => 
+					(parseDate(card.nextReview) < now)
+						? dueCount + 1
+						: dueCount
+				, 0)
+				this.dueReviews[set] = dueInDeck > maxNewAndReviews
+					? maxNewAndReviews
+					: dueInDeck
+
+			}
+		},
   }
+}
+
+function parseDate (nextReview) {
+  return new Date(nextReview.seconds ? nextReview.seconds : nextReview)
 }
 </script>
 
@@ -132,6 +169,12 @@ export default {
 	margin-bottom: 30px;
 	height: 70px;
 	transition: .5s;
+	position: relative;
+	z-index: 10;
+
+	@media (max-width: 768px) {
+    padding: 0 20px;
+	}
 
 	&.fullscreen {
 		height: 100vh;
@@ -145,6 +188,10 @@ export default {
 			margin-bottom: 20px;
 		}
 	}
+}
+
+button:not(.active).duecards {
+	background: #fd8;
 }
 
 .inlineblock {

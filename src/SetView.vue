@@ -2,36 +2,50 @@
   <div class="setview">
     <h1>
       <EditableTextField
-        :text="set.name"
+        :text="name"
         :lineBreaksAllowed="false"
 				@startEdit="startEditName"
 				@endEdit="saveEditedName"
       />
       <div class="sub">
-        ({{ set.cards.length }} card{{ set.cards.length === 1 ? '' : 's' }})
+        ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})
       </div>
     </h1>
     <div class="buttonlist">
-      <button 
-        v-if="appState !== 'addCard'"
-        @click="$store.commit('setAppState', 'addCard')"
-      >+ Add Cards</button>
       <button
-        v-else
+        :class="{active: appState === 'study'}"
         @click="$store.commit('setAppState', 'study')"
       >Study</button>
-      <button>Powerups(3) ▾</button>
-      <button>Stats</button>
-      <button @click="deleteSet">Delete Set</button>
+      <button 
+        :class="{active: appState === 'addCard'}"
+        @click="$store.commit('setAppState', 'addCard')"
+      >+ Add Card</button>
+      <!--<button>Powerups(3) ▾</button>-->
+      <button
+        :class="{active: appState === 'setStats'}"
+        @click="$store.commit('setAppState', 'setStats')"
+      >Stats</button>
+      <button
+        :class="{active: appState === 'setSettings'}"
+        @click="$store.commit('setAppState', 'setSettings')"
+      >Settings</button>
     </div>
     <br />
     <div class="setelements">
       <CardCreator 
         v-if="appState === 'addCard'"
       />
+      <SetSettings
+        v-else-if="appState === 'setSettings'"
+      />
+      <SetStats
+        v-else-if="appState === 'setStats'"
+      />
       <StudyFrame
-        v-bind="set"
         v-else
+        :cards="cards"
+        @newCard="newCard"
+        @reviewCard="reviewCard"
       />
     </div>
   </div>
@@ -40,21 +54,42 @@
 <script>
 import EditableTextField from './EditableTextField'
 import CardCreator from './CardCreator.vue'
-import CardEditor from './CardEditor.vue'
 import StudyFrame from './StudyFrame.vue'
+import SetSettings from './SetSettings.vue'
+import SetStats from './SetStats.vue'
 
 export default {
   props: {
-    set: {},
+    id: {},
+    name: {},
+    cards: {},
+    maxNewPerDay: {
+      default: 10,
+    },
+    maxReviewsPerDay: {
+      default: 50,
+    },
+    lastStudied: {
+      default: () => new Date(),
+    },
+    newToday: {
+      default: 0,
+    },
+    reviewsToday: {
+      default: 0,
+    }
   },
   components: {
     EditableTextField,
-    CardEditor,
+    SetSettings,
+    SetStats,
     CardCreator,
     StudyFrame,
   },
   data () {
     return {
+      newCardsToday: 0,
+      reviewCardsToday: 0,
     }
   },
   computed: {
@@ -62,16 +97,18 @@ export default {
   },
   methods: {
     startEditName () {
-      this.$store.commit('setAppState', 'editSetName')
+      // this.$store.commit('setAppState', 'editSetName')
     },
     saveEditedName (newName) {
       this.$store.commit('updateSetName', newName)
-      this.$store.commit('setAppState', 'study')
+      // this.$store.commit('setAppState', 'study')
     },
-    deleteSet () {
-      if (confirm(`Do you really want to delete the set "${ this.set.name }"?`))
-        this.$store.commit('deleteSet', this.set.id)
-    }
+    newCard () {
+
+    },
+    reviewCard () {
+
+    },
   }
 }
 </script>
@@ -80,6 +117,10 @@ export default {
 
 h1 {
   margin-bottom: .75rem;
+
+  @media (max-width: 768px) {
+    margin-top: .5rem;
+	}
 
   div {
     display: inline-block;

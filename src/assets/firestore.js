@@ -17,6 +17,7 @@ exports.test = function () {
 }
 
 exports.saveSet = function (username, newSet) {
+	console.log('SAVING')
 	return new Promise(resolve =>
 		db.collection('users')
 			.doc(username)

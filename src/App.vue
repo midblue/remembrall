@@ -4,7 +4,7 @@
     <div class="content">
       <SetView
         v-if="currentSet"
-        :set="currentSet"
+        v-bind="currentSet"
       />
     </div>
   </section>
@@ -77,11 +77,15 @@ html, body {
   border-radius: 4px;
   box-shadow: 0 2px 0px rgba(black, .2);
   margin-bottom: 2px;
+
+  @media (max-width: 768px) {
+    display: none;
+	}
 }
 
 button {
   margin: 0;
-  border: 1px solid #eee; 
+  border: 1px solid #eee;
   background: white;
   font-size: 0.85rem;
   font-weight: 400;
@@ -99,27 +103,18 @@ button {
 
 .buttonlist {
 	display: flex;
+  flex-wrap: wrap;
   border-radius: 10px;
   overflow: hidden;
+  border: 1px solid #eee;
 
 	button {
-		flex: 1;
+		flex-grow: 1;
+    flex-shrink: 0;
     border-radius: 0;
     outline:0;
-
-    &:last-of-type {
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
-
-    &:first-of-type {
-      border-top-left-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
-    
-    &:not(:last-of-type) {
-      border-right: none;
-    }
+    border: none;
+    box-shadow: inset -1px -1px 0 0 #eee;
 	}
 }
 

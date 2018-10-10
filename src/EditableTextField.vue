@@ -24,6 +24,16 @@ export default {
       default: true,
       type: Boolean,
     },
+    acceptBlank: {
+      required: false,
+      default: false,
+      type: Boolean,
+    },
+    disableEdits: {
+      required: false,
+      default: false,
+      type: Boolean,
+    }
   },
   components: {
   },
@@ -41,7 +51,11 @@ export default {
     text (newText) {
       if (newText !== this.displayText && !this.isEditing)
         this.displayText = newText
-    }
+    },
+    disableEdits (isDisabled) {
+      this.isEditing = false
+      this.metaDown = false
+    },
   },
   mounted () {
 		window.addEventListener('keydown', this.keyDown)
@@ -53,22 +67,29 @@ export default {
   },
   methods: {
     startEdit () {
-      if (this.isEditing) return
+      if (this.isEditing || this.disableEdits) return
       this.isEditing = true
       this.metaDown = false
       this.$nextTick(this.selectText)
       this.$emit('startEdit')
     },
     commitEdit () {
-      this.isEditing = false
-      this.metaDown = false
       const finalText = this.$el.innerHTML
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
         .replace(/^[\s\n\t]*/g, '')
         .replace(/[\s\n\t]*$/g, '')
-      this.$emit('endEdit', finalText)
+      if (finalText.length > 0)
+        this.$emit('endEdit', finalText)
+      else {
+        this.displayText = ''
+        this.$nextTick(() => this.displayText = this.text)
+      }
+      this.isEditing = false
+      this.metaDown = false
     },
     keyDown (event) {
-      if (!this.isEditing) return
+      if (!this.isEditing || this.disableEdits) return
       if (event.key === 'Meta') this.metaDown = true
       if (event.key === 'Enter' && !this.lineBreaksAllowed)
         this.commitEdit()
@@ -76,7 +97,7 @@ export default {
         this.commitEdit()
     },
     keyUp (event) {
-      if (!this.isEditing) return
+      if (!this.isEditing || this.disableEdits) return
       if (event.key === 'Meta') this.metaDown = false
     },
     selectText () {

@@ -6,12 +6,12 @@
     <h4>Add Card</h4>
     <textarea
       ref="front"
-      placeholder="Front"
+      placeholder="Hint"
       v-model="front"
       @focus="focus"
     ></textarea>
     <textarea
-      placeholder="Back"
+      placeholder="Answer"
       v-model="back"
       @focus="focus"
     ></textarea>
@@ -104,10 +104,14 @@ export default {
     width: 100%;
     height: 100px;
     font-size: 1rem;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
   }
 
   button {
     width: 100%;
+    margin-top: 20px;
   }
 }
 </style>

@@ -41,6 +41,14 @@ export default {
 			reviewGraph: {}
     }
   },
+	computed: {
+		currentSetId () { return this.$store.state.currentSetId },
+	},
+	watch: {
+		currentSetId () {
+			this.updateGraph()
+		}
+	},
   mounted () {
     this.updateGraphTimer = setInterval(this.updateGraph, 30000)
     this.updateGraph()
@@ -75,7 +83,7 @@ export default {
 }
 
 function parseDate (date) {
-  return new Date(date.seconds ? date.seconds * 1000 : date)
+  return new Date(date.seconds ? date.seconds : date)
 }
 </script>
 

@@ -22,8 +22,9 @@
 						@endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
 					/>
 					<div class="sub">
-						<a target="_blank" :href="pronunciationLink">Pronunciation</a> ・ 
-						<a target="_blank" :href="translationLink">Translation</a>
+						<a target="_blank" v-if="settings.pronunciationLink" :href="pronunciationLink">Pronunciation</a>
+						<span v-if="settings.pronunciationLink && settings.translationLink"> ・ </span>
+						<a target="_blank" v-if="settings.translationLink" :href="translationLink">Translation</a>
 					</div>
 				</div>
 			</div>
@@ -31,7 +32,7 @@
 
 		
 		<div class="buttonlist">
-			<button class="showback" v-if="!showBack" @click="showBack = true">
+			<button class="showback" v-if="!showBack" @click="showBack = true" key="showback">
 				Show Back
 				<div>
 					<span class="keyicon">Space</span>
@@ -39,6 +40,7 @@
 			</button>
 			<template v-else>
 				<button
+					key="again"
 					v-if="timeBonuses.again !== undefined"
 					@click="answer('again')"
 				>
@@ -47,6 +49,7 @@
 						<span class="keyicon">1</span>
 					</div>
 				</button><button
+					key="ok"
 					v-if="timeBonuses.ok"
 					@click="answer('ok')"
 				>
@@ -60,6 +63,7 @@
 		</div>
 		<div class="extraoptions">
 			<button
+				key="delete"
 				ref="deleteButton"
 				@click="deleteCard"
 			>
@@ -74,9 +78,7 @@ import EditableTextField from './EditableTextField'
 
 const minimumTimeMod = 10 * 60 * 1000 // 10m
 const difficultyModifiers = {
-	easy: 4,
 	ok: 2,
-	hard: 1,
 	again: .1,
 }
 const timeIgnoreCutoff = [300, 30 * 1000] // .3s / 30s
@@ -89,7 +91,7 @@ export default {
 		back: {},
 		id: {},
 		timeMod: {
-			default: minimumTimeMod,
+			default: 0,
 		},
 		nextReview: {
 			default: 0,
@@ -98,7 +100,7 @@ export default {
 			default: 0
 		},
 		created: {
-			default: () => new Date(),
+			default: () => new Date().getTime(),
 		},
 		ok: {
 			default: 0
@@ -119,31 +121,31 @@ export default {
     }
   },
   computed: {
+    settings () { return this.$store.state.setList[this.$store.state.currentSetId].settings || {} },
     isStudying () { return this.$store.state.appState === 'study' },
     isEditing () { return this.$store.state.appState === 'editCard' },
-		pronunciationLink () {
+		searchString () {
+			let searchString = this.back
 			let linebreakPos = this.back.indexOf('\n')
-			if (linebreakPos === -1)
-				linebreakPos = this.back.length
-			return `https://forvo.com/word/${ this.back.substring(0, linebreakPos) }/#es`
+			if (linebreakPos !== -1)
+				searchString = this.back.substring(0, linebreakPos)
+			return searchString
+				.split(' ')
+				.reduce((longestString, currString) => 
+					currString.length > longestString.length ? currString : longestString
+				, '')
+		},
+		pronunciationLink () {
+			return `https://forvo.com/word/${ this.searchString }/#es`
 		},
 		translationLink () {
-			let linebreakPos = this.back.indexOf('\n')
-			if (linebreakPos === -1)
-				linebreakPos = this.back.length
-			return `https://translate.google.com/#es/en/${ this.back.substring(0, linebreakPos) }`
+			return `https://translate.google.com/#es/en/${ this.searchString }`
 		},
 		timeBonuses () {
 			let bonuses = {
-				easy: this.getTimeBonus('easy'),
 				ok: this.getTimeBonus('ok'),
-				hard: this.getTimeBonus('hard'),
 				again: this.getTimeBonus('again'),
 			}
-			if (bonuses.easy === bonuses.ok)
-				delete bonuses.easy
-			if (bonuses.hard === bonuses.ok)
-				delete bonuses.hard
 			return bonuses
 		},
 		formattedTimeBonuses () {
@@ -173,6 +175,13 @@ export default {
     answer (difficulty) {
 			this.showBack = false
 			this.reviewsSoFar ++
+
+			// add to daily counts of reviews/new cards
+			if (this.totalReviews === 0)
+				this.$store.commit('addSetNewCardToday')
+			else
+				this.$store.commit('addSetReviewCardToday')
+
 			const cardTime = new Date() - this.startedCardTime
 
 			// ignore too fast or too slow times
@@ -185,39 +194,61 @@ export default {
 			// turn time into 0-1 range, 1 being fast
 			const cardTimeNormalized = (1 - ((cardTime - timeIgnoreCutoff[0]) / timeIgnoreCutoff[1]))
 
-			// calc time mod
-			let newTimeMod = this.timeBonuses[difficulty]
+			// calc time modifiers
 			// depending on time taken, can up to double the push back
+			let answerTimeBonus = 0
 			if (!ignoreTime)
-				newTimeMod += cardTimeNormalized * this.timeBonuses[difficulty]
+				answerTimeBonus = cardTimeNormalized * this.timeBonuses[difficulty]
+			// if card is older, adds more time
+			const maturityThreshold = 30
+			const maturityBonus = this.totalReviews > maturityThreshold
+				? this.timeBonuses[difficulty] 
+				: this.timeBonuses[difficulty] * (this.totalReviews / maturityThreshold)
+			// if card is usually succeeded on, adds more time
+			const successRatio = (this.ok || 0) / (this.again || 1)
+			const successRatioBonus = successRatio > 1 ? this.timeBonuses[difficulty] : this.timeBonuses[difficulty] * successRatio
 			// depending on the length of the answer vs the length of the prompt, can affect timeMod
-			const lengthRatio = (this.front.replace(/\n.*/g, '').length + 10) / (this.back.replace(/\n.*/g, '').length + 10)
-			console.log(lengthRatio)
+			let collectiveLength = this.front.replace(/\n.*/g, '').length + this.back.replace(/\n.*/g, '').length - 10
+			if (collectiveLength < 0) collectiveLength = 0
+			const lengthThreshold = 40
+			const lengthBonus = (collectiveLength > lengthThreshold)
+				? this.timeBonuses[difficulty]
+				: this.timeBonuses[difficulty] * (collectiveLength / lengthThreshold)
+
+			const newTimeMod = Math.floor(
+				this.timeBonuses[difficulty]
+					+ answerTimeBonus * .5
+					+ maturityBonus * .5
+					+ successRatioBonus * .5
+					+ lengthBonus * .5
+			)
+
+			console.log(Math.round(answerTimeBonus * .00001), Math.round(maturityBonus * .00001), Math.round(successRatioBonus * .00001), Math.round(lengthBonus * .00001), newTimeMod)
 
 			// calc interval until next review
-			const newNextReview = new Date(Date.now() + newTimeMod)
+			const newNextReview = new Date(Date.now() + newTimeMod).getTime()
 
-			// normalize to ms
-			newTimeMod = Math.floor(newTimeMod)
+			// console.log(cardTime, ignoreTime, cardTimeNormalized, this.timeMod, this.timeBonuses[difficulty], newTimeMod, newNextReview)
 
-			console.log(cardTime, ignoreTime, cardTimeNormalized, this.timeMod, this.timeBonuses[difficulty], newTimeMod)
+			const newTotalReviews = this.totalReviews + 1
+			const newAgain = this.again + (difficulty === 'again' ? 1 : 0)
+			const newOk = newTotalReviews - newAgain
 
 			// update card with new metadata
-			this.$store.commit('updateCard', {
+			this.$store.commit('studyCard', {
 				id: this.id,
 				timeMod: newTimeMod,
 				nextReview: newNextReview,
-				totalReviews: this.totalReviews + 1,
-				created: this.created,
-				ok: this.ok + (difficulty === 'ok' ? 1 : 0),
-				again: this.again + (difficulty === 'again' ? 1 : 0),
+				totalReviews: newTotalReviews,
+				ok: newOk,
+				again: newAgain,
 			})
 
 			// request new card from StudyFrame
 			this.$emit('done', newTimeMod)
 		},
 		getTimeBonus ( difficulty ) {
-			let newTimeMod = this.timeMod * difficultyModifiers[difficulty]
+			let newTimeMod = (!this.timeMod || isNaN(this.timeMod) ? 0 : this.timeMod) * difficultyModifiers[difficulty]
 			if (newTimeMod < minimumTimeMod)
 				newTimeMod = minimumTimeMod
 			if (difficulty === 'again')
@@ -247,7 +278,10 @@ export default {
 		deleteCard () {
 			this.$store.commit('deleteCard', this.id)
 			this.$emit('done')
-			this.$nextTick(() => this.$refs.deleteButton.blur())
+			this.showBack = false
+			this.$nextTick(() => {
+				try { this.$refs.deleteButton.blur() } catch (e) {}
+			})
 		},
 		startEdit () {
 			this.$store.commit('setAppState', 'editCard')
