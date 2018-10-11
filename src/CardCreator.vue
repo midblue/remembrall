@@ -15,6 +15,11 @@
       v-model="back"
       @focus="focus"
     ></textarea>
+
+    <FloatingText 
+      :text="addText"
+      offset="-30"
+    />
     <button
       @click="newCard"
       @focus="focus"
@@ -26,6 +31,7 @@
 </template>
 
 <script>
+import FloatingText from './FloatingText'
 
 export default {
   data () {
@@ -33,7 +39,11 @@ export default {
       front: '',
       back: '',
       metaDown: false,
+      addText: '',
     }
+  },
+  components: {
+    FloatingText,
   },
   computed: {
     isFocused () { return this.$store.state.appState === 'addCard' },
@@ -60,6 +70,8 @@ export default {
         nextReview: 0,
         created: new Date()
       })
+      this.addText = 'Card added.'
+      setTimeout(() => this.addText = '', 1500)
       this.front= ''
       this.back = ''
       this.$refs.front.focus()
@@ -88,6 +100,7 @@ export default {
 <style lang="scss" scoped>
 
 .cardcreator {
+  position: relative;
   margin: 0 auto;
   opacity: .3;
   transition: all .5s;

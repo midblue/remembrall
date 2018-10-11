@@ -35,7 +35,7 @@
 						active: parseInt(currentSetId) === set.id,
 						duecards: dueReviews[set.id] > 0,
 					}"
-					@click="$store.commit('setCurrentSetId', set.id)"
+					@click="switchSet(set.id)"
 				>
 					{{ set.name }}
 					<span
@@ -130,30 +130,33 @@ export default {
 		focusInput () {
 			this.$refs.usernameInput.focus()
 		},
+		switchSet (id) {
+			this.$store.commit('setAppState', 'study') // app hangs if it stays on settings
+			this.$store.commit('setCurrentSetId', id)
+		},
 		updateDueReviews () {
-			const now = new Date()
+			const now = Date.now()
 			this.dueReviews = {}
 			for (let set in this.setList) {
-				if (parseDate(this.setList[set].lastStudied).getDate() !== now.getDate()) {
+				if (new Date(this.setList[set].lastStudied).getDate() !== new Date().getDate()) {
 					this.$store.commit('resetSetDay', set)
 				}
-				const maxNewAndReviews = this.setList[set].maxReviewsPerDay + this.setList[set].maxNewPerDay
+				const maxNew = this.setList[set].settings.maxNewPerDay
+				const newToday = this.setList[set].newToday
 				const dueInDeck = this.setList[set].cards.reduce((dueCount, card) => 
-					(parseDate(card.nextReview) < now)
+					card.nextReview < now && card.totalReviews && card.totalReviews > 0
 						? dueCount + 1
 						: dueCount
 				, 0)
-				this.dueReviews[set] = dueInDeck > maxNewAndReviews
-					? maxNewAndReviews
-					: dueInDeck
-
+				const newInDeck = this.setList[set].cards.reduce((dueCount, card) => 
+					!card.totalReviews || card.totalReviews === 0
+						? dueCount + 1
+						: dueCount
+				, 0)
+				this.dueReviews[set] = dueInDeck + Math.min(maxNew - Math.min(newToday, maxNew), newInDeck)
 			}
 		},
   }
-}
-
-function parseDate (nextReview) {
-  return new Date(nextReview.seconds ? nextReview.seconds : nextReview)
 }
 </script>
 

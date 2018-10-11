@@ -5,7 +5,7 @@
 		<div class="settingslist">
       <p>
         <EditableTextField
-          class="visibletextfield"
+          class="visibletextfield marright"
           :text="`${ settings.maxNewPerDay || 10 }`"
           :lineBreaksAllowed="false"
           @endEdit="updateMaxNewPerDay"
@@ -13,28 +13,23 @@
         <b>New cards per day</b>
       </p>
       <Toggle
+        key="pro"
         :setTo="settings.pronunciationLink"
         label="Pronunciation link"
         @toggled="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
       />
       <Toggle
+        key="tra"
         :setTo="settings.translationLink"
         label="Translation link"
         @toggled="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
       />
       <Toggle
+        key="rev"
         :setTo="settings.studyReverse"
-        label="Study card backs first"
+        label="Study cards back-to-front"
         @toggled="updateSettings({ studyReverse : !(settings.studyReverse ? true : false) })"
       />
-      <p>
-        <EditableTextField
-          class="visibletextfield"
-          :text="'??'"
-          :lineBreaksAllowed="false"
-        />
-        <b>Day reset hour</b>
-      </p>
       <div>Click your set's name (above) to edit it.</div>
       <br />
       <button @click="deleteSet">Delete Set</button>
@@ -85,7 +80,7 @@ export default {
     },
     updateMaxNewPerDay (newValue) {
       const parsedValue = parseInt(newValue) || 10
-      this.updateSettings({ maxNewPerDay: parsedValue })
+      this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
     }
   }
 }
@@ -104,22 +99,23 @@ export default {
   }
 
   p {
-    margin-bottom: 10px;
-    display: grid;
-    grid-gap: 10px;
-    grid-template-columns: 60px 1fr;
-  }
+    margin-bottom: 10px; 
 
-  .visibletextfield {
-    border: 1px solid #bbb;
-    text-align: center;
-    padding: 2px 0;
-    position: relative;
-    top: -3px;
+    & > * {
+      display: inline-block;
+      min-width: 55px;
+    }
+    // display: grid;
+    // grid-gap: 10px;
+    // grid-template-columns: 60px 1fr;
   }
 
   button {
     width: 100%;
+  }
+
+  .marright {
+    margin-right: 10px;
   }
 </style>
 

@@ -12,16 +12,18 @@
         Back to normal
       </u>
     </div>
-    <div class="floatnumber" v-if="displayTimeMod">
-      {{ displayTimeMod }}
-    </div>
+
+    <FloatingText 
+      :text="displayTimeMod"
+      offset="-100"
+    />
 
     <template v-if="!doneForDay">
       <div class="sub centertext padtb-small">
         <span v-if="newCards.length > 0">
           <b>{{ newCards.length }}</b> new cards and 
         </span>
-        <b>{{ dueCards.length }}</b> reviews left today.
+        <b>{{ dueCards.length }}</b> review{{ dueCards.length === 1 ? '' : 's' }} left.
       </div>
       <div class="progressbar">
         <div 
@@ -37,8 +39,21 @@
 
     <template v-else-if="doneForDay && newCardsAreLeftOver">
       <div class="padtb centertext">
-        <h3>Done for today!</h3>
-        <div v-if="nextReviewIn">Your settings have a max of <b>{{ settings.maxNewPerDay }}</b> new cards per day. If you want to study more, change your max new cards per day in this set's settings.</div>
+        <h3>Done for now!</h3>
+        <div>There {{ newCardsLeftOver.length === 1 ? 'is' : 'are' }} <b>{{ newCardsLeftOver.length }}</b> new card{{ newCardsLeftOver.length === 1 ? '' : 's' }} remaining to be learned. If you want to study more new cards, change the setting below.
+        </div>
+        <p class="singlesetting">
+          <EditableTextField
+            class="visibletextfield"
+            :text="`${ settings.maxNewPerDay || 10 }`"
+            :lineBreaksAllowed="false"
+            @endEdit="updateMaxNewPerDay"
+          />&nbsp;&nbsp;
+          <b>New cards per day</b>
+        </p>
+        <br />
+        <br />
+        <p v-if="nextReviewIn">Otherwise, your next review is in {{ nextReviewIn }}.</p>
       </div>
       <ReviewGraph
         :cards="sortedCards"
@@ -58,7 +73,7 @@
     <template v-else>
       <div class="padtb centertext">
         <h3>Done for now!</h3>
-        <div v-if="nextReviewIn">Next review in {{ nextReviewIn }}.</div>
+        <div v-if="nextReviewIn">Your next review is in {{ nextReviewIn }}.</div>
       </div>
       <ReviewGraph
         :cards="sortedCards"
@@ -71,7 +86,9 @@
 <script>
 const debug = false
 import SingleCardStudy from './SingleCardStudy'
+import EditableTextField from './EditableTextField'
 import ReviewGraph from './ReviewGraph'
+import FloatingText from './FloatingText'
 import { msToString } from './assets/commonFunctions'
 
 export default {
@@ -79,7 +96,7 @@ export default {
     cards: {},
   },
   components: {
-    SingleCardStudy, ReviewGraph
+    SingleCardStudy, ReviewGraph, FloatingText, EditableTextField, 
   },
   data () {
     return {
@@ -117,6 +134,11 @@ export default {
         + this.newToday
         > this.settings.maxNewPerDay
     },
+    newCardsLeftOver () {
+      if (!this.newCardsAreLeftOver) return 0
+      return this.sortedCards
+        .filter(card => card.totalReviews === 0 || !card.totalReviews)
+    },
     dueCards () {
       const now = Date.now()
       return this.sortedCards
@@ -136,8 +158,10 @@ export default {
       return this.allStudyableCards[0]
     },
     nextReviewIn () {
-      if (!this.doneForDay) return '0s'
-      const nextReview = this.sortedCards.reduce((selected, card) => {
+      const reviewableCards = this.doneForDay
+        ? this.sortedCards.filter(card => card.totalReviews && card.totalReviews > 0)
+        : this.sortedCards
+      const nextReview = reviewableCards.reduce((selected, card) => {
         const cardNext = card.nextReview 
         return cardNext < selected ? cardNext : selected
       }, 9999999999999999999)
@@ -185,7 +209,12 @@ export default {
       }
     },
     refreshCards () {
-      this.$set(this, 'updatableCards', this.cards)
+      this.updatableCards = [...this.cards]
+      // this.$set(this, 'updatableCards', this.cards)
+    },
+    updateMaxNewPerDay (newValue) {
+      const parsedValue = parseInt(newValue) || 10
+      this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
     }
   }
 }
@@ -200,18 +229,6 @@ export default {
 
   &.focus {
     opacity: 1;
-  }
-
-  .floatnumber {
-    // transform: translateX(25%);
-    z-index: 100;
-    width: 100%;
-    position: absolute;
-    text-align: center;
-    user-select: none;
-    pointer-events: none;
-    animation: pointsscroll 1.5s normal forwards ease-out;
-    color: green;
   }
 }
 
@@ -235,20 +252,17 @@ export default {
   }
 }
 
-@keyframes pointsscroll {
-  from {
-    opacity: 0;
-    bottom: 25%;
-  }
-  50% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    bottom: 40%;
+.singlesetting {
+  display: inline-block;
+  border-radius: 5px;
+  padding: 15px 20px;
+  background: #eee;
+
+  & > * {
+    min-width: 50px;
+    display: inline-block;
   }
 }
-
 
 </style>
 

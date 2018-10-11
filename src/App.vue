@@ -87,6 +87,15 @@ a, a:active, a:hover, a:visited {
 	}
 }
 
+.visibletextfield {
+  background: white;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  text-align: center;
+  padding: 2px 0;
+  position: relative;
+}
+
 button {
   margin: 0;
   border: 1px solid #eee;

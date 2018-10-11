@@ -73,7 +73,7 @@ export default {
 				left: 12%;
 				top: 24%;
 				font-size: .65rem;
-				font-weight: 600;
+				font-weight: 800;
 				opacity: .5;
 				z-index: 1;
 				transition: .3s;
@@ -95,7 +95,7 @@ export default {
 		}
 		&.on .icon {
 			border: 1px solid transparent;
-			background: #0b0;
+			background: #4c4;
 
 			&:before {
 				color: white;
