@@ -31,7 +31,7 @@
 		</div>
 
 		
-		<div class="buttonlist">
+		<div class="buttonlist primary">
 			<button class="showback" v-if="!showBack" @click="showBack = true" key="showback">
 				Show Back
 				<div>
@@ -55,7 +55,8 @@
 				>
 					Right
 					<div>
-						<span class="keyicon">2</span> / 
+						<span class="keyicon">2</span>
+						<span v-if="!isMobile"> / </span>
 						<span class="keyicon">Space</span>
 					</div>
 				</button>
@@ -124,6 +125,7 @@ export default {
     settings () { return this.$store.state.setList[this.$store.state.currentSetId].settings || {} },
     isStudying () { return this.$store.state.appState === 'study' },
     isEditing () { return this.$store.state.appState === 'editCard' },
+    isMobile () { return this.$store.state.isMobile },
 		searchString () {
 			let searchString = this.back
 			let linebreakPos = this.back.indexOf('\n')
@@ -313,6 +315,7 @@ export default {
 .textfield {
 	padding: 50px 20px;
 	white-space: pre-wrap;
+	font-size: 1.5rem;
 
 	&.editabletextediting {
 		background: rgba(0, 0, 0, .05);
@@ -328,7 +331,7 @@ export default {
 			right: 10px;
 			content: 'CLICK TO EDIT';
 			font-weight: 600;
-			font-size: .7em;
+			font-size: .5em;
 			opacity: .2;
 		}
 	}

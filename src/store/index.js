@@ -9,7 +9,7 @@ export default () => {
   return new Vuex.Store({
     state: {
       currentUser: null,
-      setList: [],
+      setList: {},
       currentSetId: null,
       appState: 'study',
       isMobile: false,
@@ -78,7 +78,7 @@ export default () => {
         Vue.set(state.setList[state.currentSetId], 'reviewsToday', state.setList[state.currentSetId].reviewsToday + 1)
         updateSetInDb(state.currentUser, state.setList[state.currentSetId])
       },
-      resetSetDay (state, setId) {
+      resetSetDay (state) {
         Vue.set(state.setList[state.currentSetId], 'newToday', 0)
         Vue.set(state.setList[state.currentSetId], 'reviewsToday', 0)
         updateSetInDb(state.currentUser, state.setList[state.currentSetId])
@@ -121,11 +121,13 @@ export default () => {
       logInAs ({ commit }, username) {
         firestore.getAllSets(username)
           .then(({docs, empty}) => {
-            const setObject = {}
+            let setObject = {}
             docs.forEach(doc => {
               const set = doc.data()
               setObject[set.id] = set
             })
+            if (Object.keys(setObject).length === 0)
+              setObject = newSetObject()
             commit('setCurrentSetId', Object.keys(setObject)[0])
             commit('setUsername', username)
             commit('setSetList', setObject)
@@ -152,37 +154,7 @@ function updateSetInDb (user, set) {
   updatedSetToSaveToDb = set
 }
 
-// function loadSetById (id) {
-//   return loadSetsFromLocalStorage()[id]
-// }
-
-// function loadFirstSet () {
-//   const allSets = loadSetsFromLocalStorage()
-//   const firstKey = Object.keys( allSets )[0]
-//   return allSets[firstKey]
-// }
-
-// function loadSetsFromLocalStorage () {
-//   const loadedSets = storage.get('sets')
-//   if (loadedSets && loadedSets !== '') {
-//     let loadedSetsAsObject = JSON.parse(loadedSets)
-//     if (loadedSetsAsObject)
-//       return loadedSetsAsObject
-//   }
-//   return newSetList()
-// }
-
-// function saveSetToLocalStorage (newSet) {
-//   let loadedSets = storage.get('sets')
-//   if (loadedSets !== '')
-//     loadedSets = JSON.parse(loadedSets)
-//   if (loadedSets === null || loadedSets === '' || Array.isArray(loadedSets))
-//     loadedSets = {}
-//   loadedSets[newSet.id] = newSet
-//   starage.set('sets', JSON.stringify(loadedSets))
-// }
-
-function newSetList () {
+function newSetObject () {
   const newSet = blankSet()
   return {
     [blankSet.id] : newSet
@@ -201,9 +173,25 @@ function blankSet() {
       pronunciationLink: false,
       studyReverse: false,
     },
-    lastStudied: new Date(),
+    lastStudied: Date.now(),
     newToday: 0,
     reviewsToday: 0,
     cards: [],
   }
 }
+
+
+// function sanitizeCards(cards) {
+//   return cards.map(card => ({
+//     id: card.id,
+//     again: card.again,
+//     ok: card.ok,
+//     totalReviews: card.totalReviews,
+//     front: card.front,
+//     back: card.back,
+//     timeMod: card.timeMod,
+//     nextReview: card.nextReview,
+//   }))
+// }
+// const sanitizedCards = sanitizeCards(state.setList[state.currentSetId].cards)
+// Vue.set(state.setList[state.currentSetId], 'cards', sanitizedCards)

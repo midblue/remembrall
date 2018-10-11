@@ -10,6 +10,7 @@
       <div class="sub">
         ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})
       </div>
+      <div class="sub savedat">Saved at </div>
     </h1>
     <div class="buttonlist">
       <button

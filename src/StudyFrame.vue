@@ -95,11 +95,9 @@ export default {
     settings () { return this.$store.state.setList[this.$store.state.currentSetId].settings || {} },
     newToday () { return this.$store.state.setList[this.$store.state.currentSetId].newToday },
     sortedCards () {
-      return this.updatableCards.sort((a, b) => {
-        const aTime = parseDate(a.nextReview)
-        const bTime = parseDate(b.nextReview)
-        return aTime > bTime ? 1 : -1
-      })
+      return this.updatableCards.sort((a, b) =>  
+        a.nextReview > b.nextReview ? 1 : -1
+      )
     },
     doneForDay () {
       return this.doneReviewing && this.doneWithNewCards
@@ -120,12 +118,12 @@ export default {
         > this.settings.maxNewPerDay
     },
     dueCards () {
-      const now = new Date()
+      const now = Date.now()
       return this.sortedCards
         .filter(card => 
           card.totalReviews
           && card.totalReviews > 0 
-          && parseDate(card.nextReview) < now
+          && card.nextReview < now
         )
     },
     doneReviewing () {
@@ -138,12 +136,12 @@ export default {
       return this.allStudyableCards[0]
     },
     nextReviewIn () {
-      if (!this.done) return '0m'
+      if (!this.doneForDay) return '0s'
       const nextReview = this.sortedCards.reduce((selected, card) => {
-        const cardNext = parseDate(card.nextReview).getTime() 
+        const cardNext = card.nextReview 
         return cardNext < selected ? cardNext : selected
       }, 9999999999999999999)
-      return msToString(new Date(nextReview).getTime() - Date.now())
+      return msToString(nextReview - Date.now())
     },
   },
   watch: {
@@ -157,16 +155,20 @@ export default {
     },
     doneForDay (isDone) {
       if (isDone) {
-        this.refreshCards()
+        this.$nextTick(this.refreshCards)
         this.startedWith = 0
       }
     },
   },
   mounted () {
-    if (!this.settings.maxNewPerDay) this.$store.commit('updateSetSettings', { maxNewPerDay: 10 })
-    if (!this.settings.translationLink) this.$store.commit('updateSetSettings', { translationLink: true })
-    if (!this.settings.pronunciationLink) this.$store.commit('updateSetSettings', { pronunciationLink: true })
-    if (!this.settings.studyReverse) this.$store.commit('updateSetSettings', { studyReverse: false })
+    if (this.settings.maxNewPerDay === undefined || this.settings.maxNewPerDay === null)
+      this.$store.commit('updateSetSettings', { maxNewPerDay: 10 })
+    if (this.settings.translationLink === undefined || this.settings.translationLink === null)
+      this.$store.commit('updateSetSettings', { translationLink: true })
+    if (this.settings.pronunciationLink === undefined || this.settings.pronunciationLink === null)
+      this.$store.commit('updateSetSettings', { pronunciationLink: true })
+    if (this.settings.studyReverse === undefined || this.settings.studyReverse === null)
+      this.$store.commit('updateSetSettings', { studyReverse: false })
     
     this.refreshCardsTimer = setInterval(this.refreshCards, 10000)
     this.refreshCards()
@@ -186,10 +188,6 @@ export default {
       this.$set(this, 'updatableCards', this.cards)
     }
   }
-}
-
-function parseDate (date) {
-  return new Date(date.seconds ? date.seconds : date)
 }
 </script>
 

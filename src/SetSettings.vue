@@ -4,56 +4,39 @@
   >
 		<div class="settingslist">
       <p>
-        <b>New Cards/Day:</b>
-        <span>
-          <EditableTextField
-            :text="`${ settings.maxNewPerDay || 10 }`"
-            :lineBreaksAllowed="false"
-            @endEdit="updateMaxNewPerDay"
-          />
-        </span>
+        <EditableTextField
+          class="visibletextfield"
+          :text="`${ settings.maxNewPerDay || 10 }`"
+          :lineBreaksAllowed="false"
+          @endEdit="updateMaxNewPerDay"
+        />
+        <b>New cards per day</b>
       </p>
+      <Toggle
+        :setTo="settings.pronunciationLink"
+        label="Pronunciation link"
+        @toggled="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
+      />
+      <Toggle
+        :setTo="settings.translationLink"
+        label="Translation link"
+        @toggled="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
+      />
+      <Toggle
+        :setTo="settings.studyReverse"
+        label="Study card backs first"
+        @toggled="updateSettings({ studyReverse : !(settings.studyReverse ? true : false) })"
+      />
       <p>
-        <b>Pronunciation Link:</b>
-        <span
-          @click="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
-        >
-          <input type="checkbox" :checked="settings.pronunciationLink" />
-          <span>
-            {{ settings.pronunciationLink ? 'on' : 'off' }}
-          </span>
-        </span>
+        <EditableTextField
+          class="visibletextfield"
+          :text="'??'"
+          :lineBreaksAllowed="false"
+        />
+        <b>Day reset hour</b>
       </p>
-      <p>
-        <b>Translation Link:</b>
-        <span
-          @click="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
-        >
-          <input type="checkbox" :checked="settings.translationLink" />
-          <span>
-            {{ settings.translationLink ? 'on' : 'off' }}
-          </span>
-        </span>
-      </p>
-      <p>
-        <b>Study Back/Front:</b>
-        <span
-          @click="updateSettings({ studyReverse : !(settings.studyReverse ? true : false) })"
-        >
-          <input type="checkbox" :checked="settings.studyyReverse" />
-          <span>
-            {{ settings.studyyReverse ? 'on' : 'off' }}
-          </span>
-        </span>
-      </p>
-      <p>
-        <b>Day Reset:</b>
-        <span>xx</span>
-      </p>
-			<p>
-        <b>Set Name:</b>
-        <span>Click your set's name (above) to edit it.</span>
-      </p>
+      <div>Click your set's name (above) to edit it.</div>
+      <br />
       <button @click="deleteSet">Delete Set</button>
 
 		</div>
@@ -62,12 +45,13 @@
 
 <script>
 import EditableTextField from './EditableTextField'
+import Toggle from './Toggle'
 
 export default {
 	props: {
 	},
   components: {
-    EditableTextField,
+    EditableTextField, Toggle,
   },
   data () {
     return {
@@ -109,16 +93,29 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  p {
-    margin-bottom: 35px;
-    display: grid;
-    grid-gap: 15px;
-    grid-template-columns: 160px 1fr;
 
-    & > *:first-child {
-      text-align: right;
-      width: 100%;
+  .settingslist {
+    max-width: 300px;
+    margin: 0 auto;
+
+    & > * {
+      margin-bottom: 40px;
     }
+  }
+
+  p {
+    margin-bottom: 10px;
+    display: grid;
+    grid-gap: 10px;
+    grid-template-columns: 60px 1fr;
+  }
+
+  .visibletextfield {
+    border: 1px solid #bbb;
+    text-align: center;
+    padding: 2px 0;
+    position: relative;
+    top: -3px;
   }
 
   button {

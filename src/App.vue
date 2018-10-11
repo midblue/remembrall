@@ -54,6 +54,10 @@ html, body {
   align-items: center;
 }
 
+a, a:active, a:hover, a:visited {
+  color: #555;
+}
+
 .sub {
   font-size: .85rem;
   opacity: .6;
@@ -116,6 +120,11 @@ button {
     border: none;
     box-shadow: inset -1px -1px 0 0 #eee;
 	}
+
+  &.primary button {
+    font-size: 1.0rem;
+    padding: 15px;
+  }
 }
 
 .roundframe {

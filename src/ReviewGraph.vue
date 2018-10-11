@@ -41,11 +41,8 @@ export default {
 			reviewGraph: {}
     }
   },
-	computed: {
-		currentSetId () { return this.$store.state.currentSetId },
-	},
 	watch: {
-		currentSetId () {
+		cards () {
 			this.updateGraph()
 		}
 	},
@@ -58,9 +55,10 @@ export default {
   },
 	methods: {
 		updateGraph () {
+			if (!this.cards || this.cards.length === 0) return
 			const now = Date.now()
-      const reviewTimes = this.cards.map(card => parseDate(card.nextReview).getTime() - now)
-      const greatestTime = reviewTimes[reviewTimes.length - 1]
+      const reviewTimes = this.cards.map(card => parseInt(card.nextReview) - now)
+      const greatestTime = Math.max(...reviewTimes)
       const graphPoints = []
 			const labels = []
 			for (let x = 0; x < this.slots; x++) {
@@ -80,10 +78,6 @@ export default {
 			}
 		}
 	}
-}
-
-function parseDate (date) {
-  return new Date(date.seconds ? date.seconds : date)
 }
 </script>
 
