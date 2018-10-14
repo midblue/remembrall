@@ -56,7 +56,7 @@
         <p v-if="nextReviewIn">Otherwise, your next review is in {{ nextReviewIn }}.</p>
       </div>
       <ReviewGraph
-        :cards="sortedCards"
+        :cards="updatedCards"
         :slots="10"
       />
     </template>
@@ -76,7 +76,7 @@
         <div v-if="nextReviewIn">Your next review is in {{ nextReviewIn }}.</div>
       </div>
       <ReviewGraph
-        :cards="sortedCards"
+        :cards="updatedCards"
         :slots="10"
       />
     </template>
@@ -96,136 +96,164 @@ export default {
     cards: {},
   },
   components: {
-    SingleCardStudy, ReviewGraph, FloatingText, EditableTextField, 
+    SingleCardStudy,
+    ReviewGraph,
+    FloatingText,
+    EditableTextField,
   },
-  data () {
+  data() {
     return {
       refreshCardsTimer: null,
       startedWith: 0,
       displayTimeMod: null,
-      updatableCards: []
+      updatedCards: [],
     }
   },
   computed: {
-    appState () { return this.$store.state.appState },
-    currentSetId () { return this.$store.state.currentSetId },
-    settings () { return this.$store.state.setList[this.$store.state.currentSetId].settings || {} },
-    newToday () { return this.$store.state.setList[this.$store.state.currentSetId].newToday },
-    sortedCards () {
-      return this.updatableCards.sort((a, b) =>  
-        a.nextReview > b.nextReview ? 1 : -1
+    appState() {
+      return this.$store.state.appState
+    },
+    currentSetId() {
+      return this.$store.state.currentSetId
+    },
+    settings() {
+      return (
+        this.$store.state.setList[this.$store.state.currentSetId].settings || {}
       )
     },
-    doneForDay () {
+    newToday() {
+      return this.$store.state.setList[this.$store.state.currentSetId].newToday
+    },
+    doneForDay() {
       return this.doneReviewing && this.doneWithNewCards
     },
-    newCards () {
-      return this.sortedCards
+    newCards() {
+      return this.updatedCards
         .filter(card => card.totalReviews === 0 || !card.totalReviews)
-        .slice(0, this.settings.maxNewPerDay - this.newToday)
+        .sort((a, b) => (a.id > b.id ? 1 : -1))
+        .slice(0, (this.settings.maxNewPerDay || 999) - (this.newToday || 0))
     },
-    doneWithNewCards () {
-      return (this.newToday >= this.settings.maxNewPerDay || this.newCards.length === 0)
+    doneWithNewCards() {
+      return (
+        this.newToday >= this.settings.maxNewPerDay ||
+        this.newCards.length === 0
+      )
     },
-    newCardsAreLeftOver () {
-      return this.sortedCards
-        .filter(card => card.totalReviews === 0 || !card.totalReviews)
-        .length 
-        + this.newToday
-        > this.settings.maxNewPerDay
+    newCardsAreLeftOver() {
+      return (
+        this.updatedCards.filter(
+          card => card.totalReviews === 0 || !card.totalReviews
+        ).length +
+          this.newToday >
+        this.settings.maxNewPerDay
+      )
     },
-    newCardsLeftOver () {
+    newCardsLeftOver() {
       if (!this.newCardsAreLeftOver) return 0
-      return this.sortedCards
+      return this.updatedCards
         .filter(card => card.totalReviews === 0 || !card.totalReviews)
+        .sort((a, b) => (a.id > b.id ? 1 : -1))
     },
-    dueCards () {
+    dueCards() {
       const now = Date.now()
-      return this.sortedCards
-        .filter(card => 
-          card.totalReviews
-          && card.totalReviews > 0 
-          && card.nextReview < now
+      return this.updatedCards
+        .filter(
+          card =>
+            card.totalReviews && card.totalReviews > 0 && card.nextReview < now
         )
+        .sort((a, b) => (a.nextReview > b.nextReview ? 1 : -1))
     },
-    doneReviewing () {
-      return (this.dueCards.length === 0)
+    doneReviewing() {
+      return this.dueCards.length === 0
     },
-    allStudyableCards () {
+    allStudyableCards() {
       return [...this.newCards, ...this.dueCards]
     },
-    cardToStudy () {
+    cardToStudy() {
       return this.allStudyableCards[0]
     },
-    nextReviewIn () {
+    nextReviewIn() {
       const reviewableCards = this.doneForDay
-        ? this.sortedCards.filter(card => card.totalReviews && card.totalReviews > 0)
-        : this.sortedCards
+        ? this.updatedCards.filter(
+            card => card.totalReviews && card.totalReviews > 0
+          )
+        : this.updatedCards
       const nextReview = reviewableCards.reduce((selected, card) => {
-        const cardNext = card.nextReview 
+        const cardNext = card.nextReview
         return cardNext < selected ? cardNext : selected
       }, 9999999999999999999)
       return msToString(nextReview - Date.now())
     },
   },
   watch: {
-    currentSetId () {
+    currentSetId() {
       this.toReview = []
       this.refreshCards()
       this.startedWith = 0
     },
-    cards () {
+    cards() {
       this.refreshCards()
     },
-    doneForDay (isDone) {
+    doneForDay(isDone) {
       if (isDone) {
         this.$nextTick(this.refreshCards)
         this.startedWith = 0
       }
     },
   },
-  mounted () {
-    if (this.settings.maxNewPerDay === undefined || this.settings.maxNewPerDay === null)
+  mounted() {
+    if (
+      this.settings.maxNewPerDay === undefined ||
+      this.settings.maxNewPerDay === null
+    )
       this.$store.commit('updateSetSettings', { maxNewPerDay: 10 })
-    if (this.settings.translationLink === undefined || this.settings.translationLink === null)
+    if (
+      this.settings.translationLink === undefined ||
+      this.settings.translationLink === null
+    )
       this.$store.commit('updateSetSettings', { translationLink: true })
-    if (this.settings.pronunciationLink === undefined || this.settings.pronunciationLink === null)
+    if (
+      this.settings.pronunciationLink === undefined ||
+      this.settings.pronunciationLink === null
+    )
       this.$store.commit('updateSetSettings', { pronunciationLink: true })
-    if (this.settings.studyReverse === undefined || this.settings.studyReverse === null)
+    if (
+      this.settings.studyReverse === undefined ||
+      this.settings.studyReverse === null
+    )
       this.$store.commit('updateSetSettings', { studyReverse: false })
-    
+
     this.refreshCardsTimer = setInterval(this.refreshCards, 10000)
     this.refreshCards()
     this.startedWith = this.dueCards.length + this.newCards.length
   },
-  beforeDestroy () {
+  beforeDestroy() {
     clearInterval(this.refreshCardsTimer)
   },
   methods: {
-    finishedCurrentCard (timeMod) {
-      if (timeMod) {
-        this.displayTimeMod = null
-        this.$nextTick(() => this.displayTimeMod = '+' + msToString(timeMod))
-      }
+    finishedCurrentCard(timeMod) {
+      if (timeMod === undefined) return
+      const text = timeMod ? '+' + msToString(timeMod) : 'Again!'
+      this.displayTimeMod = null
+      this.$nextTick(() => (this.displayTimeMod = text))
     },
-    refreshCards () {
-      this.updatableCards = [...this.cards]
-      // this.$set(this, 'updatableCards', this.cards)
+    refreshCards() {
+      this.updatedCards = [...this.cards]
+      // this.$set(this, 'updatedCards', this.cards)
     },
-    updateMaxNewPerDay (newValue) {
+    updateMaxNewPerDay(newValue) {
       const parsedValue = parseInt(newValue) || 10
       this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
-
 .studyframe {
   position: relative;
-  opacity: .3;
-  transition: all .5s;
+  opacity: 0.3;
+  transition: all 0.5s;
 
   &.focus {
     opacity: 1;
@@ -247,7 +275,7 @@ export default {
 
   div {
     background: #ccc;
-    transition: .5s;
+    transition: 0.5s;
     height: 5px;
   }
 }
@@ -263,6 +291,4 @@ export default {
     display: inline-block;
   }
 }
-
 </style>
-

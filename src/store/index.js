@@ -1,7 +1,7 @@
 import Vuex from 'vuex'
-import Vue from 'vue';
+import Vue from 'vue'
 const storage = require('../assets/storage')
-const firestore = require('../assets/firestore')
+const dbManager = require('../assets/dbManager')
 
 Vue.use(Vuex)
 
@@ -13,151 +13,208 @@ export default () => {
       currentSetId: null,
       appState: 'study',
       isMobile: false,
+      pauseDbSets: true,
+      isEditingText: false,
     },
     mutations: {
       // global vars
-      setUsername (state, newUsername) {
+      setUsername(state, newUsername) {
         state.currentUser = newUsername
         storage.set('currentUser', newUsername)
       },
-      setSetList (state, newSetList) {
+      setSetList(state, newSetList) {
         state.setList = newSetList
       },
-      setCurrentSetId (state, newSetId) {
+      setCurrentSetId(state, newSetId) {
         state.currentSetId = newSetId
         storage.set('currentSetId', newSetId)
       },
-      logOut (state) {
+      logOut(state) {
         state.currentUser = null
         state.setList = []
         state.currentSetId = null
       },
-      setAppWidth (state, newWidth) {
+      setAppWidth(state, newWidth) {
         state.isMobile = parseInt(newWidth) <= 768
+      },
+      setPauseDbSets(state, shouldPause) {
+        state.pauseDbSets = shouldPause
+      },
+      setIsEditingText(state, isEditing) {
+        state.isEditingText = isEditing
       },
 
       // app state
-      setAppState (state, newState) {
+      setAppState(state, newState) {
         state.appState = newState || 'deckList'
       },
 
       // sets
-      updateSetName (state, newName) {
+      updateSetName(state, newName) {
         Vue.set(state.setList[state.currentSetId], 'name', newName)
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            name: state.setList[state.currentSetId].name,
+          })
       },
-      updateSetSettings (state, newSettings) {
+      updateSetSettings(state, newSettings) {
         for (let param in newSettings) {
           if (!state.setList[state.currentSetId].settings)
             state.setList[state.currentSetId].settings = {}
-          Vue.set(state.setList[state.currentSetId].settings, param, newSettings[param])
+          Vue.set(
+            state.setList[state.currentSetId].settings,
+            param,
+            newSettings[param]
+          )
         }
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            settings: state.setList[state.currentSetId].settings,
+          })
       },
-      addSet (state) {
+      addSet(state) {
         const newSet = blankSet()
         state.setList[newSet.id] = newSet
         state.currentSetId = newSet.id
         storage.set('currentSetId', newSet.id)
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
+        if (!state.pauseDbSets) dbManager.setSet(state.currentUser, newSet)
       },
-      deleteSet (state, setId) {
+      deleteSet(state, setId) {
         Vue.delete(state.setList, setId)
         state.currentSetId = Object.keys(state.setList)[0]
-        firestore.deleteSet(state.currentUser, setId)
+        if (!state.pauseDbSets) dbManager.deleteSet(state.currentUser, setId)
       },
 
       // set-level daily review numbers
-      addSetNewCardToday (state) {
-        if (!state.setList[state.currentSetId].newToday) state.setList[state.currentSetId].newToday = 0
-        Vue.set(state.setList[state.currentSetId], 'newToday', state.setList[state.currentSetId].newToday + 1)
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
-      },
-      addSetReviewCardToday (state) {
-        if (!state.setList[state.currentSetId].reviewsToday) state.setList[state.currentSetId].reviewsToday = 0
-        Vue.set(state.setList[state.currentSetId], 'reviewsToday', state.setList[state.currentSetId].reviewsToday + 1)
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
-      },
-      resetSetDay (state) {
+      resetSetDay(state) {
         Vue.set(state.setList[state.currentSetId], 'newToday', 0)
         Vue.set(state.setList[state.currentSetId], 'reviewsToday', 0)
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            newToday: 0,
+            reviewsToday: 0,
+          })
       },
 
       // cards
-      addCard (state, card) {
-        state.setList[state.currentSetId].cards.push({
+      addCard(state, card) {
+        const newCards = state.setList[state.currentSetId].cards || []
+        newCards.push({
           ...card,
-          id: Date.now()
+          id: Date.now(),
         })
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
-      },
-      cardToEditId (state, id) {
-        if (!id) state.editingCard = null
-        state.editingCard = state.setList[state.currentSetId].cards.find(c => c.id === id)
-      },
-      updateCard (state, card) {
-        const foundCardIndex = state.setList[state.currentSetId].cards.findIndex(c => c.id === card.id)
-        if (foundCardIndex !== undefined)
-          for (let param in card)
-            Vue.set(state.setList[state.currentSetId].cards[foundCardIndex], param, card[param])
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
-      },
-      studyCard (state, card) {
-        const foundCardIndex = state.setList[state.currentSetId].cards.findIndex(c => c.id === card.id)
-        if (foundCardIndex !== undefined)
-          for (let param in card)
-            Vue.set(state.setList[state.currentSetId].cards[foundCardIndex], param, card[param])
-        Vue.set(state.setList[state.currentSetId], 'lastStudied', Date.now())
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
-      },
-      deleteCard (state, id) {
-        const newCards = state.setList[state.currentSetId].cards.filter(card => card.id !== id)
         Vue.set(state.setList[state.currentSetId], 'cards', newCards)
-        updateSetInDb(state.currentUser, state.setList[state.currentSetId])
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            cards: state.setList[state.currentSetId].cards,
+          })
+      },
+      updateCard(state, card) {
+        const foundCardIndex = state.setList[
+          state.currentSetId
+        ].cards.findIndex(c => c.id === card.id)
+        if (foundCardIndex !== undefined)
+          for (let param in card)
+            Vue.set(
+              state.setList[state.currentSetId].cards[foundCardIndex],
+              param,
+              card[param]
+            )
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            cards: state.setList[state.currentSetId].cards,
+          })
+      },
+      studyCard(state, card) {
+        const foundCardIndex = state.setList[
+          state.currentSetId
+        ].cards.findIndex(c => c.id === card.id)
+        // update card data
+        if (foundCardIndex !== undefined)
+          for (let param in card)
+            Vue.set(
+              state.setList[state.currentSetId].cards[foundCardIndex],
+              param,
+              card[param]
+            )
+        // update newToday, reviewsToday
+        if (
+          new Date(state.setList[state.currentSetId].lastStudied).getDate() !==
+          new Date().getDate()
+        ) {
+          // new day
+          Vue.set(state.setList[state.currentSetId], 'newToday', 0)
+          Vue.set(state.setList[state.currentSetId], 'reviewsToday', 0)
+        }
+        if (card.totalReviews <= 1)
+          Vue.set(
+            state.setList[state.currentSetId],
+            'newToday',
+            state.setList[state.currentSetId].newToday
+              ? state.setList[state.currentSetId].newToday + 1
+              : 1
+          )
+        else
+          Vue.set(
+            state.setList[state.currentSetId],
+            'reviewsToday',
+            state.setList[state.currentSetId].reviewsToday
+              ? state.setList[state.currentSetId].reviewsToday + 1
+              : 1
+          )
+        // update set last studied
+        Vue.set(state.setList[state.currentSetId], 'lastStudied', Date.now())
+        // update Db
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            lastStudied: state.setList[state.currentSetId].lastStudied,
+            newToday: state.setList[state.currentSetId].newToday,
+            reviewsToday: state.setList[state.currentSetId].reviewsToday,
+            cards: state.setList[state.currentSetId].cards,
+          })
+      },
+      deleteCard(state, id) {
+        const newCards = state.setList[state.currentSetId].cards.filter(
+          card => card.id !== id
+        )
+        Vue.set(state.setList[state.currentSetId], 'cards', newCards)
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.currentSetId,
+            cards: state.setList[state.currentSetId].cards,
+          })
       },
     },
     actions: {
-      logInAs ({ commit }, username) {
-        firestore.getAllSets(username)
-          .then(({docs, empty}) => {
-            let setObject = {}
-            docs.forEach(doc => {
-              const set = doc.data()
-              setObject[set.id] = set
-            })
-            if (Object.keys(setObject).length === 0)
-              setObject = newSetObject()
-            commit('setCurrentSetId', Object.keys(setObject)[0])
-            commit('setUsername', username)
-            commit('setSetList', setObject)
+      logInAs({ commit }, username) {
+        dbManager.getAllSets(username).then(res => {
+          const { docs, empty } = res
+          let setObject = {}
+          docs.forEach(doc => {
+            const set = doc.data()
+            setObject[set.id] = set
           })
+          if (Object.keys(setObject).length === 0) setObject = newSetObject()
+          commit('setPauseDbSets', false)
+          commit('setCurrentSetId', Object.keys(setObject)[0])
+          commit('setUsername', username)
+          commit('setSetList', setObject)
+        })
       },
-    }
+    },
   })
 }
 
-let currentlyUpdating = false,
-    updatedUserToSaveToDb,
-    updatedSetToSaveToDb
-setInterval(() => {
-  if (!currentlyUpdating && updatedUserToSaveToDb && updatedSetToSaveToDb) {
-    currentlyUpdating = true
-    firestore.saveSet(updatedUserToSaveToDb, updatedSetToSaveToDb)
-      .then(() => currentlyUpdating = false)
-    updatedSetToSaveToDb = null
-    updatedUserToSaveToDb = null
-  }
-}, 2000)
-function updateSetInDb (user, set) {
-  updatedUserToSaveToDb = user
-  updatedSetToSaveToDb = set
-}
-
-function newSetObject () {
+function newSetObject() {
   const newSet = blankSet()
   return {
-    [blankSet.id] : newSet
+    [blankSet.id]: newSet,
   }
 }
 
@@ -179,7 +236,6 @@ function blankSet() {
     cards: [],
   }
 }
-
 
 // function sanitizeCards(cards) {
 //   return cards.map(card => ({

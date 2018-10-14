@@ -1,7 +1,7 @@
 <template>
   <div
     class="cardcreator"
-    :class="{ focus: isFocused }"
+    :class="{ focus: isFocused || active }"
   >
     <h4>Add Card</h4>
     <textarea
@@ -22,7 +22,6 @@
     />
     <button
       @click="newCard"
-      @focus="focus"
     >
       <div>Add Card</div>
       <div class="keyicon">⌘-Enter</div>
@@ -34,7 +33,10 @@
 import FloatingText from './FloatingText'
 
 export default {
-  data () {
+  props: {
+    active: {},
+  },
+  data() {
     return {
       front: '',
       back: '',
@@ -46,64 +48,63 @@ export default {
     FloatingText,
   },
   computed: {
-    isFocused () { return this.$store.state.appState === 'addCard' },
-  }, 
-  watch: {
-    isFocused (newFocus) {
-      if (newFocus) this.$nextTick(() => this.$refs.front.focus())
-		}
+    isFocused() {
+      return this.$store.state.appState === 'addCard'
+    },
   },
-  mounted () {
-		window.addEventListener('keydown', this.keyDown)
-		window.addEventListener('keyup', this.keyUp)
-	},
-	beforeDestroy () {
-		window.removeEventListener('keydown', this.keyDown)
-		window.removeEventListener('keyup', this.keyUp)
-	},
+  watch: {
+    isFocused(newFocus) {
+      if (newFocus) this.$nextTick(() => this.$refs.front.focus())
+    },
+  },
+  mounted() {
+    window.addEventListener('keydown', this.keyDown)
+    window.addEventListener('keyup', this.keyUp)
+    this.$store.commit('setAppState', 'addCard')
+    this.$nextTick(() => this.$refs.front.focus())
+  },
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.keyDown)
+    window.removeEventListener('keyup', this.keyUp)
+    this.$store.commit('setIsEditingText', false)
+  },
   methods: {
-    newCard () {
+    newCard() {
       if (!this.front || !this.back) return
       this.$store.commit('addCard', {
+        id: Date.now(),
         front: this.front,
         back: this.back,
         nextReview: 0,
-        created: new Date()
       })
       this.addText = 'Card added.'
-      setTimeout(() => this.addText = '', 1500)
-      this.front= ''
+      setTimeout(() => (this.addText = ''), 1500)
+      this.front = ''
       this.back = ''
       this.$refs.front.focus()
     },
-    focus () {
-      this.$store.commit('setAppState', 'addCard')
-    },
-    blur () {
-      this.$store.commit('setAppState', 'study')
-    },
-    keyDown (event) {
+    keyDown(event) {
       if (!this.isFocused) return
       if (event.key === 'Meta') this.metaDown = true
-			if (event.key === 'Enter' && this.metaDown)
-        this.newCard()
+      if (event.key === 'Enter' && this.metaDown) this.newCard()
     },
-    keyUp (event) {
+    keyUp(event) {
       if (!this.isFocused) return
       if (event.key === 'Meta') this.metaDown = false
     },
-  }
+    focus() {
+      this.$store.commit('setIsEditingText', true)
+    },
+  },
 }
-
 </script>
 
 <style lang="scss" scoped>
-
 .cardcreator {
   position: relative;
   margin: 0 auto;
-  opacity: .3;
-  transition: all .5s;
+  opacity: 0.3;
+  transition: all 0.5s;
 
   &.focus {
     opacity: 1;
@@ -128,4 +129,3 @@ export default {
   }
 }
 </style>
-

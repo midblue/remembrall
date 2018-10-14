@@ -7,46 +7,59 @@
 				@startEdit="startEditName"
 				@endEdit="saveEditedName"
       />
-      <div class="sub">
+      <div class="sub" v-if="cards">
         ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})
       </div>
-      <!--<div class="sub savedat">Saved at </div>-->
     </h1>
-    <div class="buttonlist">
+    <div class="buttonlist" v-if="cards">
       <button
-        :class="{active: appState === 'study'}"
+        :class="{active: appState === 'study' || appState === 'editCard'}"
         @click="$store.commit('setAppState', 'study')"
-      >Study</button>
+      >
+        <div>Study</div>
+        <span class="keyicon">s</span>
+      </button>
       <button 
         :class="{active: appState === 'addCard'}"
         @click="$store.commit('setAppState', 'addCard')"
-      >+ Add Card</button>
-      <!--<button>Powerups(3) ▾</button>-->
+      >
+        <div>Add Card</div>
+        <span class="keyicon">a</span>
+      </button>
       <button
         :class="{active: appState === 'setStats'}"
         @click="$store.commit('setAppState', 'setStats')"
-      >Stats</button>
+      >
+        <div>Stats</div>
+        <span class="keyicon">t</span>
+      </button>
       <button
         :class="{active: appState === 'setSettings'}"
         @click="$store.commit('setAppState', 'setSettings')"
-      >Settings</button>
+      >
+        <div>Settings</div>
+        <span class="keyicon">e</span>
+      </button>
     </div>
     <br />
     <div class="setelements">
       <CardCreator 
-        v-if="appState === 'addCard'"
+        key="add"
+        v-if="appState === 'addCard' || !cards"
+        :active="cards ? false : true"
       />
       <SetSettings
+        key="settings"
         v-else-if="appState === 'setSettings'"
       />
       <SetStats
+        key="stats"
         v-else-if="appState === 'setStats'"
       />
       <StudyFrame
+        key="study"
         v-else
         :cards="cards"
-        @newCard="newCard"
-        @reviewCard="reviewCard"
       />
     </div>
   </div>
@@ -64,12 +77,6 @@ export default {
     id: {},
     name: {},
     cards: {},
-    maxNewPerDay: {
-      default: 10,
-    },
-    maxReviewsPerDay: {
-      default: 50,
-    },
     lastStudied: {
       default: () => new Date(),
     },
@@ -78,7 +85,7 @@ export default {
     },
     reviewsToday: {
       default: 0,
-    }
+    },
   },
   components: {
     EditableTextField,
@@ -87,41 +94,52 @@ export default {
     CardCreator,
     StudyFrame,
   },
-  data () {
+  data() {
     return {
       newCardsToday: 0,
       reviewCardsToday: 0,
     }
   },
   computed: {
-    appState () { return this.$store.state.appState },
+    appState() {
+      return this.$store.state.appState
+    },
+    isEditingText() {
+      return this.$store.state.isEditingText
+    },
+  },
+  mounted() {
+    window.addEventListener('keyup', this.keyUp)
+  },
+  beforeDestroy() {
+    window.removeEventListener('keyup', this.keyUp)
   },
   methods: {
-    startEditName () {
-      // this.$store.commit('setAppState', 'editSetName')
+    startEditName() {
+      this.$store.commit('setIsEditingText', true)
     },
-    saveEditedName (newName) {
+    saveEditedName(newName) {
       this.$store.commit('updateSetName', newName)
-      // this.$store.commit('setAppState', 'study')
+      this.$store.commit('setIsEditingText', false)
     },
-    newCard () {
-
+    keyUp(event) {
+      if (this.isEditingText) return
+      if (event.key === 's') this.$store.commit('setAppState', 'study')
+      if (event.key === 'a') this.$store.commit('setAppState', 'addCard')
+      if (event.key === 't') this.$store.commit('setAppState', 'setStats')
+      if (event.key === 'e') this.$store.commit('setAppState', 'setSettings')
     },
-    reviewCard () {
-
-    },
-  }
+  },
 }
 </script>
 
 <style lang="scss" scoped>
-
 h1 {
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
 
   @media (max-width: 768px) {
-    margin-top: .5rem;
-	}
+    margin-top: 0.5rem;
+  }
 
   div {
     display: inline-block;
@@ -135,14 +153,14 @@ h1 {
 }
 
 .setelements {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-gap: 50px;
+  display: block;
+  position: relative;
 
-  & > * {
+  & > *,
+  & > * > * {
     width: 100%;
+    position: absolute;
+    top: 0;
   }
 }
-
 </style>
-

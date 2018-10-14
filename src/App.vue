@@ -1,10 +1,17 @@
 <template>
   <section class="app">
     <UserAndSetPicker />
+    <RefreshHandler />
     <div class="content">
       <SetView
         v-if="currentSet"
-        v-bind="currentSet"
+        :key="currentSet.id"
+        :id="currentSet.id"
+        :name="currentSet.name"
+        :cards="currentSet.cards"
+        :lastStudied="currentSet.lastStudied"
+        :newToday="currentSet.newToday"
+        :reviewsToday="currentSet.reviewsToday"
       />
     </div>
   </section>
@@ -12,29 +19,35 @@
 
 <script>
 import UserAndSetPicker from './UserAndSetPicker.vue'
+import RefreshHandler from './RefreshHandler.vue'
 import SetView from './SetView.vue'
 
 export default {
   components: {
-    SetView, UserAndSetPicker,
+    SetView,
+    UserAndSetPicker,
+    RefreshHandler,
   },
   computed: {
-    currentSet () { return this.$store.state.setList[this.$store.state.currentSetId] },
+    currentSet() {
+      return this.$store.state.setList[this.$store.state.currentSetId]
+    },
   },
-  mounted () {
+  mounted() {
     window.addEventListener('resize', this.checkWidth)
     this.checkWidth()
   },
   methods: {
-    checkWidth () {
+    checkWidth() {
       this.$store.commit('setAppWidth', window.innerWidth)
     },
-  }
+  },
 }
 </script>
 
 <style lang="scss">
-html, body {
+html,
+body {
   margin: 0;
   font-family: 'Avenir', sans-serif;
 }
@@ -54,13 +67,16 @@ html, body {
   align-items: center;
 }
 
-a, a:active, a:hover, a:visited {
+a,
+a:active,
+a:hover,
+a:visited {
   color: #555;
 }
 
 .sub {
-  font-size: .85rem;
-  opacity: .6;
+  font-size: 0.85rem;
+  opacity: 0.6;
 }
 
 .centertext {
@@ -69,22 +85,22 @@ a, a:active, a:hover, a:visited {
 
 .keyicon {
   display: inline-block;
-  border: 1px solid rgba(black, .3);
-  background: rgba(black, .05);
-  color: rgba(black, .7);
+  border: 1px solid rgba(black, 0.3);
+  background: rgba(black, 0.05);
+  color: rgba(black, 0.7);
   text-transform: uppercase;
   font-weight: 600;
-  font-size: .7em;
+  font-size: 0.7em;
   padding: 1px 5px;
   text-align: center;
   min-width: 18px;
   border-radius: 4px;
-  box-shadow: 0 2px 0px rgba(black, .2);
+  box-shadow: 0 2px 0px rgba(black, 0.2);
   margin-bottom: 2px;
 
   @media (max-width: 768px) {
     display: none;
-	}
+  }
 }
 
 .visibletextfield {
@@ -106,32 +122,33 @@ button {
   border-radius: 10px;
   font-family: 'Avenir', sans-serif;
   cursor: pointer;
-  transition: .2s;
+  transition: 0.2s;
 
-  &:hover, &.active {
+  &:hover,
+  &.active {
     background: #f8f8f8;
     border: 1px solid transparent;
   }
 }
 
 .buttonlist {
-	display: flex;
+  display: flex;
   flex-wrap: wrap;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #eee;
 
-	button {
-		flex-grow: 1;
+  button {
+    flex-grow: 1;
     flex-shrink: 0;
     border-radius: 0;
-    outline:0;
+    outline: 0;
     border: none;
     box-shadow: inset -1px -1px 0 0 #eee;
-	}
+  }
 
   &.primary button {
-    font-size: 1.0rem;
+    font-size: 1rem;
     padding: 15px;
   }
 }
@@ -140,6 +157,4 @@ button {
   overflow: hidden;
   border-radius: 10px;
 }
-
 </style>
-
