@@ -34,6 +34,7 @@ export default {
     },
   },
   mounted() {
+    this.$nextTick(() => this.$el.focus())
     window.addEventListener('resize', this.checkWidth)
     this.checkWidth()
   },
@@ -49,7 +50,7 @@ export default {
 html,
 body {
   margin: 0;
-  font-family: 'Avenir', sans-serif;
+  font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
 }
 
 * {
@@ -108,7 +109,7 @@ a:visited {
   border: 1px solid #bbb;
   border-radius: 5px;
   text-align: center;
-  padding: 2px 0;
+  padding: 5px 0;
   position: relative;
 }
 
@@ -151,6 +152,14 @@ button {
     font-size: 1rem;
     padding: 15px;
   }
+}
+
+select {
+  border: 1px solid #bbb;
+  background: white;
+  font-size: 1rem;
+  font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
+  height: 37px;
 }
 
 .roundframe {

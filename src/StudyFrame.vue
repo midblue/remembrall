@@ -15,6 +15,9 @@
 
     <FloatingText 
       :text="displayTimeMod"
+      :color="displayTimeMod 
+        ? (displayTimeMod.toLowerCase().indexOf('again') !== -1 ? '#fa4' : '#0c6')
+        : 'green'" 
       offset="-100"
     />
 
@@ -57,7 +60,9 @@
       </div>
       <ReviewGraph
         :cards="updatedCards"
-        :slots="10"
+        :slots="8"
+        :maxTime="1 * 26 * 60 * 60 * 1000"
+        title="Upcoming reviews:"
       />
     </template>
 
@@ -77,7 +82,9 @@
       </div>
       <ReviewGraph
         :cards="updatedCards"
-        :slots="10"
+        :slots="8"
+        :maxTime="1 * 26 * 60 * 60 * 1000"
+        title="Upcoming reviews:"
       />
     </template>
   </div>
@@ -207,16 +214,6 @@ export default {
       this.settings.maxNewPerDay === null
     )
       this.$store.commit('updateSetSettings', { maxNewPerDay: 10 })
-    if (
-      this.settings.translationLink === undefined ||
-      this.settings.translationLink === null
-    )
-      this.$store.commit('updateSetSettings', { translationLink: true })
-    if (
-      this.settings.pronunciationLink === undefined ||
-      this.settings.pronunciationLink === null
-    )
-      this.$store.commit('updateSetSettings', { pronunciationLink: true })
     if (
       this.settings.studyReverse === undefined ||
       this.settings.studyReverse === null

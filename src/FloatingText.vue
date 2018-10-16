@@ -2,7 +2,10 @@
 	<div
     class="floattext" 
     v-if="textToFloat"
-    :style="{transform: `translateY(${ offset }px)`}"
+    :style="{
+      transform: `translateY(${ offset }px)`,
+      color,
+    }"
   >
 		{{ textToFloat }}
 	</div>
@@ -14,34 +17,36 @@ export default {
     text: {},
     offset: {
       default: 0,
-    }
+    },
+    color: {
+      default: 'green',
+    },
   },
-  data () {
+  data() {
     return {
       textToFloat: null,
     }
   },
   watch: {
-   text (newText) {
-		  this.textToFloat = null
-			this.$nextTick(() => this.textToFloat = this.text)
-	 }
+    text(newText) {
+      this.textToFloat = null
+      this.$nextTick(() => (this.textToFloat = this.text))
+    },
   },
 }
 </script>
 
 <style lang="scss" scoped>
-
 .floattext {
-	z-index: 1000;
-	width: 100%;
+  z-index: 1000;
+  width: 100%;
   left: 0;
-	position: absolute;
-	text-align: center;
-	user-select: none;
-	pointer-events: none;
-	animation: pointsscroll 1.5s normal forwards ease-out;
-	color: green;
+  position: absolute;
+  text-align: center;
+  user-select: none;
+  pointer-events: none;
+  font-weight: 600;
+  animation: pointsscroll 1.5s normal forwards ease-out;
 }
 
 @keyframes pointsscroll {
@@ -57,5 +62,4 @@ export default {
     bottom: 100px;
   }
 }
-
 </style>

@@ -200,6 +200,7 @@ export default () => {
             const set = doc.data()
             setObject[set.id] = set
           })
+          console.log(setObject, empty, new Date().toLocaleTimeString())
           if (Object.keys(setObject).length === 0) setObject = newSetObject()
           commit('setPauseDbSets', false)
           commit('setCurrentSetId', Object.keys(setObject)[0])
@@ -226,8 +227,7 @@ function blankSet() {
     settings: {
       maxNewPerDay: 10,
       maxReviewsPerDay: 50,
-      translationLink: false,
-      pronunciationLink: false,
+      languageTools: 'none',
       studyReverse: false,
     },
     lastStudied: Date.now(),

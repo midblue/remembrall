@@ -23,8 +23,15 @@
         :class="{active: appState === 'addCard'}"
         @click="$store.commit('setAppState', 'addCard')"
       >
-        <div>Add Card</div>
+        <div>Add</div>
         <span class="keyicon">a</span>
+      </button>
+      <button 
+        :class="{active: appState === 'setBrowse'}"
+        @click="$store.commit('setAppState', 'setBrowse')"
+      >
+        <div>Browse</div>
+        <span class="keyicon">b</span>
       </button>
       <button
         :class="{active: appState === 'setStats'}"
@@ -46,7 +53,10 @@
       <CardCreator 
         key="add"
         v-if="appState === 'addCard' || !cards"
-        :active="cards ? false : true"
+      />
+      <CardBrowser 
+        key="browse"
+        v-else-if="appState === 'setBrowse'"
       />
       <SetSettings
         key="settings"
@@ -67,10 +77,11 @@
 
 <script>
 import EditableTextField from './EditableTextField'
-import CardCreator from './CardCreator.vue'
-import StudyFrame from './StudyFrame.vue'
-import SetSettings from './SetSettings.vue'
-import SetStats from './SetStats.vue'
+import CardCreator from './CardCreator'
+import StudyFrame from './StudyFrame'
+import CardBrowser from './CardBrowser'
+import SetSettings from './SetSettings'
+import SetStats from './SetStats'
 
 export default {
   props: {
@@ -93,6 +104,7 @@ export default {
     SetStats,
     CardCreator,
     StudyFrame,
+    CardBrowser,
   },
   data() {
     return {
@@ -126,6 +138,7 @@ export default {
       if (this.isEditingText) return
       if (event.key === 's') this.$store.commit('setAppState', 'study')
       if (event.key === 'a') this.$store.commit('setAppState', 'addCard')
+      if (event.key === 'b') this.$store.commit('setAppState', 'setBrowse')
       if (event.key === 't') this.$store.commit('setAppState', 'setStats')
       if (event.key === 'e') this.$store.commit('setAppState', 'setSettings')
     },

@@ -15,7 +15,7 @@
 			Total Reviews: <b>{{ totalReviews }}</b>
 		</p>
 		<p>
-			Ok/Again Ratio: <b>{{ (oks / agains).toFixed(3) }}</b> <span class="sub">({{ oks }} oks / {{ agains }} agains)</span>
+			Ok/Again Ratio: <b>{{ oks && agains ? (oks / agains).toFixed(3) : 0 }}</b> <span class="sub" v-if="oks && agains">({{ oks }} oks / {{ agains }} agains)</span>
 		</p>
 		<ReviewGraph
 			:cards="currentSet.cards"

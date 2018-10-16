@@ -21,10 +21,12 @@
 						@startEdit="startEdit"
 						@endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
 					/>
-					<div class="sub">
-						<a target="_blank" v-if="settings.pronunciationLink" :href="pronunciationLink">Pronunciation</a>
-						<span v-if="settings.pronunciationLink && settings.translationLink"> ・ </span>
-						<a target="_blank" v-if="settings.translationLink" :href="translationLink">Translation</a>
+					<div class="sub" v-if="settings.languageTools">
+						<a v-if="speaker" @click="speakWord" class="fakelink">Speak it</a>
+						<span v-if="speaker"> ・ </span>
+						<a target="_blank" :href="pronunciationLink">Native</a>
+						<span> ・ </span>
+						<a target="_blank" :href="translationLink">Translation</a>
 					</div>
 				</div>
 			</div>
@@ -118,6 +120,7 @@ export default {
       startedCardTime: new Date(),
       averageTime: 7000,
       reviewsSoFar: 0,
+      speaker: null,
     }
   },
   computed: {
@@ -142,7 +145,11 @@ export default {
       if (linebreakPos !== -1)
         searchString = this.back.substring(0, linebreakPos)
       return searchString
-        .split(' ')
+    },
+    searchWord() {
+      return this.searchString
+        .toLowerCase()
+        .split(/[ /;.,?¿!+]/)
         .reduce(
           (longestString, currString) =>
             currString.length > longestString.length
@@ -152,10 +159,14 @@ export default {
         )
     },
     pronunciationLink() {
-      return `https://forvo.com/word/${this.searchString}/#es`
+      return `https://forvo.com/word/${this.searchWord}/#${
+        this.settings.languageTools
+      }`
     },
     translationLink() {
-      return `https://translate.google.com/#es/en/${this.searchString}`
+      return `https://translate.google.com/#${this.settings.languageTools}/en/${
+        this.searchString
+      }`
     },
     timeBonuses() {
       let bonuses = {
@@ -174,7 +185,10 @@ export default {
   watch: {
     id(newId) {
       this.startedCardTime = new Date()
-      console.log('started studying', newId)
+      // console.log('started studying', newId)
+    },
+    settings(newSettings) {
+      this.speaker.lang = newSettings.languageTools
     },
     isStudying(newFocus) {
       // if (newFocus) this.showBack = false
@@ -183,6 +197,11 @@ export default {
   mounted() {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
+    if (window.speechSynthesis) {
+      this.speaker = new SpeechSynthesisUtterance()
+      this.speaker.lang = this.settings.languageTools
+      this.speaker.volume = 0.4
+    }
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.keyDown)
@@ -205,15 +224,16 @@ export default {
           this.averageTime * ((this.reviewsSoFar - 1) / this.reviewsSoFar) +
           cardTime * (1 / this.reviewsSoFar)
 
+      // calc time modifiers
+
+      // depending on time taken, adds time
       // turn time into 0-1 range, 1 being fast
       const cardTimeNormalized =
         1 - (cardTime - timeIgnoreCutoff[0]) / timeIgnoreCutoff[1]
-
-      // calc time modifiers
-      // depending on time taken, can up to double the push back
       let answerTimeBonus = 0
       if (!ignoreTime)
         answerTimeBonus = cardTimeNormalized * this.timeBonuses[difficulty]
+
       // if card is older, adds more time
       const maturityThreshold = 30
       const maturityBonus =
@@ -221,13 +241,15 @@ export default {
           ? this.timeBonuses[difficulty]
           : this.timeBonuses[difficulty] *
             (this.totalReviews / maturityThreshold)
+
       // if card is usually succeeded on, adds more time
       const successRatio = (this.ok || 0) / (this.again || 1)
       const successRatioBonus =
         successRatio > 1
           ? this.timeBonuses[difficulty]
           : this.timeBonuses[difficulty] * successRatio
-      // depending on the length of the answer vs the length of the prompt, can affect timeMod
+
+      // depending on the length of the answer vs the length of the prompt, adds time
       let collectiveLength =
         this.front.replace(/\n.*/g, '').length +
         this.back.replace(/\n.*/g, '').length -
@@ -248,20 +270,20 @@ export default {
       )
 
       console.log(
-        'time bonus: ',
+        '  time bonus:',
         Math.round(answerTimeBonus * 0.00001),
-        'maturity bonus: ',
+        '  maturity bonus:',
         Math.round(maturityBonus * 0.00001),
-        'success ratio bonus: ',
+        '  success ratio bonus:',
         Math.round(successRatioBonus * 0.00001),
-        'length bonus: ',
-        Math.round(lengthBonus * 0.00001)
+        '  length bonus:',
+        Math.round(lengthBonus * 0.00001),
+        '  total:',
+        Math.round(newTimeMod * 0.00001)
       )
 
       // calc interval until next review
       const newNextReview = new Date(Date.now() + newTimeMod).getTime()
-
-      // console.log(cardTime, ignoreTime, cardTimeNormalized, this.timeMod, this.timeBonuses[difficulty], newTimeMod, newNextReview)
 
       const newTotalReviews = this.totalReviews + 1
       const newAgain = this.again + (difficulty === 'again' ? 1 : 0)
@@ -291,14 +313,12 @@ export default {
     keyDown(event) {
       if (!this.isStudying || this.isEditingText) return
       if (event.key === '1') this.answer('again')
-      // else if (event.key === '2') this.answer('hard')
       else if (event.key === ' ') {
         event.preventDefault()
         !this.showBack ? (this.showBack = true) : this.answer('ok')
       } else if (event.key === 'Enter')
         !this.showBack ? (this.showBack = true) : this.answer('ok')
       else if (event.key === '2') this.answer('ok')
-      // else if (event.key === '4') this.answer('easy')
     },
     addCard() {
       this.$store.commit('setAppState', 'addCard')
@@ -325,6 +345,10 @@ export default {
         id: this.id,
         [side]: newValue,
       })
+    },
+    speakWord() {
+      this.speaker.text = this.searchString
+      window.speechSynthesis.speak(this.speaker)
     },
   },
 }
@@ -384,12 +408,17 @@ export default {
   }
 }
 
+.fakelink {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .showback {
   width: 100%;
 }
 
 .extraoptions {
-  margin-top: 30px;
+  margin: 40px 0;
   width: 100%;
 
   button {

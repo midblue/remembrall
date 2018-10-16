@@ -1,17 +1,18 @@
 <template>
   <div
     class="cardcreator"
-    :class="{ focus: isFocused || active }"
+    :class="{ focus: isFocused }"
   >
-    <h4>Add Card</h4>
     <textarea
       ref="front"
+      class="front"
       placeholder="Hint"
       v-model="front"
       @focus="focus"
     ></textarea>
     <textarea
       placeholder="Answer"
+      class="back"
       v-model="back"
       @focus="focus"
     ></textarea>
@@ -33,9 +34,7 @@
 import FloatingText from './FloatingText'
 
 export default {
-  props: {
-    active: {},
-  },
+  props: {},
   data() {
     return {
       front: '',
@@ -115,12 +114,22 @@ export default {
   }
 
   textarea {
+    background: #f8f8f8;
     width: 100%;
-    height: 100px;
-    font-size: 1rem;
+    min-height: 150px;
+    font-size: 1.3rem;
     border: 1px solid #ddd;
-    padding: 10px;
+    padding: 20px;
     text-align: center;
+
+    &.front {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    &.back {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
   }
 
   button {
