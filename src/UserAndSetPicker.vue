@@ -47,7 +47,7 @@
 				</button><button
 					@click="$store.commit('addSet')"
 				>
-					+<span v-if="!isMobile"> New Set</span>
+					+<span v-if="!isMobile"> Add Set</span>
 				</button>
 			</div>
 			<div>

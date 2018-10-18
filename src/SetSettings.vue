@@ -3,6 +3,7 @@
     class="settings"
   >
 		<div class="settingslist">
+
       <p>
         <EditableTextField
           class="visibletextfield marright"
@@ -12,12 +13,7 @@
         />
         <b>New cards per day</b>
       </p>
-      <Toggle
-        key="rev"
-        :setTo="settings.studyReverse"
-        label="Study cards back-to-front"
-        @toggled="updateSettings({ studyReverse : !(settings.studyReverse ? true : false) })"
-      />
+
       <select v-model="selectedLanguageTools" class="marright">
         <option
           v-for="language, key in languages"
@@ -26,6 +22,13 @@
         >{{ language }}</option>
       </select>
       <b>Language Tools</b>
+
+      <Toggle
+        key="rev"
+        :setTo="settings.studyReverse"
+        label="Study cards back-to-front"
+        @toggled="updateSettings({ studyReverse : !(settings.studyReverse ? true : false) })"
+      />
 
       <!--<Toggle
         key="pro"

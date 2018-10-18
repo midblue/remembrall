@@ -14,6 +14,17 @@ db.settings({ timestampsInSnapshots: true })
 const userCollectionName = 'users'
 const setCollectionName = 'sets'
 
+exports.newUser = function(username) {
+  return new Promise(resolve =>
+    db
+      .collection(userCollectionName)
+      .doc(username)
+      .set({})
+      .then(() => resolve('create new user success!'))
+      .catch(e => resolve(e))
+  )
+}
+
 exports.setSet = function(username, newSet) {
   return new Promise(resolve =>
     db

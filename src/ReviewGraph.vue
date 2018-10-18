@@ -2,7 +2,7 @@
   <div
     class="reviewgraph"
   >
-		<h4>{{ title }}</h4>
+		<h4 v-if="reviewGraph.graphPoints">{{ title }}</h4>
 		<div class="bars">
 			<div
 				v-for="bar, key in reviewGraph.graphPoints"

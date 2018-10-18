@@ -6,6 +6,9 @@
 			Cards: <b>{{ currentSet.cards.length }}</b>
 		</p>
 		<p>
+			Mastered Cards: <b>{{ masteredCards }}</b>
+		</p>
+		<p>
 			New Cards: <b>{{ newCards }}</b>
 		</p>
 		<p>
@@ -59,6 +62,18 @@ export default {
     agains() {
       return this.currentSet.cards.reduce(
         (total, card) => total + (card.again ? card.again : 0),
+        0
+      )
+    },
+    masteredCards() {
+      return this.currentSet.cards.reduce(
+        (total, card) =>
+          total +
+          (card.ok
+            ? card.ok > 5 && card.ok / (card.again ? card.again : 0) > 4
+              ? 1
+              : 0
+            : 0),
         0
       )
     },

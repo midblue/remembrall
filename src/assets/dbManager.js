@@ -9,9 +9,22 @@ setInterval(() => {
     const newUpdate = pendingUpdates.shift()
     // console.log('attempting', newUpdate)
 
-    if (newUpdate.type === 'updateSet') {
+    if (newUpdate.type === 'newUser') {
+      firestore.newUser(newUpdate.user).then(res => {
+        // console.log(res)
+        currentlyUpdating = false
+        lastUpdated = Date.now()
+      })
+    } else if (newUpdate.type === 'updateSet') {
       firestore.updateSet(newUpdate.user, newUpdate.set).then(res => {
         // console.log(res)
+        if (res.code === 'not-found') {
+          return firestore.setSet(newUpdate.user, newUpdate.set).then(res => {
+            // console.log(res)
+            currentlyUpdating = false
+            lastUpdated = Date.now()
+          })
+        }
         currentlyUpdating = false
         lastUpdated = Date.now()
       })
@@ -58,6 +71,13 @@ setInterval(() => {
     }
   }
 }, 100)
+
+exports.newUser = function(user) {
+  pendingUpdates.push({
+    type: 'newUser',
+    user,
+  })
+}
 
 exports.updateSet = function(user, set) {
   pendingUpdates.push({

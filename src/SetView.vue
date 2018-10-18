@@ -6,6 +6,7 @@
         :lineBreaksAllowed="false"
 				@startEdit="startEditName"
 				@endEdit="saveEditedName"
+        class="padright"
       />
       <div class="sub" v-if="cards">
         ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})
@@ -157,6 +158,9 @@ h1 {
   div {
     display: inline-block;
   }
+}
+.padright {
+  padding-right: 10px;
 }
 
 .setview {

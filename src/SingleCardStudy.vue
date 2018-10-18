@@ -78,6 +78,7 @@
 
 <script>
 import EditableTextField from './EditableTextField'
+import { msToString } from './assets/commonFunctions'
 
 const minimumTimeMod = 10 * 60 * 1000 // 10m
 const difficultyModifiers = {
@@ -118,6 +119,7 @@ export default {
     return {
       showBack: false,
       startedCardTime: new Date(),
+      revealedBackTime: 0,
       averageTime: 7000,
       reviewsSoFar: 0,
       speaker: null,
@@ -193,6 +195,9 @@ export default {
     isStudying(newFocus) {
       // if (newFocus) this.showBack = false
     },
+    showBack(willShow) {
+      this.revealedBackTime = new Date()
+    },
   },
   mounted() {
     window.addEventListener('keydown', this.keyDown)
@@ -212,7 +217,7 @@ export default {
       this.showBack = false
       this.reviewsSoFar++
 
-      const cardTime = new Date() - this.startedCardTime
+      const cardTime = this.revealedBackTime - this.startedCardTime
 
       // ignore too fast or too slow times
       const ignoreTime =
@@ -224,30 +229,25 @@ export default {
           this.averageTime * ((this.reviewsSoFar - 1) / this.reviewsSoFar) +
           cardTime * (1 / this.reviewsSoFar)
 
-      // calc time modifiers
+      // calc time modifiers, all in 0-1 range
+      // 0 being bad, 1 being good
+      const bonuses = {}
 
       // depending on time taken, adds time
-      // turn time into 0-1 range, 1 being fast
-      const cardTimeNormalized =
-        1 - (cardTime - timeIgnoreCutoff[0]) / timeIgnoreCutoff[1]
-      let answerTimeBonus = 0
-      if (!ignoreTime)
-        answerTimeBonus = cardTimeNormalized * this.timeBonuses[difficulty]
+      bonuses.answerTime = ignoreTime
+        ? 0
+        : 1 - (cardTime - timeIgnoreCutoff[0]) / timeIgnoreCutoff[1]
 
       // if card is older, adds more time
       const maturityThreshold = 30
-      const maturityBonus =
+      bonuses.maturity =
         this.totalReviews > maturityThreshold
-          ? this.timeBonuses[difficulty]
-          : this.timeBonuses[difficulty] *
-            (this.totalReviews / maturityThreshold)
+          ? 1
+          : this.totalReviews / maturityThreshold
 
       // if card is usually succeeded on, adds more time
-      const successRatio = (this.ok || 0) / (this.again || 1)
-      const successRatioBonus =
-        successRatio > 1
-          ? this.timeBonuses[difficulty]
-          : this.timeBonuses[difficulty] * successRatio
+      const successRatio = ((this.ok || 0) * 0.2) / (this.again || 1)
+      bonuses.successRatio = successRatio > 1 ? 1 : successRatio
 
       // depending on the length of the answer vs the length of the prompt, adds time
       let collectiveLength =
@@ -256,31 +256,32 @@ export default {
         10
       if (collectiveLength < 0) collectiveLength = 0
       const lengthThreshold = 40
-      const lengthBonus =
+      bonuses.length =
         collectiveLength > lengthThreshold
-          ? this.timeBonuses[difficulty]
-          : this.timeBonuses[difficulty] * (collectiveLength / lengthThreshold)
+          ? 1
+          : collectiveLength / lengthThreshold
 
-      const newTimeMod = Math.floor(
-        this.timeBonuses[difficulty] +
-          answerTimeBonus * 0.5 +
-          maturityBonus * 0.5 +
-          successRatioBonus * 0.5 +
-          lengthBonus * 0.5
-      )
+      const bonusMultipliers = {
+        answerTime: 0.8,
+        maturity: 1,
+        successRatio: 0.5,
+        length: 0.3,
+      }
 
-      console.log(
-        '  time bonus:',
-        Math.round(answerTimeBonus * 0.00001),
-        '  maturity bonus:',
-        Math.round(maturityBonus * 0.00001),
-        '  success ratio bonus:',
-        Math.round(successRatioBonus * 0.00001),
-        '  length bonus:',
-        Math.round(lengthBonus * 0.00001),
-        '  total:',
-        Math.round(newTimeMod * 0.00001)
-      )
+      let newTimeMod = this.timeBonuses[difficulty]
+      for (let bonus in bonuses) {
+        console.log(
+          bonus + ' bonus:',
+          (bonuses[bonus] * bonusMultipliers[bonus]).toFixed(2)
+        )
+        newTimeMod +=
+          bonuses[bonus] *
+          bonusMultipliers[bonus] *
+          this.timeBonuses[difficulty]
+      }
+      newTimeMod = Math.floor(newTimeMod)
+
+      console.log('new time mod:', msToString(newTimeMod), '\n')
 
       // calc interval until next review
       const newNextReview = new Date(Date.now() + newTimeMod).getTime()
@@ -292,6 +293,7 @@ export default {
       // update card with new metadata
       this.$store.commit('studyCard', {
         id: this.id,
+        lastStudied: Date.now(),
         timeMod: newTimeMod,
         nextReview: newNextReview,
         totalReviews: newTotalReviews,

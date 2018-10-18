@@ -58,12 +58,6 @@
         <br />
         <p v-if="nextReviewIn">Otherwise, your next review is in {{ nextReviewIn }}.</p>
       </div>
-      <ReviewGraph
-        :cards="updatedCards"
-        :slots="8"
-        :maxTime="1 * 26 * 60 * 60 * 1000"
-        title="Upcoming reviews:"
-      />
     </template>
 
     <template v-else-if="cards.length === 0">
@@ -80,6 +74,9 @@
         <h3>Done for now!</h3>
         <div v-if="nextReviewIn">Your next review is in {{ nextReviewIn }}.</div>
       </div>
+    </template>
+
+    <template v-if="doneForDay && cards.length > 0">
       <ReviewGraph
         :cards="updatedCards"
         :slots="8"
@@ -195,11 +192,11 @@ export default {
   watch: {
     currentSetId() {
       this.toReview = []
-      this.refreshCards()
+      this.$nextTick(this.refreshCards)
       this.startedWith = 0
     },
     cards() {
-      this.refreshCards()
+      this.$nextTick(this.refreshCards)
     },
     doneForDay(isDone) {
       if (isDone) {

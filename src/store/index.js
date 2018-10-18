@@ -200,8 +200,9 @@ export default () => {
             const set = doc.data()
             setObject[set.id] = set
           })
-          console.log(setObject, empty, new Date().toLocaleTimeString())
+          if (empty) dbManager.newUser(username)
           if (Object.keys(setObject).length === 0) setObject = newSetObject()
+          dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
           commit('setPauseDbSets', false)
           commit('setCurrentSetId', Object.keys(setObject)[0])
           commit('setUsername', username)
@@ -215,7 +216,7 @@ export default () => {
 function newSetObject() {
   const newSet = blankSet()
   return {
-    [blankSet.id]: newSet,
+    [newSet.id]: newSet,
   }
 }
 
