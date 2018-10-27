@@ -13,7 +13,7 @@ export default () => {
       currentSetId: null,
       appState: 'study',
       isMobile: false,
-      pauseDbSets: true,
+      pauseDbSets: false,
       isEditingText: false,
     },
     mutations: {
@@ -23,6 +23,18 @@ export default () => {
         storage.set('currentUser', newUsername)
       },
       setSetList(state, newSetList) {
+        // for (let set in newSetList) { // clear out unnecessary props
+        //   newSetList[set].cards = newSetList[set].cards.map(card => ({
+        //     id: card.id,
+        //     front: card.front,
+        //     back: card.back,
+        //     totalReviews: card.totalReviews,
+        //     timeMod: card.timeMod,
+        //     ok: card.ok,
+        //     again: card.again,
+        //     nextReview: new Date(card.nextReview).getTime(),
+        //   }))
+        // }
         state.setList = newSetList
       },
       setCurrentSetId(state, newSetId) {
@@ -30,6 +42,8 @@ export default () => {
         storage.set('currentSetId', newSetId)
       },
       logOut(state) {
+        storage.remove('currentUser')
+        storage.remove('currentSetId')
         state.currentUser = null
         state.setList = []
         state.currentSetId = null
@@ -46,16 +60,19 @@ export default () => {
 
       // app state
       setAppState(state, newState) {
-        state.appState = newState || 'deckList'
+        state.appState = newState || 'study'
       },
 
       // sets
       updateSetName(state, newName) {
         Vue.set(state.setList[state.currentSetId], 'name', newName)
+        // update set last updated
+        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
             id: state.currentSetId,
             name: state.setList[state.currentSetId].name,
+            lastUpdated: state.setList[state.currentSetId].lastUpdated,
           })
       },
       updateSetSettings(state, newSettings) {
@@ -68,10 +85,13 @@ export default () => {
             newSettings[param]
           )
         }
+        // update set last updated
+        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
             id: state.currentSetId,
             settings: state.setList[state.currentSetId].settings,
+            lastUpdated: state.setList[state.currentSetId].lastUpdated,
           })
       },
       addSet(state) {
@@ -107,10 +127,13 @@ export default () => {
           id: Date.now(),
         })
         Vue.set(state.setList[state.currentSetId], 'cards', newCards)
+        // update set last updated
+        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
             id: state.currentSetId,
             cards: state.setList[state.currentSetId].cards,
+            lastUpdated: state.setList[state.currentSetId].lastUpdated,
           })
       },
       updateCard(state, card) {
@@ -124,10 +147,14 @@ export default () => {
               param,
               card[param]
             )
+        // update set last updated
+        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
+        // update db
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
             id: state.currentSetId,
             cards: state.setList[state.currentSetId].cards,
+            lastUpdated: state.setList[state.currentSetId].lastUpdated,
           })
       },
       studyCard(state, card) {
@@ -144,7 +171,7 @@ export default () => {
             )
         // update newToday, reviewsToday
         if (
-          new Date(state.setList[state.currentSetId].lastStudied).getDate() !==
+          new Date(state.setList[state.currentSetId].lastUpdated).getDate() !==
           new Date().getDate()
         ) {
           // new day
@@ -167,13 +194,13 @@ export default () => {
               ? state.setList[state.currentSetId].reviewsToday + 1
               : 1
           )
-        // update set last studied
-        Vue.set(state.setList[state.currentSetId], 'lastStudied', Date.now())
+        // update set last updated
+        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         // update Db
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
             id: state.currentSetId,
-            lastStudied: state.setList[state.currentSetId].lastStudied,
+            lastUpdated: state.setList[state.currentSetId].lastUpdated,
             newToday: state.setList[state.currentSetId].newToday,
             reviewsToday: state.setList[state.currentSetId].reviewsToday,
             cards: state.setList[state.currentSetId].cards,
@@ -184,15 +211,19 @@ export default () => {
           card => card.id !== id
         )
         Vue.set(state.setList[state.currentSetId], 'cards', newCards)
+        // update set last updated
+        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
+        // update db
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
             id: state.currentSetId,
             cards: state.setList[state.currentSetId].cards,
+            lastUpdated: state.setList[state.currentSetId].lastUpdated,
           })
       },
     },
     actions: {
-      logInAs({ commit }, username) {
+      logInAs({ commit, state }, username) {
         dbManager.getAllSets(username).then(res => {
           const { docs, empty } = res
           let setObject = {}
@@ -201,12 +232,40 @@ export default () => {
             setObject[set.id] = set
           })
           if (empty) dbManager.newUser(username)
-          if (Object.keys(setObject).length === 0) setObject = newSetObject()
-          dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
-          commit('setPauseDbSets', false)
-          commit('setCurrentSetId', Object.keys(setObject)[0])
+          if (Object.keys(setObject).length === 0) {
+            setObject = newSetObject()
+            dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
+          }
+          // if is refresh
+          if (username === state.currentUser) {
+            for (let id in setObject) {
+              if (!state.setList[id]) {
+                console.log(
+                  'Deck ' +
+                    id +
+                    ' has been created elsewhere, and will now be loaded.'
+                )
+              }
+              // if something in these sets has been updated elsewhere
+              else if (
+                setObject[id].lastUpdated < state.setList[id].lastUpdated
+              ) {
+                alert(`OLD SET IN DATABASE. Dumped set ${id} to localStorage.`)
+                storage.set(`${id}`, state.setList[id].cards)
+                console.log()
+                console.log(setObject[id], state.setList[id])
+              }
+            }
+          }
           commit('setUsername', username)
           commit('setSetList', setObject)
+          commit(
+            'setCurrentSetId',
+            setObject[storage.get('currentSetId')]
+              ? storage.get('currentSetId')
+              : Object.keys(setObject)[0]
+          )
+          commit('setPauseDbSets', false)
         })
       },
     },
@@ -231,7 +290,7 @@ function blankSet() {
       languageTools: 'none',
       studyReverse: false,
     },
-    lastStudied: Date.now(),
+    lastUpdated: Date.now(),
     newToday: 0,
     reviewsToday: 0,
     cards: [],

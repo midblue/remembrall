@@ -22,6 +22,14 @@
         >{{ language }}</option>
       </select>
       <b>Language Tools</b>
+      
+      <Toggle
+        v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
+        key="autospeak"
+        :setTo="settings.autoSpeak"
+        label="Auto-speak card backs"
+        @toggled="updateSettings({ autoSpeak : !(settings.autoSpeak ? true : false) })"
+      />
 
       <Toggle
         key="rev"
@@ -31,6 +39,13 @@
       />
 
       <!--<Toggle
+        key="mix"
+        :setTo="settings.mixNewCards"
+        label="Mix new cards with reviews"
+        @toggled="updateSettings({ mixNewCards : !(settings.mixNewCards ? true : false) })"
+      />
+
+      <Toggle
         key="pro"
         :setTo="settings.pronunciationLink"
         label="Pronunciation link"

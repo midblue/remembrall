@@ -1,24 +1,28 @@
 <template>
   <div
     class="cardcreator"
-    :class="{ focus: isFocused }"
   >
-    <textarea
-      ref="front"
-      class="front"
-      placeholder="Hint"
+
+    <EditableTextField
+      class="textfield front"
+      :class="{duplicate: isDuplicate}"
+      :focus="setFocus === 'front'"
       v-model="front"
-      @focus="focus"
-    ></textarea>
-    <textarea
-      placeholder="Answer"
-      class="back"
+      placeholder="Hint"
+      @startEdit="focus"
+      @next="tab"
+    />
+    <EditableTextField
+      class="textfield back"
+      :focus="setFocus === 'back'"
       v-model="back"
-      @focus="focus"
-    ></textarea>
+      placeholder="Answer"
+      @startEdit="focus"
+      @prev="shiftTab"
+    />
 
     <FloatingText 
-      :text="addText"
+      :text="floatText"
       offset="-30"
     />
     <button
@@ -32,6 +36,7 @@
 
 <script>
 import FloatingText from './FloatingText'
+import EditableTextField from './EditableTextField'
 
 export default {
   props: {},
@@ -40,27 +45,30 @@ export default {
       front: '',
       back: '',
       metaDown: false,
-      addText: '',
+      floatText: '',
+      isDuplicate: false,
+      setFocus: 'front',
     }
   },
   components: {
     FloatingText,
+    EditableTextField,
   },
   computed: {
-    isFocused() {
-      return this.$store.state.appState === 'addCard'
+    cards() {
+      return this.$store.state.setList[this.$store.state.currentSetId].cards
     },
   },
   watch: {
-    isFocused(newFocus) {
-      if (newFocus) this.$nextTick(() => this.$refs.front.focus())
+    front(newFront) {
+      if (newFront.length < 2) return (this.isDuplicate = false)
+      this.isDuplicate = this.cards.find(card => card.front === newFront)
     },
   },
   mounted() {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
     this.$store.commit('setAppState', 'addCard')
-    this.$nextTick(() => this.$refs.front.focus())
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.keyDown)
@@ -76,23 +84,33 @@ export default {
         back: this.back,
         nextReview: 0,
       })
-      this.addText = 'Card added.'
-      setTimeout(() => (this.addText = ''), 1500)
+      this.floatText = 'Card added.'
+      setTimeout(() => (this.floatText = ''), 1500)
       this.front = ''
       this.back = ''
-      this.$refs.front.focus()
+      this.isDuplicate = false
+      this.focus = null
+      if (newFocus) this.$nextTick(() => (this.focus = 'front'))
     },
     keyDown(event) {
-      if (!this.isFocused) return
       if (event.key === 'Meta') this.metaDown = true
       if (event.key === 'Enter' && this.metaDown) this.newCard()
     },
     keyUp(event) {
-      if (!this.isFocused) return
       if (event.key === 'Meta') this.metaDown = false
     },
     focus() {
       this.$store.commit('setIsEditingText', true)
+    },
+    tab(e) {
+      e.preventDefault()
+      this.setFocus = null
+      this.$nextTick(() => (this.setFocus = 'back'))
+    },
+    shiftTab(e) {
+      e.preventDefault()
+      this.setFocus = null
+      this.$nextTick(() => (this.setFocus = 'front'))
     },
   },
 }
@@ -102,34 +120,62 @@ export default {
 .cardcreator {
   position: relative;
   margin: 0 auto;
-  opacity: 0.3;
+  opacity: 1;
   transition: all 0.5s;
-
-  &.focus {
-    opacity: 1;
-  }
 
   & > * {
     display: block;
   }
 
-  textarea {
+  .textfield {
     background: #f8f8f8;
-    width: 100%;
-    min-height: 150px;
-    font-size: 1.3rem;
-    border: 1px solid #ddd;
-    padding: 20px;
+    padding: 50px 20px;
+    white-space: pre-wrap;
+    font-size: 1.5rem;
     text-align: center;
+    transition: background 0.2s;
+    outline: 0;
 
-    &.front {
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
+    &.editabletextediting {
+      background: rgba(0, 0, 0, 0.05);
     }
-    &.back {
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
+
+    &:after {
+      position: absolute;
+      top: 10px;
+      right: -10px;
+      opacity: 0;
+      content: '';
+      transition: all 0.4s;
+      font-weight: 600;
+      font-size: 0.5em;
     }
+
+    &:hover:not(.editabletextediting) {
+      position: relative;
+      background: rgba(0, 0, 0, 0.05);
+
+      &:after {
+        right: 10px;
+        content: 'Click to Edit';
+        opacity: 1;
+        color: rgba(black, 0.2);
+      }
+    }
+
+    &.duplicate {
+      &:after {
+        right: 10px;
+        content: 'Duplicate card!' !important;
+        color: rgba(#f52, 1) !important;
+        opacity: 1;
+      }
+    }
+  }
+
+  .back {
+    border-top: 1px solid #ddd;
+    transition: 0.2s;
   }
 
   button {

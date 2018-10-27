@@ -3,10 +3,10 @@
     <h1>
       <EditableTextField
         :text="name"
+        placeholder="Enter set name"
         :lineBreaksAllowed="false"
 				@startEdit="startEditName"
 				@endEdit="saveEditedName"
-        class="padright"
       />
       <div class="sub" v-if="cards">
         ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})

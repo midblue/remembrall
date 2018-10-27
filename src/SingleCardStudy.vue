@@ -1,6 +1,9 @@
 <template>
   <div>
-		<div class="card roundframe">
+		<div
+      class="card roundframe"
+      :class="{new: !totalReviews}"
+    >
 			<EditableTextField
 				class="front textfield"
 				:text="reverse ? back : front"
@@ -196,7 +199,10 @@ export default {
       // if (newFocus) this.showBack = false
     },
     showBack(willShow) {
-      this.revealedBackTime = new Date()
+      if (willShow) {
+        this.revealedBackTime = new Date()
+        if (this.settings.autoSpeak) this.speakWord()
+      }
     },
   },
   mounted() {
@@ -253,18 +259,18 @@ export default {
       let collectiveLength =
         this.front.replace(/\n.*/g, '').length +
         this.back.replace(/\n.*/g, '').length -
-        10
+        5
       if (collectiveLength < 0) collectiveLength = 0
-      const lengthThreshold = 40
+      const lengthThreshold = 30
       bonuses.length =
         collectiveLength > lengthThreshold
           ? 1
           : collectiveLength / lengthThreshold
 
       const bonusMultipliers = {
-        answerTime: 0.8,
-        maturity: 1,
-        successRatio: 0.5,
+        answerTime: 1,
+        maturity: 1.5,
+        successRatio: 0.8,
         length: 0.3,
       }
 
@@ -281,7 +287,9 @@ export default {
       }
       newTimeMod = Math.floor(newTimeMod)
 
-      console.log('new time mod:', msToString(newTimeMod), '\n')
+      console.log('old time mod:', msToString(this.timeMod))
+      console.log('new time mod:', msToString(newTimeMod))
+      console.log('')
 
       // calc interval until next review
       const newNextReview = new Date(Date.now() + newTimeMod).getTime()
@@ -314,7 +322,7 @@ export default {
     },
     keyDown(event) {
       if (!this.isStudying || this.isEditingText) return
-      if (event.key === '1') this.answer('again')
+      if (event.key === '1' && this.showBack) this.answer('again')
       else if (event.key === ' ') {
         event.preventDefault()
         !this.showBack ? (this.showBack = true) : this.answer('ok')
@@ -361,6 +369,10 @@ export default {
   background: #f8f8f8;
   margin-bottom: 20px;
   text-align: center;
+
+  &.new {
+    // background: rgba(#0bb, 0.1);
+  }
 }
 
 .front,
@@ -394,7 +406,7 @@ export default {
 }
 
 .back {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid rgba(black, 0.15);
   padding-bottom: 20px;
   transition: 0.2s;
 

@@ -18,21 +18,20 @@
       :color="displayTimeMod 
         ? (displayTimeMod.toLowerCase().indexOf('again') !== -1 ? '#fa4' : '#0c6')
         : 'green'" 
-      offset="-100"
+      offset="-120"
     />
 
     <template v-if="!doneForDay">
-      <div class="sub centertext padtb-small">
+      <div class="sub centertext padt-small">
         <span v-if="newCards.length > 0">
           <b>{{ newCards.length }}</b> new cards and 
         </span>
         <b>{{ dueCards.length }}</b> review{{ dueCards.length === 1 ? '' : 's' }} left.
       </div>
-      <div class="progressbar">
-        <div 
-          :style="{ width: (100 - (((newCards.length + dueCards.length) / startedWith) * 100)) + '%' }"
-        ></div>
-      </div>
+      <RemainingCardIndicator
+        :toStudy="allStudyableCards"
+        :startedWith="startedWith"
+      />
       <SingleCardStudy
         v-bind="cardToStudy"
         :reverse="settings.studyReverse"
@@ -91,6 +90,7 @@
 const debug = false
 import SingleCardStudy from './SingleCardStudy'
 import EditableTextField from './EditableTextField'
+import RemainingCardIndicator from './RemainingCardIndicator'
 import ReviewGraph from './ReviewGraph'
 import FloatingText from './FloatingText'
 import { msToString } from './assets/commonFunctions'
@@ -104,6 +104,7 @@ export default {
     ReviewGraph,
     FloatingText,
     EditableTextField,
+    RemainingCardIndicator,
   },
   data() {
     return {
@@ -172,6 +173,9 @@ export default {
     },
     allStudyableCards() {
       return [...this.newCards, ...this.dueCards]
+      // return this.settings.mixNewCards
+      //   ? mixInto(this.newCards, this.dueCards)
+      //   : [...this.newCards, ...this.dueCards]
     },
     cardToStudy() {
       return this.allStudyableCards[0]
@@ -192,8 +196,10 @@ export default {
   watch: {
     currentSetId() {
       this.toReview = []
-      this.$nextTick(this.refreshCards)
-      this.startedWith = 0
+      this.$nextTick(() => {
+        this.refreshCards()
+        this.startedWith = this.dueCards.length + this.newCards.length
+      })
     },
     cards() {
       this.$nextTick(this.refreshCards)
@@ -241,6 +247,23 @@ export default {
     },
   },
 }
+
+function mixInto(a, b) {
+  const mixedArray = []
+  const toMix = [...a],
+    mixInto = [...b]
+  const addEvery = (toMix.length + mixInto.length) / toMix.length
+  let counter = 0,
+    addAt = 0
+  while (toMix.length > 0 || mixInto.length > 0) {
+    if ((counter >= addAt && toMix.length > 0) || mixInto.length === 0) {
+      mixedArray.push(toMix.shift())
+      addAt += addEvery
+    } else mixedArray.push(mixInto.shift())
+    counter++
+  }
+  return mixedArray
+}
 </script>
 
 <style lang="scss" scoped>
@@ -254,6 +277,9 @@ export default {
   }
 }
 
+.padt-small {
+  padding-top: 15px;
+}
 .padtb-small {
   padding-top: 15px;
   padding-bottom: 15px;

@@ -39,7 +39,7 @@
 				>
 					{{ set.name }}
 					<span
-						v-if="!isMobile && dueReviews[set.id] > 0 && parseInt(currentSetId) !== set.id"
+						v-if="!isMobile && dueReviews[set.id] > 0 && parseInt(currentSetId) !== parseInt(set.id)"
 						class="sub"
 					>
 						({{ dueReviews[set.id] }})
@@ -151,7 +151,7 @@ export default {
       this.dueReviews = {}
       for (let set in this.setList) {
         if (
-          new Date(this.setList[set].lastStudied).getDate() !==
+          new Date(this.setList[set].lastUpdated).getDate() !==
           new Date().getDate()
         ) {
           this.$store.commit('resetSetDay', set)

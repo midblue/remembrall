@@ -7,6 +7,7 @@
 		</p>
 		<p>
 			Mastered Cards: <b>{{ masteredCards }}</b>
+			<span class="sub">({{ (masteredCards / currentSet.cards.length).toFixed(2) * 100 }}%)</span>
 		</p>
 		<p>
 			New Cards: <b>{{ newCards }}</b>
@@ -18,7 +19,7 @@
 			Total Reviews: <b>{{ totalReviews }}</b>
 		</p>
 		<p>
-			Ok/Again Ratio: <b>{{ oks && agains ? (oks / agains).toFixed(3) : 0 }}</b> <span class="sub" v-if="oks && agains">({{ oks }} oks / {{ agains }} agains)</span>
+			Success Rate: <b>{{ oks && agains ? ((oks / (agains + oks)).toFixed(3)) * 100 : 0 }}%</b> <span class="sub" v-if="oks && agains">({{ oks }} oks / {{ agains }} agains)</span>
 		</p>
 		<ReviewGraph
 			:cards="currentSet.cards"

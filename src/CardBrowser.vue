@@ -6,6 +6,7 @@
 			class="searchbar"
 			@focus="$store.commit('setIsEditingText', true)"
 			@blur="$store.commit('setIsEditingText', false)"
+      ref="searchbar"
 			v-model="searchTerm"
 			placeholder="Type to filter..."
 		/>
@@ -29,12 +30,13 @@
 					@endEdit="saveEditedCard('back', card.id, ...arguments)"
 				/>
 				<div class="stats sub">
-					<div v-if="card.ok && card.again && card.ok + card.again > 0">
-						Oks: {{ (card.ok || 0) }} ・ Agains: {{ (card.again || 0) }}
+					<div v-if="card.ok !== undefined && card.again !== undefined && card.ok + card.again > 0">
+						{{ ((card.again || 0) + (card.ok || 0)) }} reviews ・ {{ Math.round(((card.ok || 0) / ((card.again || 0) + (card.ok || 0))) * 100) }}% oks ・ 
 					</div>
 					<div v-else>
-						New
+						New ・ 
 					</div>
+          <div style="cursor: pointer" @click="$store.commit('deleteCard', card.id)"><u>Delete</u></div>
 				</div>
 			</div>
 		</div>
@@ -82,7 +84,9 @@ export default {
     },
   },
   watch: {},
-  mounted() {},
+  mounted() {
+    this.$nextTick(() => this.$refs.searchbar.focus())
+  },
   beforeDestroy() {
     this.$store.commit('setIsEditingText', false)
   },
