@@ -10,6 +10,7 @@
     @click="startEdit"
     @input="$emit('changeText', sanitize($el.innerHTML))"
     @blur="commitEdit"
+    @paste="paste"
     tabindex="0"
     v-html="displayText"
   ></div>
@@ -66,16 +67,31 @@ export default {
   computed: {},
   watch: {
     text(newText) {
-      if (newText !== this.displayText && !this.isEditing)
-        this.displayText = newText
+      this.$nextTick(() => {
+        // console.log(
+        //   'text change, is editing:',
+        //   this.isEditing,
+        //   newText,
+        //   this.$el.innerHTML
+        // )
+        if (!this.isEditing) {
+          this.displayText = ''
+          this.$el.innerHTML = ''
+          this.$nextTick(() => (this.displayText = newText))
+        }
+      })
     },
+
     disableEdits(isDisabled) {
       this.isEditing = false
       this.metaDown = false
       this.shiftDown = false
     },
     focus(shouldFocus) {
-      if (shouldFocus) this.startEdit()
+      if (shouldFocus)
+        this.$nextTick(() => {
+          this.startEdit()
+        })
     },
   },
   mounted() {
@@ -92,6 +108,7 @@ export default {
     startEdit() {
       if (this.isEditing || this.disableEdits) return
       this.isEditing = true
+      // console.log('start edit, is editing:', this.isEditing)
       if (this.isPlaceholder) this.displayText = ''
       this.isPlaceholder = false
       this.metaDown = false
@@ -100,10 +117,15 @@ export default {
         this.$el.focus()
         this.$nextTick(this.selectText)
       })
-
       this.$emit('startEdit', this.displayText)
     },
     commitEdit() {
+      if (window.getSelection) window.getSelection().removeAllRanges()
+      else if (document.selection) document.selection.empty()
+      this.isEditing = false
+      // console.log('commit edit, is editing:', this.isEditing)
+      this.metaDown = false
+      this.shiftDown = false
       const finalText = this.sanitize(this.$el.innerHTML)
       if (finalText.length > 0) this.$emit('endEdit', finalText)
       else {
@@ -111,9 +133,6 @@ export default {
         this.$nextTick(() => (this.displayText = this.placeholder))
         this.isPlaceholder = true
       }
-      this.isEditing = false
-      this.metaDown = false
-      this.shiftDown = false
     },
     keyDown(event) {
       if (!this.isEditing || this.disableEdits) return
@@ -143,11 +162,23 @@ export default {
       }
     },
     sanitize(text) {
-      return text
+      const sanitizedText = text
+        .replace('<div>', '\n')
+        .replace(/<[^>]*>/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/^[\s\n\t]*/g, '')
         .replace(/[\s\n\t]*$/g, '')
+      console.log(text, sanitizedText)
+      return sanitizedText
+    },
+    paste(e) {
+      e.stopPropagation()
+      e.preventDefault()
+      const clipboardData = e.clipboardData || window.clipboardData
+      const pastedData = clipboardData.getData('Text')
+      this.displayText = this.sanitize(pastedData)
+      this.$emit('changeText', this.displayText)
     },
   },
 }
@@ -156,6 +187,7 @@ export default {
 <style lang="scss">
 .editabletext {
   cursor: pointer;
+  white-space: pre-wrap;
 
   &.placeholder {
     color: rgba(black, 0.2);

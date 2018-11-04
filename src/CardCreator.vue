@@ -86,15 +86,17 @@ export default {
       })
       this.floatText = 'Card added.'
       setTimeout(() => (this.floatText = ''), 1500)
-      this.front = ''
-      this.back = ''
-      this.isDuplicate = false
-      this.focus = null
-      if (newFocus) this.$nextTick(() => (this.focus = 'front'))
+      this.$nextTick(() => {
+        this.front = ''
+        this.back = ''
+        this.isDuplicate = false
+        this.setFocus = null
+        this.$nextTick(() => (this.setFocus = 'front'))
+      })
     },
     keyDown(event) {
       if (event.key === 'Meta') this.metaDown = true
-      if (event.key === 'Enter' && this.metaDown) this.newCard()
+      if (event.key === 'Enter' && this.metaDown) this.$nextTick(this.newCard)
     },
     keyUp(event) {
       if (event.key === 'Meta') this.metaDown = false

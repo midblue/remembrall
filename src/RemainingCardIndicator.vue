@@ -2,17 +2,17 @@
   <div
     class="remainingcards"
   >
-		<div
-			v-for="key in ((startedWith - toStudy.length) > 0 ? (startedWith - toStudy.length) : 0)"
-			:key="key"
-			class="card"
-		></div>
     <div
-			v-for="card, key in toStudy"
-			:key="card.id"
-			class="card"
-			:class="{review: card.totalReviews, new: !card.totalReviews, current: key === 0}"
-		></div>
+      v-for="key in ((startedWith - toStudy.length) > 0 ? (startedWith - toStudy.length) : 0)"
+      :key="key"
+      class="card"
+    ></div>
+    <div
+      v-for="card, key in toStudy"
+      :key="card.id"
+      class="card"
+      :class="{review: card.totalReviews, new: !card.totalReviews, current: key === 0}"
+    ></div>
   </div>
 </template>
 
@@ -51,6 +51,7 @@ export default {
     height: 4px;
     background: #ddd;
     opacity: 0.5;
+    transform: scaleX(1);
 
     &.review {
       background: #bbb;
@@ -72,9 +73,10 @@ export default {
 
     &.current {
       flex-shrink: 0;
-      width: 15px;
+      animation-duration: 0s;
+      width: 10px;
       height: 10px;
-      border-radius: 7.5px;
+      border-radius: 5px;
     }
   }
 }

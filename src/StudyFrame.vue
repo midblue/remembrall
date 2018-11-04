@@ -24,9 +24,12 @@
     <template v-if="!doneForDay">
       <div class="sub centertext padt-small">
         <span v-if="newCards.length > 0">
-          <b>{{ newCards.length }}</b> new cards and 
+          <b>{{ newCards.length }}</b> new card{{ newCards.length === 1 ? '' : 's' }} <span v-if="dueCards.length > 0">and</span>
         </span>
-        <b>{{ dueCards.length }}</b> review{{ dueCards.length === 1 ? '' : 's' }} left.
+        <span v-if="dueCards.length > 0">
+          <b>{{ dueCards.length }}</b> review{{ dueCards.length === 1 ? '' : 's' }}
+        </span>
+        left.
       </div>
       <RemainingCardIndicator
         :toStudy="allStudyableCards"
