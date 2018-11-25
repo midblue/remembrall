@@ -10,6 +10,10 @@
 			v-model="searchTerm"
 			placeholder="Type to filter..."
 		/>
+    <div
+      class="mar-b sub"
+      v-if="sortedCards.length < currentCards.length"
+    >{{ sortedCards.length }} cards shown.</div>
     
 		<div class="cardlist">
 			<div 
@@ -123,7 +127,7 @@ export default {
   font-size: 1.2rem;
   font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
   padding: 10px 10px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .cardlist {
@@ -152,5 +156,9 @@ export default {
       justify-content: center;
     }
   }
+}
+
+.mar-b {
+  margin-bottom: 20px;
 }
 </style>

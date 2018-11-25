@@ -62,7 +62,9 @@ export default {
   watch: {
     front(newFront) {
       if (newFront.length < 2) return (this.isDuplicate = false)
-      this.isDuplicate = this.cards.find(card => card.front === newFront)
+      this.isDuplicate = this.cards.find(
+        card => card.front.toLowerCase() === newFront.toLowerCase()
+      )
     },
   },
   mounted() {

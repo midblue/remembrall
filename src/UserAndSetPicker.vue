@@ -114,7 +114,7 @@ export default {
   mounted() {
     window.addEventListener('keydown', this.keyDown)
     this.updateDueReviews()
-    window.setInterval(this.updateDueReviews, 2 * 60 * 1000)
+    window.setInterval(this.updateDueReviews, 10 * 60 * 1000)
     const savedUsername = get('currentUser')
     if (savedUsername && savedUsername !== '') {
       this.$store.dispatch('logInAs', savedUsername)
@@ -136,7 +136,7 @@ export default {
       this.$store.commit('logOut')
     },
     keyDown(event) {
-      if (this.currentUser) return
+      if (this.currentUser) return this.updateDueReviews()
       if (event.key === 'Enter') this.logInAs()
     },
     focusInput() {

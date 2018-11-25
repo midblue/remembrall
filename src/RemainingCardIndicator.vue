@@ -1,17 +1,21 @@
 <template>
-  <div
-    class="remainingcards"
-  >
+  <div class="remainingcards">
     <div
-      v-for="key in ((startedWith - toStudy.length) > 0 ? (startedWith - toStudy.length) : 0)"
+      v-for="key in adjustedStartedWith - toStudy.length > 0
+        ? adjustedStartedWith - toStudy.length
+        : 0"
       :key="key"
       class="card"
     ></div>
     <div
-      v-for="card, key in toStudy"
+      v-for="(card, key) in toStudy"
       :key="card.id"
       class="card"
-      :class="{review: card.totalReviews, new: !card.totalReviews, current: key === 0}"
+      :class="{
+        review: card.totalReviews,
+        new: !card.totalReviews,
+        current: key === 0,
+      }"
     ></div>
   </div>
 </template>
@@ -26,7 +30,12 @@ export default {
   data() {
     return {}
   },
-  computed: {},
+  computed: {
+    adjustedStartedWith() {
+      if (this.toStudy.length > this.startedWith) return this.toStudy.length
+      return this.startedWith
+    },
+  },
   watch: {},
   mounted() {},
   beforeDestroy() {},
@@ -63,7 +72,7 @@ export default {
     }
 
     &.new {
-      background: #999;
+      background: #bbb;
 
       &.current {
         // background: #0cc;

@@ -1,81 +1,70 @@
 <template>
   <div>
-		<div
-      class="card roundframe"
-      :class="{new: !totalReviews}"
-    >
-			<EditableTextField
-				class="front textfield"
-				:text="reverse ? back : front"
-				@startEdit="startEdit"
-				@endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
-			/>
-			<div 
-				class="back"
-				:class="{pointer: showBack === false}"
-				@click="showBack = true"
-			>
-				<div
-					:class="{hideanswer: !showBack}"
-				>
-					<EditableTextField
-						class="textfield"
-						:text="reverse ? front : back"
-						@startEdit="startEdit"
-						@endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
-					/>
-					<div class="sub" v-if="settings.languageTools">
-						<a v-if="speaker" @click="speakWord" class="fakelink">Speak it</a>
-						<span v-if="speaker"> ・ </span>
-						<a target="_blank" :href="pronunciationLink">Native</a>
-						<span> ・ </span>
-						<a target="_blank" :href="translationLink">Translation</a>
-					</div>
-				</div>
-			</div>
-		</div>
+    <div class="card roundframe" :class="{ new: !totalReviews }">
+      <EditableTextField
+        class="front textfield"
+        :class="{
+          newcard: isNewCard,
+        }"
+        :text="reverse ? back : front"
+        @startEdit="startEdit"
+        @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
+      />
+      <div
+        class="back"
+        :class="{ pointer: showBack === false }"
+        @click="showBack = true"
+      >
+        <div :class="{ hideanswer: !showBack }">
+          <EditableTextField
+            class="textfield"
+            :text="reverse ? front : back"
+            @startEdit="startEdit"
+            @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
+          />
+          <div class="sub" v-if="settings.languageTools">
+            <a v-if="speaker" @click="speakWord" class="fakelink">Speak it</a>
+            <span v-if="speaker"> ・ </span>
+            <a target="_blank" :href="pronunciationLink">Native</a>
+            <span> ・ </span>
+            <a target="_blank" :href="translationLink">Translation</a>
+          </div>
+        </div>
+      </div>
+    </div>
 
-		
-		<div class="buttonlist primary">
-			<button class="showback" v-if="!showBack" @click="showBack = true" key="showback">
-				Show Back
-				<div>
-					<span class="keyicon">Space</span>
-				</div>
-			</button>
-			<template v-else>
-				<button
-					key="again"
-					v-if="timeBonuses.again !== undefined"
-					@click="answer('again')"
-				>
-					Wrong
-					<div>
-						<span class="keyicon">1</span>
-					</div>
-				</button><button
-					key="ok"
-					v-if="timeBonuses.ok"
-					@click="answer('ok')"
-				>
-					Right
-					<div>
-						<span class="keyicon">2</span>
-						<span v-if="!isMobile"> / </span>
-						<span class="keyicon">Space</span>
-					</div>
-				</button>
-			</template>
-		</div>
-		<div class="extraoptions">
-			<button
-				key="delete"
-				ref="deleteButton"
-				@click="deleteCard"
-			>
-				Delete Card
-			</button>
-		</div>
+    <div class="buttonlist primary">
+      <button
+        class="showback"
+        v-if="!showBack"
+        @click="showBack = true"
+        key="showback"
+      >
+        Show Back
+        <div><span class="keyicon">Space</span></div>
+      </button>
+      <template v-else>
+        <button
+          key="again"
+          v-if="timeBonuses.again !== undefined"
+          @click="answer('again')"
+        >
+          Wrong
+          <div><span class="keyicon">1</span></div></button
+        ><button key="ok" v-if="timeBonuses.ok" @click="answer('ok')">
+          Right
+          <div>
+            <span class="keyicon">2</span> <span v-if="!isMobile"> / </span>
+            <span class="keyicon">Space</span>
+          </div>
+        </button>
+      </template>
+    </div>
+    <div class="extraoptions">
+      <button key="delete" ref="deleteButton" @click="deleteCard">
+        Delete Card
+      </button>
+    </div>
   </div>
 </template>
 
@@ -83,7 +72,7 @@
 import EditableTextField from './EditableTextField'
 import { msToString } from './assets/commonFunctions'
 
-const minimumTimeMod = 10 * 60 * 1000 // 10m
+const minimumTimeMod = 30 * 60 * 1000 // 30m
 const difficultyModifiers = {
   ok: 2,
   again: 0.1,
@@ -143,6 +132,9 @@ export default {
     },
     isEditingText() {
       return this.$store.state.isEditingText
+    },
+    isNewCard() {
+      return !this.totalReviews || this.totalReviews === 0
     },
     searchString() {
       let searchString = this.back
@@ -257,11 +249,11 @@ export default {
 
       // depending on the length of the answer vs the length of the prompt, adds time
       let collectiveLength =
-        this.front.replace(/\n.*/g, '').length +
-        this.back.replace(/\n.*/g, '').length -
+        this.front.length + //.replace(/\n.*/g, '')
+        this.back.length -
         5
       if (collectiveLength < 0) collectiveLength = 0
-      const lengthThreshold = 30
+      const lengthThreshold = 40
       bonuses.length =
         collectiveLength > lengthThreshold
           ? 1
@@ -328,7 +320,7 @@ export default {
         !this.showBack ? (this.showBack = true) : this.answer('ok')
       } else if (event.key === 'Enter')
         !this.showBack ? (this.showBack = true) : this.answer('ok')
-      else if (event.key === '2') this.answer('ok')
+      else if (event.key === '2' && this.showBack) this.answer('ok')
     },
     addCard() {
       this.$store.commit('setAppState', 'addCard')
@@ -403,6 +395,10 @@ export default {
       opacity: 0.2;
     }
   }
+}
+
+.newcard {
+  box-shadow: inset 0 3px 0 0px #0bf;
 }
 
 .back {

@@ -110,6 +110,8 @@ export default {
       flex: 1;
       background: #ddd;
       margin: 0 3px;
+      border-top-right-radius: 5px;
+      border-top-left-radius: 5px;
       position: relative;
     }
   }

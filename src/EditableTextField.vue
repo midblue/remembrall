@@ -2,7 +2,7 @@
   <div
     class="editabletext"
     :class="{
-      editabletextediting: isEditing, 
+      editabletextediting: isEditing,
       placeholder: isPlaceholder,
     }"
     :contenteditable="isEditing"
@@ -67,19 +67,23 @@ export default {
   computed: {},
   watch: {
     text(newText) {
-      this.$nextTick(() => {
-        // console.log(
-        //   'text change, is editing:',
-        //   this.isEditing,
-        //   newText,
-        //   this.$el.innerHTML
-        // )
-        if (!this.isEditing) {
-          this.displayText = ''
-          this.$el.innerHTML = ''
-          this.$nextTick(() => (this.displayText = newText))
-        }
-      })
+      // console.log(
+      //   'text change, is editing:',
+      //   this.isEditing,
+      //   newText,
+      //   this.$el.innerHTML
+      // )
+      if (!this.isEditing) {
+        this.displayText = ''
+        this.$el.innerHTML = ''
+        this.$nextTick(() => {
+          this.displayText = newText
+          if (!newText && this.placeholder && !this.isEditing) {
+            this.displayText = this.placeholder
+            this.isPlaceholder = true
+          }
+        })
+      }
     },
 
     disableEdits(isDisabled) {
@@ -108,7 +112,7 @@ export default {
     startEdit() {
       if (this.isEditing || this.disableEdits) return
       this.isEditing = true
-      // console.log('start edit, is editing:', this.isEditing)
+      // console.log('start edit')
       if (this.isPlaceholder) this.displayText = ''
       this.isPlaceholder = false
       this.metaDown = false
@@ -123,7 +127,7 @@ export default {
       if (window.getSelection) window.getSelection().removeAllRanges()
       else if (document.selection) document.selection.empty()
       this.isEditing = false
-      // console.log('commit edit, is editing:', this.isEditing)
+      // console.log('commit edit')
       this.metaDown = false
       this.shiftDown = false
       const finalText = this.sanitize(this.$el.innerHTML)
@@ -163,13 +167,12 @@ export default {
     },
     sanitize(text) {
       const sanitizedText = text
-        .replace('<div>', '\n')
+        .replace(/<div>/g, '\n')
         .replace(/<[^>]*>/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/^[\s\n\t]*/g, '')
         .replace(/[\s\n\t]*$/g, '')
-      console.log(text, sanitizedText)
       return sanitizedText
     },
     paste(e) {

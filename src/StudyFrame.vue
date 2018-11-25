@@ -13,21 +13,30 @@
       </u>
     </div>
 
-    <FloatingText 
+    <FloatingText
       :text="displayTimeMod"
-      :color="displayTimeMod 
-        ? (displayTimeMod.toLowerCase().indexOf('again') !== -1 ? '#fa4' : '#0c6')
-        : 'green'" 
+      :color="
+        displayTimeMod
+          ? displayTimeMod.toLowerCase().indexOf('again') !== -1
+            ? '#fa4'
+            : '#0c6'
+          : 'green'
+      "
       offset="-120"
     />
 
     <template v-if="!doneForDay">
       <div class="sub centertext padt-small">
         <span v-if="newCards.length > 0">
-          <b>{{ newCards.length }}</b> new card{{ newCards.length === 1 ? '' : 's' }} <span v-if="dueCards.length > 0">and</span>
+          <b>{{ newCards.length }}</b> new card{{
+            newCards.length === 1 ? '' : 's'
+          }}
+          <span v-if="dueCards.length > 0">and</span>
         </span>
         <span v-if="dueCards.length > 0">
-          <b>{{ dueCards.length }}</b> review{{ dueCards.length === 1 ? '' : 's' }}
+          <b>{{ dueCards.length }}</b> review{{
+            dueCards.length === 1 ? '' : 's'
+          }}
         </span>
         left.
       </div>
@@ -45,36 +54,45 @@
     <template v-else-if="doneForDay && newCardsAreLeftOver">
       <div class="padtb centertext">
         <h3>Done for now!</h3>
-        <div>There {{ newCardsLeftOver.length === 1 ? 'is' : 'are' }} <b>{{ newCardsLeftOver.length }}</b> new card{{ newCardsLeftOver.length === 1 ? '' : 's' }} remaining to be learned. If you want to study more new cards, change the setting below.
+        <div>
+          There {{ newCardsLeftOver.length === 1 ? 'is' : 'are' }}
+          <b>{{ newCardsLeftOver.length }}</b> new card{{
+            newCardsLeftOver.length === 1 ? '' : 's'
+          }}
+          remaining to be learned. If you want to study more new cards, change
+          the setting below.
         </div>
         <p class="singlesetting">
           <EditableTextField
             class="visibletextfield"
-            :text="`${ settings.maxNewPerDay || 10 }`"
+            :text="`${settings.maxNewPerDay}`"
             :lineBreaksAllowed="false"
             @endEdit="updateMaxNewPerDay"
-          />&nbsp;&nbsp;
-          <b>New cards per day</b>
+          />&nbsp;&nbsp; <b>New cards per day</b>
         </p>
         <br />
         <br />
-        <p v-if="nextReviewIn">Otherwise, your next review is in {{ nextReviewIn }}.</p>
+        <p v-if="nextReviewIn">
+          Otherwise, your next review is in {{ nextReviewIn }}.
+        </p>
       </div>
     </template>
 
     <template v-else-if="cards.length === 0">
       <div class="padtb centertext">
         <h3>No cards yet!</h3>
-        <button 
-          @click="$store.commit('setAppState', 'addCard')"
-        >+ Add Cards</button>
+        <button @click="$store.commit('setAppState', 'addCard')">
+          + Add Cards
+        </button>
       </div>
     </template>
 
     <template v-else>
       <div class="padtb centertext">
         <h3>Done for now!</h3>
-        <div v-if="nextReviewIn">Your next review is in {{ nextReviewIn }}.</div>
+        <div v-if="nextReviewIn">
+          Your next review is in {{ nextReviewIn }}.
+        </div>
       </div>
     </template>
 
@@ -136,10 +154,17 @@ export default {
       return this.doneReviewing && this.doneWithNewCards
     },
     newCards() {
+      const possibleAdditionalNewCardsToday =
+        (this.settings.maxNewPerDay || 0) - (this.newToday || 0)
       return this.updatedCards
-        .filter(card => card.totalReviews === 0 || !card.totalReviews)
+        .filter(card => !card.totalReviews)
         .sort((a, b) => (a.id > b.id ? 1 : -1))
-        .slice(0, (this.settings.maxNewPerDay || 999) - (this.newToday || 0))
+        .slice(
+          0,
+          possibleAdditionalNewCardsToday > 0
+            ? possibleAdditionalNewCardsToday
+            : 0
+        )
     },
     doneWithNewCards() {
       return (
@@ -175,10 +200,11 @@ export default {
       return this.dueCards.length === 0
     },
     allStudyableCards() {
-      return [...this.newCards, ...this.dueCards]
-      // return this.settings.mixNewCards
-      //   ? mixInto(this.newCards, this.dueCards)
-      //   : [...this.newCards, ...this.dueCards]
+      const shuffleArray = arr => arr.sort(() => Math.random() - 0.5)
+      let cards = this.doneWithNewCards
+        ? [...this.dueCards]
+        : [...this.newCards, ...this.dueCards]
+      return cards
     },
     cardToStudy() {
       return this.allStudyableCards[0]

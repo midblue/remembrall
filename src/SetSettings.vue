@@ -1,13 +1,12 @@
 <template>
-  <div
-    class="settings"
-  >
-		<div class="settingslist">
-
+  <div class="settings">
+    <div class="settingslist">
       <p>
         <EditableTextField
           class="visibletextfield marright"
-          :text="`${ settings.maxNewPerDay || 10 }`"
+          :text="
+            `${settings.maxNewPerDay === 0 ? 0 : settings.maxNewPerDay || 10}`
+          "
           :lineBreaksAllowed="false"
           @endEdit="updateMaxNewPerDay"
         />
@@ -15,53 +14,62 @@
       </p>
 
       <select v-model="selectedLanguageTools" class="marright">
-        <option
-          v-for="language, key in languages"
-          :key="key"
-          :value="key"
-        >{{ language }}</option>
+        <option v-for="(language, key) in languages" :key="key" :value="key">{{
+          language
+        }}</option>
       </select>
       <b>Language Tools</b>
-      
+
       <Toggle
         v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
         key="autospeak"
         :setTo="settings.autoSpeak"
         label="Auto-speak card backs"
-        @toggled="updateSettings({ autoSpeak : !(settings.autoSpeak ? true : false) })"
+        @toggled="
+          updateSettings({ autoSpeak: !(settings.autoSpeak ? true : false) })
+        "
       />
 
       <Toggle
         key="rev"
         :setTo="settings.studyReverse"
         label="Study cards back-to-front"
-        @toggled="updateSettings({ studyReverse : !(settings.studyReverse ? true : false) })"
+        @toggled="
+          updateSettings({
+            studyReverse: !(settings.studyReverse ? true : false),
+          })
+        "
       />
 
-      <!--<Toggle
-        key="mix"
-        :setTo="settings.mixNewCards"
-        label="Mix new cards with reviews"
-        @toggled="updateSettings({ mixNewCards : !(settings.mixNewCards ? true : false) })"
-      />
+      <!--
+        <Toggle
+          key="mix"
+          :setTo="settings.mixNewCards"
+          label="Mix new cards with reviews"
+          @toggled="
+            updateSettings({
+              mixNewCards: !(settings.mixNewCards ? true : false),
+            })
+          "
+        />
 
-      <Toggle
-        key="pro"
-        :setTo="settings.pronunciationLink"
-        label="Pronunciation link"
-        @toggled="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
-      />
-      <Toggle
-        key="tra"
-        :setTo="settings.translationLink"
-        label="Translation link"
-        @toggled="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
-      />-->
+          <Toggle
+            key="pro"
+            :setTo="settings.pronunciationLink"
+            label="Pronunciation link"
+            @toggled="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
+          />
+          <Toggle
+            key="tra"
+            :setTo="settings.translationLink"
+            label="Translation link"
+            @toggled="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
+          />
+      -->
       <div>Click your set's name (above) to edit it.</div>
-      <br />
+      <button @click="downloadSet">Download Set</button>
       <button @click="deleteSet">Delete Set</button>
-
-		</div>
+    </div>
   </div>
 </template>
 
@@ -80,6 +88,7 @@ export default {
       selectedLanguageTools: null,
       languages: {
         none: 'None',
+        ar: 'Arabic',
         zh: 'Chinese',
         da: 'Danish',
         en: 'English',
@@ -129,10 +138,33 @@ export default {
       })
     },
     updateMaxNewPerDay(newValue) {
-      const parsedValue = parseInt(newValue) || 10
+      const parsedValue =
+        parseInt(newValue) === 0 ? 0 : parseInt(newValue) || 10
       this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
     },
+    downloadSet() {
+      downloadObjectAsJson(
+        this.currentSet,
+        this.currentSet.name +
+          ' ' +
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      )
+    },
   },
+}
+
+function downloadObjectAsJson(exportObj, exportName) {
+  var dataStr =
+    'data:text/json;charset=utf-8,' +
+    encodeURIComponent(JSON.stringify(exportObj))
+  var downloadAnchorNode = document.createElement('a')
+  downloadAnchorNode.setAttribute('href', dataStr)
+  downloadAnchorNode.setAttribute('download', exportName + '.json')
+  document.body.appendChild(downloadAnchorNode) // required for firefox
+  downloadAnchorNode.click()
+  downloadAnchorNode.remove()
 }
 </script>
 

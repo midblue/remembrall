@@ -225,19 +225,35 @@ export default () => {
     actions: {
       logInAs({ commit, state }, username) {
         dbManager.getAllSets(username).then(res => {
+          console.log(res)
           const { docs, empty } = res
+
+          // falsely empty state (disconnect)
+          if (empty && username === state.currentUser) {
+            console.log('dc')
+            return commit('setPauseDbSets', false)
+          }
+
+          // get all sets from response
           let setObject = {}
           docs.forEach(doc => {
             const set = doc.data()
             setObject[set.id] = set
           })
-          if (empty) dbManager.newUser(username)
-          if (Object.keys(setObject).length === 0) {
-            setObject = newSetObject()
-            dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
+
+          // first ever load
+          if (!state.currentUser && empty) {
+            console.log('first')
+            dbManager.newUser(username)
+            if (Object.keys(setObject).length === 0) {
+              setObject = newSetObject()
+              dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
+            }
           }
-          // if is refresh
-          if (username === state.currentUser) {
+
+          // refresh
+          if (!empty && username === state.currentUser) {
+            console.log('refresh')
             for (let id in setObject) {
               if (!state.setList[id]) {
                 console.log(
@@ -257,6 +273,9 @@ export default () => {
               }
             }
           }
+
+          // finish up
+          console.log(username, setObject)
           commit('setUsername', username)
           commit('setSetList', setObject)
           commit(
