@@ -133,6 +133,7 @@ export default {
       startedWith: 0,
       displayTimeMod: null,
       updatedCards: [],
+      cardsToStudy: [],
     }
   },
   computed: {
@@ -158,7 +159,11 @@ export default {
         (this.settings.maxNewPerDay || 0) - (this.newToday || 0)
       return this.updatedCards
         .filter(card => !card.totalReviews)
-        .sort((a, b) => (a.id > b.id ? 1 : -1))
+        .sort((a, b) =>
+          // this.settings.shuffleCards
+          // ? Math.random() - 0.5:
+          a.id > b.id ? 1 : -1
+        )
         .slice(
           0,
           possibleAdditionalNewCardsToday > 0
@@ -200,14 +205,13 @@ export default {
       return this.dueCards.length === 0
     },
     allStudyableCards() {
-      const shuffleArray = arr => arr.sort(() => Math.random() - 0.5)
       let cards = this.doneWithNewCards
         ? [...this.dueCards]
         : [...this.newCards, ...this.dueCards]
       return cards
     },
     cardToStudy() {
-      return this.allStudyableCards[0]
+      return this.cardsToStudy[0]
     },
     nextReviewIn() {
       const reviewableCards = this.doneForDay
@@ -239,6 +243,41 @@ export default {
         this.startedWith = 0
       }
     },
+    allStudyableCards(newStudyable) {
+      const shuffleArray = arr => arr.sort(() => Math.random() - 0.5)
+      const shuffleArrayLeaveFirstAndLast = arr => [
+        ...arr.slice(0, 1),
+        ...shuffleArray(arr.slice(1, arr.length - 2)),
+        ...arr.slice(arr.length - 2),
+      ]
+
+      const newCardsToAdd = newStudyable.filter(
+        toStudy =>
+          !this.cardsToStudy.find(
+            existingCard => existingCard.id === toStudy.id
+          )
+      )
+
+      const hasUpdatedElsewhere = !!this.cardsToStudy.find(
+        existingCard =>
+          !newStudyable.find(toStudy => existingCard.id === toStudy.id)
+      )
+      if (hasUpdatedElsewhere)
+        return (this.cardsToStudy = this.settings.shuffleCards
+          ? shuffleArray(newStudyable)
+          : newStudyable)
+
+      if (newCardsToAdd.length === 0) return
+      const newCardsToStudy = [
+        ...this.cardsToStudy,
+        ...(this.settings.shuffleCards
+          ? shuffleArray(newCardsToAdd)
+          : newCardsToAdd),
+      ]
+      this.cardsToStudy = this.settings.shuffleCards
+        ? shuffleArrayLeaveFirstAndLast(newCardsToStudy)
+        : newCardsToStudy.sort((a, b) => a.nextReview - b.nextReview)
+    },
   },
   mounted() {
     if (
@@ -261,6 +300,7 @@ export default {
   },
   methods: {
     finishedCurrentCard(timeMod) {
+      this.cardsToStudy.shift()
       if (timeMod === undefined) return
       const text = timeMod ? '+' + msToString(timeMod) : 'Again!'
       this.displayTimeMod = null
@@ -268,30 +308,12 @@ export default {
     },
     refreshCards() {
       this.updatedCards = [...this.cards]
-      // this.$set(this, 'updatedCards', this.cards)
     },
     updateMaxNewPerDay(newValue) {
       const parsedValue = parseInt(newValue) || 10
       this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
     },
   },
-}
-
-function mixInto(a, b) {
-  const mixedArray = []
-  const toMix = [...a],
-    mixInto = [...b]
-  const addEvery = (toMix.length + mixInto.length) / toMix.length
-  let counter = 0,
-    addAt = 0
-  while (toMix.length > 0 || mixInto.length > 0) {
-    if ((counter >= addAt && toMix.length > 0) || mixInto.length === 0) {
-      mixedArray.push(toMix.shift())
-      addAt += addEvery
-    } else mixedArray.push(mixInto.shift())
-    counter++
-  }
-  return mixedArray
 }
 </script>
 

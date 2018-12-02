@@ -1,27 +1,26 @@
 <template>
-  <div
-    class="reviewgraph"
-  >
-		<h4 v-if="reviewGraph.graphPoints">{{ title }}</h4>
-		<div class="bars">
-			<div
-				v-for="bar, key in reviewGraph.graphPoints"
-				:key="'bar' + key"
-				:style="{height: ((bar / reviewGraph.maxValue) * 100) + '%' }"
-			>
-				<div class="count">{{ bar }}</div>
-			</div>
-		</div>
-		<div class="labels">
-			<span
-				class="sub"
-				v-for="label, key in reviewGraph.labels"
-				:key="'label' + key"
-			>{{
-				label
-			}}
-			</span>
-		</div>
+  <div class="reviewgraph">
+    <h4 v-if="reviewGraph.graphPoints">{{ title }}</h4>
+    <div class="bars">
+      <div
+        v-for="(bar, key) in reviewGraph.graphPoints"
+        class="fill"
+        :key="'bar' + key"
+        :style="{
+          height: firstFrame ? 0 : (bar / reviewGraph.maxValue) * 100 + '%',
+        }"
+      >
+        <div class="count">{{ bar }}</div>
+      </div>
+    </div>
+    <div class="labels">
+      <span
+        class="sub"
+        v-for="(label, key) in reviewGraph.labels"
+        :key="'label' + key"
+        >{{ label }}
+      </span>
+    </div>
   </div>
 </template>
 
@@ -46,6 +45,7 @@ export default {
     return {
       updateGraphTimer: null,
       reviewGraph: {},
+      firstFrame: true,
     }
   },
   watch: {
@@ -56,6 +56,7 @@ export default {
   mounted() {
     this.updateGraphTimer = setInterval(this.updateGraph, 30000)
     this.updateGraph()
+    setTimeout(() => (this.firstFrame = false), 100)
   },
   beforeDestroy() {
     clearInterval(this.updateGraphTimer)
@@ -106,13 +107,15 @@ export default {
     justify-content: stretch;
     align-items: flex-end;
 
-    & > * {
+    .fill {
       flex: 1;
       background: #ddd;
       margin: 0 3px;
       border-top-right-radius: 5px;
       border-top-left-radius: 5px;
       position: relative;
+      transition: all 1s;
+      height: 0;
     }
   }
 

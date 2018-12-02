@@ -1,53 +1,31 @@
 <template>
-  <div
-    class="cardbrowser"
-  >
-		<input
-			class="searchbar"
-			@focus="$store.commit('setIsEditingText', true)"
-			@blur="$store.commit('setIsEditingText', false)"
-      ref="searchbar"
-			v-model="searchTerm"
-			placeholder="Type to filter..."
-		/>
-    <div
-      class="mar-b sub"
-      v-if="sortedCards.length < currentCards.length"
-    >{{ sortedCards.length }} cards shown.</div>
-    
-		<div class="cardlist">
-			<div 
-				v-for="card in sortedCards"
-				:key="card.id"
-				class="card"
-			>
-				<EditableTextField
-					class="front"
-					:text="card.front"
-					@startEdit="startEdit"
-					@endEdit="saveEditedCard('front', card.id, ...arguments)"
-				/>
-				<EditableTextField
-					class="back"
-					:text="card.back"
-					@startEdit="startEdit"
-					@endEdit="saveEditedCard('back', card.id, ...arguments)"
-				/>
-				<div class="stats sub">
-					<div v-if="card.ok !== undefined && card.again !== undefined && card.ok + card.again > 0">
-						{{ ((card.again || 0) + (card.ok || 0)) }} reviews ・ {{ Math.round(((card.ok || 0) / ((card.again || 0) + (card.ok || 0))) * 100) }}% oks ・ 
-					</div>
-					<div v-else>
-						New ・ 
-					</div>
-          <div style="cursor: pointer" @click="$store.commit('deleteCard', card.id)"><u>Delete</u></div>
-				</div>
-			</div>
-		</div>
-		
-    <button
-      @click="$store.commit('setAppState', 'addCard')"
-    >
+  <div class="cardbrowser">
+    <template v-if="sortedCards.length > 0">
+      <input
+        class="searchbar"
+        @focus="$store.commit('setIsEditingText', true)"
+        @blur="$store.commit('setIsEditingText', false)"
+        ref="searchbar"
+        v-model="searchTerm"
+        placeholder="Type to filter..."
+      />
+      <div class="mar-b sub" v-if="sortedCards.length < currentCards.length">
+        {{ sortedCards.length }} cards shown.
+      </div>
+
+      <div class="cardlist">
+        <Card
+          v-for="card in sortedCards"
+          :key="card.id"
+          class="card"
+          v-bind="card"
+          :forStudy="false"
+          :mini="true"
+        />
+      </div>
+    </template>
+
+    <button @click="$store.commit('setAppState', 'addCard')">
       <div>Add Card</div>
     </button>
   </div>
@@ -55,7 +33,7 @@
 
 <script>
 import FloatingText from './FloatingText'
-import EditableTextField from './EditableTextField'
+import Card from './Card'
 
 export default {
   props: {},
@@ -68,7 +46,7 @@ export default {
   },
   components: {
     FloatingText,
-    EditableTextField,
+    Card,
   },
   computed: {
     currentCards() {
@@ -89,25 +67,12 @@ export default {
   },
   watch: {},
   mounted() {
-    this.$nextTick(() => this.$refs.searchbar.focus())
+    if (this.$refs.searchbar) this.$nextTick(() => this.$refs.searchbar.focus())
   },
   beforeDestroy() {
     this.$store.commit('setIsEditingText', false)
   },
-  methods: {
-    startEdit(startText) {
-      this.$store.commit('setIsEditingText', true)
-      this.initialEditText = startText
-    },
-    saveEditedCard(side, id, newValue) {
-      this.$store.commit('setIsEditingText', false)
-      if (this.initialEditText === newValue) return
-      this.$store.commit('updateCard', {
-        id,
-        [side]: newValue,
-      })
-    },
-  },
+  methods: {},
 }
 </script>
 
@@ -118,43 +83,23 @@ export default {
   transition: all 0.5s;
   margin-bottom: 200px;
   font-size: 1rem;
-}
 
-.searchbar {
-  width: 100%;
-  border-radius: 7px;
-  border: 1px solid #ddd;
-  font-size: 1.2rem;
-  font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
-  padding: 10px 10px;
-  margin-bottom: 20px;
-}
+  .searchbar {
+    width: 100%;
+    border-radius: 7px;
+    border: 1px solid #ddd;
+    font-size: 1.2rem;
+    font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
+    padding: 10px 10px;
+    margin-bottom: 20px;
+  }
 
-.cardlist {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-gap: 25px;
-  text-align: center;
-  margin-bottom: 20px;
-
-  & > * {
-    background: #f8f8f8;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-
-    .front,
-    .back {
-      flex: 1;
-      padding: 20px;
-      border-bottom: 1px solid #e8e8e8;
-    }
-    .stats {
-      padding: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+  .cardlist {
+    display: grid;
+    grid-template-columns: 48% 48%;
+    grid-gap: 10px 4%;
+    text-align: center;
+    margin-bottom: 20px;
   }
 }
 

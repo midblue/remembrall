@@ -4,7 +4,7 @@
     <RefreshHandler />
     <div class="content">
       <SetView
-        v-if="currentSet"
+        v-if="currentSet && appState !== 'user'"
         :key="currentSet.id"
         :id="currentSet.id"
         :name="currentSet.name"
@@ -13,6 +13,7 @@
         :newToday="currentSet.newToday"
         :reviewsToday="currentSet.reviewsToday"
       />
+      <UserView v-if="appState === 'user'" />
     </div>
   </section>
 </template>
@@ -21,16 +22,21 @@
 import UserAndSetPicker from './UserAndSetPicker.vue'
 import RefreshHandler from './RefreshHandler.vue'
 import SetView from './SetView.vue'
+import UserView from './UserView.vue'
 
 export default {
   components: {
     SetView,
+    UserView,
     UserAndSetPicker,
     RefreshHandler,
   },
   computed: {
     currentSet() {
       return this.$store.state.setList[this.$store.state.currentSetId]
+    },
+    appState() {
+      return this.$store.state.appState
     },
   },
   mounted() {
@@ -60,7 +66,7 @@ body {
 }
 
 .app {
-  min-height: 100vh;
+  min-height: 150vh;
 }
 
 .content {

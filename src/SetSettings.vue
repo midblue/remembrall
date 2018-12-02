@@ -41,30 +41,30 @@
         "
       />
 
+      <Toggle
+        key="mix"
+        :setTo="settings.shuffleCards"
+        label="Shuffle cards (new & reviews)"
+        @toggled="
+          updateSettings({
+            shuffleCards: !(settings.shuffleCards ? true : false),
+          })
+        "
+      />
+
       <!--
         <Toggle
-          key="mix"
-          :setTo="settings.mixNewCards"
-          label="Mix new cards with reviews"
-          @toggled="
-            updateSettings({
-              mixNewCards: !(settings.mixNewCards ? true : false),
-            })
-          "
+          key="pro"
+          :setTo="settings.pronunciationLink"
+          label="Pronunciation link"
+          @toggled="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
         />
-
-          <Toggle
-            key="pro"
-            :setTo="settings.pronunciationLink"
-            label="Pronunciation link"
-            @toggled="updateSettings({ pronunciationLink : !(settings.pronunciationLink ? true : false) })"
-          />
-          <Toggle
-            key="tra"
-            :setTo="settings.translationLink"
-            label="Translation link"
-            @toggled="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
-          />
+        <Toggle
+          key="tra"
+          :setTo="settings.translationLink"
+          label="Translation link"
+          @toggled="updateSettings({ translationLink : !(settings.translationLink ? true : false) })"
+        />
       -->
       <div>Click your set's name (above) to edit it.</div>
       <button @click="downloadSet">Download Set</button>

@@ -1,11 +1,8 @@
 <template>
-  <div
-    class="cardcreator"
-  >
-
+  <div class="cardcreator">
     <EditableTextField
       class="textfield front"
-      :class="{duplicate: isDuplicate}"
+      :class="{ duplicate: isDuplicate }"
       :focus="setFocus === 'front'"
       v-model="front"
       placeholder="Hint"
@@ -21,13 +18,8 @@
       @prev="shiftTab"
     />
 
-    <FloatingText 
-      :text="floatText"
-      offset="-30"
-    />
-    <button
-      @click="newCard"
-    >
+    <FloatingText :text="floatText" offset="-30" />
+    <button @click="newCard">
       <div>Add Card</div>
       <div class="keyicon">⌘-Enter</div>
     </button>
@@ -85,6 +77,7 @@ export default {
         front: this.front,
         back: this.back,
         nextReview: 0,
+        set: this.$store.state.currentSetId,
       })
       this.floatText = 'Card added.'
       setTimeout(() => (this.floatText = ''), 1500)

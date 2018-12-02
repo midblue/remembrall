@@ -1,4 +1,5 @@
 exports.msToString = function(ms) {
+  ms = parseInt(ms)
   if (ms < 1000) return '0s'
   else if (ms < 1000 * 60) return Math.round(ms / 1000) + 's'
   else if (ms < 1000 * 60 * 60) return Math.round(ms / 1000 / 60) + 'm'

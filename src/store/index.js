@@ -207,18 +207,60 @@ export default () => {
           })
       },
       deleteCard(state, id) {
-        const newCards = state.setList[state.currentSetId].cards.filter(
-          card => card.id !== id
-        )
-        Vue.set(state.setList[state.currentSetId], 'cards', newCards)
+        let setWithCard
+        for (let set in state.setList)
+          if (
+            state.setList[set].cards &&
+            state.setList[set].cards.find(card => card.id === id)
+          ) {
+            setWithCard = state.setList[set]
+            break
+          }
+        if (!setWithCard)
+          return console.log('No card found by that id in any deck.')
+        const newCards = setWithCard.cards.filter(card => card.id !== id)
+        Vue.set(setWithCard, 'cards', newCards)
         // update set last updated
-        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
+        Vue.set(setWithCard, 'lastUpdated', Date.now())
         // update db
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
-            cards: state.setList[state.currentSetId].cards,
-            lastUpdated: state.setList[state.currentSetId].lastUpdated,
+            id: setWithCard.id,
+            cards: setWithCard.cards,
+            lastUpdated: setWithCard.lastUpdated,
+          })
+      },
+      moveCard(state, { id, from, to }) {
+        console.log(id, from, to)
+        const cardToMove = state.setList[from].cards.find(
+          card => card.id === id
+        )
+        if (!cardToMove) return
+        // add to destination deck
+        const newDestCards = state.setList[to].cards
+        newDestCards.push(cardToMove)
+        Vue.set(state.setList[to], 'cards', newDestCards)
+        // update set last updated
+        Vue.set(state.setList[to], 'lastUpdated', Date.now())
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: to,
+            cards: state.setList[to].cards,
+            lastUpdated: state.setList[to].lastUpdated,
+          })
+        // delete from source deck
+        const newSourceCards = state.setList[from].cards.filter(
+          card => card.id !== id
+        )
+        Vue.set(state.setList[from], 'cards', newSourceCards)
+        // update set last updated
+        Vue.set(state.setList[from], 'lastUpdated', Date.now())
+        // update db
+        if (!state.pauseDbSets)
+          dbManager.updateSet(state.currentUser, {
+            id: state.setList[from].id,
+            cards: state.setList[from].cards,
+            lastUpdated: state.setList[from].lastUpdated,
           })
       },
     },
@@ -240,6 +282,14 @@ export default () => {
             const set = doc.data()
             setObject[set.id] = set
           })
+
+          // just until everyone has all sets added
+          for (let set in setObject) {
+            setObject[set].cards = setObject[set].cards.map(card => ({
+              ...card,
+              set: parseInt(set),
+            }))
+          }
 
           // first ever load
           if (!state.currentUser && empty) {

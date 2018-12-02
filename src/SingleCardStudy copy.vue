@@ -1,7 +1,40 @@
 <template>
   <div>
+    <!--
+      <div class="card roundframe" :class="{ new: !totalReviews }">
+        <EditableTextField
+          class="front textfield"
+          :class="{
+            newcard: isNewCard,
+          }"
+          :text="reverse ? back : front"
+          @startEdit="startEdit"
+          @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
+        />
+        <div
+          class="back"
+          :class="{ pointer: showBack === false }"
+          @click="showBack = true"
+        >
+          <div :class="{ hideanswer: !showBack }">
+            <EditableTextField
+              class="textfield"
+              :text="reverse ? front : back"
+              @startEdit="startEdit"
+              @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
+            />
+            <div class="sub" v-if="settings.languageTools">
+              <a v-if="speaker" @click="speakWord" class="fakelink">Speak it</a>
+              <span v-if="speaker"> ・ </span>
+              <a target="_blank" :href="pronunciationLink">Native</a>
+              <span> ・ </span>
+              <a target="_blank" :href="translationLink">Translation</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    -->
     <Card
-      class="card"
       :id="id"
       :front="front"
       :back="back"
@@ -14,7 +47,6 @@
       :again="again"
       :forStudy="true"
       :showBack="showBack"
-      :set="set"
     />
 
     <div class="buttonlist primary">
@@ -44,6 +76,11 @@
         </button>
       </template>
     </div>
+    <div class="extraoptions">
+      <button key="delete" ref="deleteButton" @click="deleteCard">
+        Delete Card
+      </button>
+    </div>
   </div>
 </template>
 
@@ -65,7 +102,6 @@ export default {
     front: {},
     back: {},
     id: {},
-    set: {},
     timeMod: {
       default: 0,
     },
@@ -86,6 +122,7 @@ export default {
     },
   },
   components: {
+    EditableTextField,
     Card,
   },
   data() {
@@ -95,6 +132,7 @@ export default {
       revealedBackTime: 0,
       averageTime: 7000,
       reviewsSoFar: 0,
+      speaker: null,
     }
   },
   computed: {
@@ -116,6 +154,35 @@ export default {
     isNewCard() {
       return !this.totalReviews || this.totalReviews === 0
     },
+    searchString() {
+      let searchString = this.back
+      let linebreakPos = this.back.indexOf('\n')
+      if (linebreakPos !== -1)
+        searchString = this.back.substring(0, linebreakPos)
+      return searchString
+    },
+    searchWord() {
+      return this.searchString
+        .toLowerCase()
+        .split(/[ /;.,?¿!+]/)
+        .reduce(
+          (longestString, currString) =>
+            currString.length > longestString.length
+              ? currString
+              : longestString,
+          ''
+        )
+    },
+    pronunciationLink() {
+      return `https://forvo.com/word/${this.searchWord}/#${
+        this.settings.languageTools
+      }`
+    },
+    translationLink() {
+      return `https://translate.google.com/#${this.settings.languageTools}/en/${
+        this.searchString
+      }`
+    },
     timeBonuses() {
       let bonuses = {
         ok: this.getTimeBonus('ok'),
@@ -133,11 +200,29 @@ export default {
   watch: {
     id(newId) {
       this.startedCardTime = new Date()
+      // console.log('started studying', newId)
+    },
+    settings(newSettings) {
+      this.speaker.lang = newSettings.languageTools
+    },
+    isStudying(newFocus) {
+      // if (newFocus) this.showBack = false
+    },
+    showBack(willShow) {
+      if (willShow) {
+        this.revealedBackTime = new Date()
+        if (this.settings.autoSpeak) this.speakWord()
+      }
     },
   },
   mounted() {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
+    if (window.speechSynthesis) {
+      this.speaker = new SpeechSynthesisUtterance()
+      this.speaker.lang = this.settings.languageTools
+      this.speaker.volume = 0.4
+    }
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.keyDown)
@@ -255,15 +340,119 @@ export default {
         !this.showBack ? (this.showBack = true) : this.answer('ok')
       else if (event.key === '2' && this.showBack) this.answer('ok')
     },
+    addCard() {
+      this.$store.commit('setAppState', 'addCard')
+    },
+    deleteCard() {
+      this.$store.commit('deleteCard', this.id)
+      this.$emit('done')
+      this.showBack = false
+      this.$nextTick(() => {
+        try {
+          this.$refs.deleteButton.blur()
+        } catch (e) {}
+      })
+    },
+    startEdit() {
+      this.$store.commit('setAppState', 'editCard')
+      this.$store.commit('setIsEditingText', true)
+    },
+    saveEditedCard(side, newValue) {
+      this.$store.commit('setAppState', 'study')
+      this.$store.commit('setIsEditingText', false)
+      if (this[side] === newValue) return
+      this.$store.commit('updateCard', {
+        id: this.id,
+        [side]: newValue,
+      })
+    },
+    speakWord() {
+      this.speaker.text = this.searchString
+      window.speechSynthesis.speak(this.speaker)
+    },
   },
 }
 </script>
 
 <style lang="scss" scoped>
 .card {
+  background: #f8f8f8;
   margin-bottom: 20px;
+  text-align: center;
+
+  &.new {
+    // background: rgba(#0bb, 0.1);
+  }
 }
+
+.front,
+.back {
+  transition: 0.2s;
+}
+
+.textfield {
+  padding: 50px 20px;
+  white-space: pre-wrap;
+  font-size: 1.5rem;
+
+  &.editabletextediting {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  &:hover:not(.editabletextediting) {
+    position: relative;
+    background: rgba(0, 0, 0, 0.05);
+
+    &:after {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      content: 'CLICK TO EDIT';
+      font-weight: 600;
+      font-size: 0.5em;
+      opacity: 0.2;
+    }
+  }
+}
+
+.newcard {
+  // box-shadow: inset 0 3px 0 0px #0bf;
+  color: #09c;
+}
+
+.back {
+  border-top: 1px solid rgba(black, 0.15);
+  padding-bottom: 20px;
+  transition: 0.2s;
+
+  &.pointer {
+    cursor: pointer;
+  }
+
+  .hideanswer {
+    user-select: none;
+    pointer-events: none;
+    opacity: 0.15;
+    filter: blur(7px);
+  }
+}
+
+.fakelink {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .showback {
   width: 100%;
+}
+
+.extraoptions {
+  margin: 40px 0;
+  width: 100%;
+
+  button {
+    display: block;
+    margin: 0 auto;
+  }
 }
 </style>

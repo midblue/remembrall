@@ -1,60 +1,65 @@
 <template>
-  <div 
-		class="userandsetpicker"
-		:class="{
-			fullscreen: !currentUser || isLoading,
-			vertical: !currentUser,
-		}"
-	>
-		<template v-if="!currentUser && !isLoading">
-			<div>
-				<b>Enter your username.</b>
-			</div>
-			<div>
-				<input
-					v-model="inputUsername"
-					placeholder="username"
-					ref="usernameInput"
-				/>
-			</div>
-			<div>
-				<button
-					@click="logInAs"
-				>Go</button>
-			</div>
-		</template>
-		<template v-else-if="isLoading">
-			<div class="sub">Loading...</div>
-		</template>
-		<template v-else>
-			<div class="buttonlist inlineblock">
-				<button
-					v-for="set in setList"
-					:key="set.id"
-					:class="{
-						active: parseInt(currentSetId) === parseInt(set.id),
-						duecards: dueReviews[set.id] > 0,
-					}"
-					@click="switchSet(set.id)"
-				>
-					{{ set.name }}
-					<span
-						v-if="!isMobile && dueReviews[set.id] > 0 && parseInt(currentSetId) !== parseInt(set.id)"
-						class="sub"
-					>
-						({{ dueReviews[set.id] }})
-					</span>
-				</button><button
-					@click="$store.commit('addSet')"
-				>
-					+<span v-if="!isMobile"> Add Set</span>
-				</button>
-			</div>
-			<div>
-				<span><span v-if="!isMobile">Logged in as </span><b>{{ currentUser }}</b></span>
-				<button @click="logOut">Log out</button>
-			</div>
-		</template>
+  <div
+    class="userandsetpicker"
+    :class="{
+      fullscreen: !currentUser || isLoading,
+      vertical: !currentUser,
+    }"
+  >
+    <template v-if="!currentUser && !isLoading">
+      <div><b>Enter your username.</b></div>
+      <div>
+        <input
+          v-model="inputUsername"
+          placeholder="username"
+          ref="usernameInput"
+        />
+      </div>
+      <div><button @click="logInAs">Go</button></div>
+    </template>
+    <template v-else-if="isLoading">
+      <div class="sub">Loading...</div>
+    </template>
+    <template v-else>
+      <div class="buttonlist inlineblock">
+        <button
+          v-for="set in setList"
+          :key="set.id"
+          :class="{
+            active:
+              parseInt(currentSetId) === parseInt(set.id) &&
+              appState !== 'user',
+            duecards: dueReviews[set.id] > 0,
+          }"
+          @click="switchSet(set.id)"
+        >
+          {{ set.name }}
+          <span
+            v-if="
+              !isMobile &&
+                dueReviews[set.id] > 0 &&
+                (parseInt(currentSetId) !== parseInt(set.id) ||
+                  appState === 'user')
+            "
+            class="sub"
+          >
+            ({{ dueReviews[set.id] }})
+          </span></button
+        ><button @click="$store.commit('addSet')">
+          +<span v-if="!isMobile"> Add Set</span>
+        </button>
+      </div>
+      <div class="flex-ai">
+        <div class="buttonlist inlineblock">
+          <button
+            @click="$store.commit('setAppState', 'user')"
+            :class="{ active: appState === 'user' }"
+          >
+            {{ currentUser }}</button
+          ><button @click="logOut">Log out</button>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -88,6 +93,9 @@ export default {
     },
     isMobile() {
       return this.$store.state.isMobile
+    },
+    appState() {
+      return this.$store.state.appState
     },
   },
   watch: {
@@ -218,5 +226,10 @@ button:not(.active).duecards {
 
 .inlineblock {
   display: inline-block;
+}
+
+.flex-ai {
+  display: flex;
+  align-items: center;
 }
 </style>
