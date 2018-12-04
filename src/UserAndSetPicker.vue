@@ -168,14 +168,17 @@ export default {
         const newToday = this.setList[set].newToday
         const dueInDeck = this.setList[set].cards.reduce(
           (dueCount, card) =>
-            card.nextReview < now && card.totalReviews && card.totalReviews > 0
+            card.nextReview < now &&
+            card.totalReviews &&
+            card.totalReviews > 0 &&
+            !card.suspended
               ? dueCount + 1
               : dueCount,
           0
         )
         const newInDeck = this.setList[set].cards.reduce(
           (dueCount, card) =>
-            !card.totalReviews || card.totalReviews === 0
+            (!card.totalReviews || card.totalReviews === 0) && !card.suspended
               ? dueCount + 1
               : dueCount,
           0

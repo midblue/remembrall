@@ -108,12 +108,12 @@ export default () => {
       },
 
       // set-level daily review numbers
-      resetSetDay(state) {
-        Vue.set(state.setList[state.currentSetId], 'newToday', 0)
-        Vue.set(state.setList[state.currentSetId], 'reviewsToday', 0)
+      resetSetDay(state, setId) {
+        Vue.set(state.setList[setId], 'newToday', 0)
+        Vue.set(state.setList[setId], 'reviewsToday', 0)
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
+            id: setId,
             newToday: 0,
             reviewsToday: 0,
           })
@@ -267,7 +267,6 @@ export default () => {
     actions: {
       logInAs({ commit, state }, username) {
         dbManager.getAllSets(username).then(res => {
-          console.log(res)
           const { docs, empty } = res
 
           // falsely empty state (disconnect)
@@ -325,7 +324,6 @@ export default () => {
           }
 
           // finish up
-          console.log(username, setObject)
           commit('setUsername', username)
           commit('setSetList', setObject)
           commit(

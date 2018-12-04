@@ -307,7 +307,7 @@ export default {
       this.$nextTick(() => (this.displayTimeMod = text))
     },
     refreshCards() {
-      this.updatedCards = [...this.cards]
+      this.updatedCards = [...this.cards.filter(card => !card.suspended)]
     },
     updateMaxNewPerDay(newValue) {
       const parsedValue = parseInt(newValue) || 10

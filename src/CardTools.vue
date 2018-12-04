@@ -35,6 +35,9 @@
       </div>
       <div class="button" @click="swapSides">Swap Front/Back</div>
       <div class="button" @click="moveToDeck">Move to Deck...</div>
+      <div class="button" @click="suspendCard">
+        {{ suspended ? 'Unsuspend Card' : 'Suspend Card' }}
+      </div>
       <div class="button" @click="deleteCard">Delete Card</div>
     </div>
   </div>
@@ -57,6 +60,7 @@ export default {
     front: {},
     back: {},
     nextReview: {},
+    suspended: {},
   },
   data() {
     return { open: false }
@@ -99,6 +103,13 @@ export default {
         id: this.id,
         from: this.set,
         to: this.set,
+      })
+      this.open = false
+    },
+    suspendCard() {
+      this.$store.commit('updateCard', {
+        id: this.id,
+        suspended: this.suspended ? false : true,
       })
       this.open = false
     },

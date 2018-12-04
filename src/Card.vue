@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="card roundframe" :class="{ new: !totalReviews, mini }">
+    <div
+      class="card roundframe"
+      :class="{ new: !totalReviews, mini, suspended }"
+    >
       <CardTools
         :id="id"
         :totalReviews="totalReviews"
@@ -9,6 +12,7 @@
         :back="back"
         :nextReview="nextReview"
         :set="set"
+        :suspended="suspended"
       />
       <div class="front">
         <EditableTextField
@@ -82,6 +86,9 @@ export default {
     },
     again: {
       default: 0,
+    },
+    suspended: {
+      default: false,
     },
     forStudy: {
       default: true,
@@ -211,6 +218,29 @@ export default {
     font-size: 1rem;
     padding: 20px 35px;
     line-height: 1.2;
+  }
+}
+
+.card.suspended {
+  position: relative;
+
+  .textfield {
+    background: #f5f5f5;
+    color: #bbb;
+  }
+
+  &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    content: 'SUSPENDED';
+    user-select: none;
+    pointer-events: none;
+    font-weight: 600;
+    font-size: 1.7rem;
+    opacity: 1;
+    color: #888;
   }
 }
 </style>

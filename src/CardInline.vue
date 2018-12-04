@@ -1,8 +1,12 @@
 <template>
-  <div class="card" :class="{ newcard: !totalReviews, checked }" @click="click">
+  <div
+    class="card"
+    :class="{ newcard: !totalReviews, checked, suspended }"
+    @click="click"
+  >
     <input type="checkbox" v-model="checked" />
-    <div>{{ front }}</div>
-    <div>{{ back }}</div>
+    <div class="cardtext">{{ front }}</div>
+    <div class="cardtext">{{ back }}</div>
     <div class="sub center">{{ setName }}</div>
     <div style="position: relative;">
       <CardTools
@@ -13,6 +17,7 @@
         :front="front"
         :back="back"
         :nextReview="nextReview"
+        :suspended="suspended"
       />
     </div>
   </div>
@@ -49,6 +54,9 @@ export default {
     },
     again: {
       default: 0,
+    },
+    suspended: {
+      default: false,
     },
   },
   components: {
@@ -116,5 +124,25 @@ input[type='checkbox'] {
 }
 .center {
   text-align: center;
+}
+
+.card.suspended {
+  .cardtext {
+    color: #bbb;
+  }
+
+  &:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    content: 'SUSPENDED';
+    user-select: none;
+    pointer-events: none;
+    font-weight: 600;
+    font-size: 1.4rem;
+    opacity: 1;
+    color: #888;
+  }
 }
 </style>
