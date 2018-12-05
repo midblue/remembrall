@@ -34,7 +34,26 @@
         <div v-else>This card is new.</div>
       </div>
       <div class="button" @click="swapSides">Swap Front/Back</div>
-      <div class="button" @click="moveToDeck">Move to Deck...</div>
+      <div
+        class="button"
+        @mouseover="moveToSetOpen = true"
+        @click="
+          $store.state.isMobile ? (moveToSetOpen = !moveToSetOpen) : false
+        "
+        @mouseout="moveToSetOpen = false"
+      >
+        Move to Set...
+        <div v-if="moveToSetOpen">
+          <div
+            v-for="set in allSets"
+            class="button"
+            @key="set.id"
+            @click="moveToSet(set.id)"
+          >
+            {{ set.name }}
+          </div>
+        </div>
+      </div>
       <div class="button" @click="suspendCard">
         {{ suspended ? 'Unsuspend Card' : 'Suspend Card' }}
       </div>
@@ -63,11 +82,19 @@ export default {
     suspended: {},
   },
   data() {
-    return { open: false }
+    return { open: false, moveToSetOpen: false }
   },
   computed: {
     settings() {
       return this.$store.state.setList[this.$store.state.currentSetId].settings
+    },
+    allSets() {
+      const allSetsObject = this.$store.state.setList
+      const allSetsArray = []
+      for (let setId in allSetsObject) {
+        allSetsArray.push({ id: setId, name: allSetsObject[setId].name })
+      }
+      return allSetsArray
     },
   },
   watch: {
@@ -98,11 +125,11 @@ export default {
       })
       this.open = false
     },
-    moveToDeck() {
+    moveToSet(toId) {
       this.$store.commit('moveCard', {
         id: this.id,
         from: this.set,
-        to: this.set,
+        to: toId,
       })
       this.open = false
     },

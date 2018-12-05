@@ -1,7 +1,16 @@
 <template>
   <div class="settings">
     <div class="settingslist">
-      <p>
+      <Toggle
+        key="aadd"
+        :setTo="settings.autoAddNew"
+        label="Auto-add new cards as older cards are mastered"
+        @toggled="
+          updateSettings({ autoAddNew: !(settings.autoAddNew ? true : false) })
+        "
+      />
+
+      <p v-if="!settings.autoAddNew">
         <EditableTextField
           class="visibletextfield marright"
           :text="
@@ -172,6 +181,7 @@ function downloadObjectAsJson(exportObj, exportName) {
 .settingslist {
   max-width: 300px;
   margin: 0 auto;
+  margin-top: 20px;
 
   & > * {
     margin-bottom: 40px;

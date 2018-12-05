@@ -15,7 +15,7 @@
 
       <div class="cardlist">
         <Card
-          v-for="card in sortedCards"
+          v-for="card in clampedCards"
           :key="card.id"
           class="card"
           v-bind="card"
@@ -42,6 +42,7 @@ export default {
       initialEditText: '',
       searchTerm: '',
       sortBy: '',
+      shownCount: 20,
     }
   },
   components: {
@@ -64,15 +65,36 @@ export default {
     sortedCards() {
       return this.filteredCards.sort((a, b) => (a.id > b.id ? -1 : 1))
     },
+    clampedCards() {
+      return this.sortedCards.slice(0, this.shownCount)
+    },
   },
   watch: {},
   mounted() {
     if (this.$refs.searchbar) this.$nextTick(() => this.$refs.searchbar.focus())
+    window.addEventListener('scroll', this.scroll)
   },
   beforeDestroy() {
     this.$store.commit('setIsEditingText', false)
+    window.removeEventListener('scroll', this.scroll)
   },
-  methods: {},
+  methods: {
+    showMore() {
+      if (this.shownCount < this.sortedCards.length) this.shownCount += 20
+    },
+    scroll() {
+      const scrollPos =
+        Math.max(
+          document.body.scrollHeight,
+          document.body.offsetHeight,
+          document.documentElement.clientHeight,
+          document.documentElement.scrollHeight,
+          document.documentElement.offsetHeight
+        ) - window.innerHeight
+      console.log(window.pageYOffset, scrollPos)
+      if (scrollPos - window.pageYOffset < 500) this.showMore()
+    },
+  },
 }
 </script>
 

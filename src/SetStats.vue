@@ -1,29 +1,34 @@
 <template>
-  <div
-    class="stats"
-  >
-		<p>
-			Cards: <b>{{ currentSet.cards.length }}</b>
-		</p>
-		<p>
-			Mastered Cards: <b>{{ masteredCards }}</b>
-			<span class="sub">({{ (masteredCards / currentSet.cards.length).toFixed(2) * 100 }}%)</span>
-		</p>
-		<p>
-			New Cards: <b>{{ newCards }}</b>
-		</p>
-		<p>
-			Deck Created: <b>{{ new Date(parseInt(currentSet.id)).toLocaleDateString() }}</b>
-		</p>
-		<p>
-			Total Reviews: <b>{{ totalReviews }}</b>
-		</p>
-		<p>
-			Success Rate: <b>{{ oks && agains ? ((oks / (agains + oks)).toFixed(3)) * 100 : 0 }}%</b> <span class="sub" v-if="oks && agains">({{ oks }} oks / {{ agains }} agains)</span>
-		</p>
-		<ReviewGraph
-			:cards="currentSet.cards"
-		/>
+  <div class="stats">
+    <p>
+      Cards: <b>{{ currentSet.cards.length }}</b>
+    </p>
+    <p>
+      Mastered Cards: <b>{{ masteredCards }}</b>
+      <span class="sub"
+        >({{
+          Math.round((masteredCards / currentSet.cards.length) * 100)
+        }}%)</span
+      >
+    </p>
+    <p>
+      New Cards: <b>{{ newCards }}</b>
+    </p>
+    <p>
+      Deck Created:
+      <b>{{ new Date(parseInt(currentSet.id)).toLocaleDateString() }}</b>
+    </p>
+    <p>
+      Total Reviews: <b>{{ totalReviews }}</b>
+    </p>
+    <p>
+      Success Rate:
+      <b>{{ oks && agains ? (oks / (agains + oks)).toFixed(3) * 100 : 0 }}%</b>
+      <span class="sub" v-if="oks && agains"
+        >({{ oks }} oks / {{ agains }} agains)</span
+      >
+    </p>
+    <ReviewGraph :cards="currentSet.cards" />
   </div>
 </template>
 
@@ -86,5 +91,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

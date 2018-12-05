@@ -133,6 +133,7 @@ export default {
   watch: {
     id(newId) {
       this.startedCardTime = new Date()
+      this.showBack = false
     },
   },
   mounted() {
