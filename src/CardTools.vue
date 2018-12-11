@@ -36,6 +36,7 @@
       <div class="button" @click="swapSides">Swap Front/Back</div>
       <div
         class="button"
+        v-if="allSets.length > 1"
         @mouseover="moveToSetOpen = true"
         @click="
           $store.state.isMobile ? (moveToSetOpen = !moveToSetOpen) : false
@@ -43,9 +44,10 @@
         @mouseout="moveToSetOpen = false"
       >
         Move to Set...
-        <div v-if="moveToSetOpen">
+        <div class="secondarypanel" v-if="moveToSetOpen">
           <div
             v-for="set in allSets"
+            v-if="set.id != realSetId"
             class="button"
             @key="set.id"
             @click="moveToSet(set.id)"
@@ -71,7 +73,7 @@ export default {
     id: {
       required: true,
     },
-    set: {
+    setId: {
       required: true,
     },
     totalReviews: { default: 0 },
@@ -82,7 +84,7 @@ export default {
     suspended: {},
   },
   data() {
-    return { open: false, moveToSetOpen: false }
+    return { open: false, moveToSetOpen: false, realSetId: this.setId }
   },
   computed: {
     settings() {
@@ -110,14 +112,12 @@ export default {
     },
     mouseover() {
       if (!this.$store.state.isMobile) this.open = true
-      // this.$nextTick(() => {
-      //   debugger
-      // })
     },
     mouseout() {
       if (!this.$store.state.isMobile) this.open = false
     },
     swapSides() {
+      // THESE UPDATES NEED TO HAVE SET FIELD, CURRENTLY USES CURRENTSETID
       this.$store.commit('updateCard', {
         id: this.id,
         front: this.back,
@@ -128,10 +128,11 @@ export default {
     moveToSet(toId) {
       this.$store.commit('moveCard', {
         id: this.id,
-        from: this.set,
+        from: this.realSetId,
         to: toId,
       })
       this.open = false
+      this.realSetId = toId
     },
     suspendCard() {
       this.$store.commit('updateCard', {
@@ -155,6 +156,34 @@ export default {
 }
 </script>
 <style scoped lang="scss">
+.button {
+  position: relative;
+  user-select: none;
+  padding: 12px 5px;
+  border-top: 1px solid #ddd;
+  cursor: pointer;
+  text-align: center;
+  width: 150px;
+  background: #eee;
+
+  &:hover {
+    background: #ddd;
+  }
+  &:first-of-type {
+    border-top-right-radius: 10px;
+  }
+  &:last-of-type {
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+  }
+  &:first-of-type:last-of-type {
+    border-bottom-left-radius: 0;
+  }
+  &:first-child {
+    border-top: none;
+  }
+}
+
 .cardtools {
   .icon {
     position: absolute;
@@ -198,20 +227,11 @@ export default {
     .stats {
       padding: 10px 20px;
     }
-
-    & > * {
-      &.button {
-        user-select: none;
-        padding: 12px 5px;
-        border-top: 1px solid #ddd;
-        cursor: pointer;
-        text-align: center;
-
-        &:hover {
-          background: #ddd;
-        }
-      }
-    }
   }
+}
+.secondarypanel {
+  position: absolute;
+  left: 100%;
+  top: 0;
 }
 </style>

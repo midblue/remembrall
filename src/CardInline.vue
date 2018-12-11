@@ -7,11 +7,11 @@
     <input type="checkbox" v-model="checked" />
     <div class="cardtext">{{ front }}</div>
     <div class="cardtext">{{ back }}</div>
-    <div class="sub center">{{ setName }}</div>
+    <div class="sub center">{{ $store.state.setList[set].name }}</div>
     <div style="position: relative;">
       <CardTools
         :id="id"
-        :set="set"
+        :setId="set"
         :totalReviews="totalReviews"
         :ok="ok"
         :front="front"
@@ -36,7 +36,6 @@ export default {
     set: {
       required: true,
     },
-    setName: {},
     timeMod: {
       default: 0,
     },

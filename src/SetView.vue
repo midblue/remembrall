@@ -5,8 +5,8 @@
         :text="name"
         placeholder="Enter set name"
         :lineBreaksAllowed="false"
-				@startEdit="startEditName"
-				@endEdit="saveEditedName"
+        @startEdit="startEditName"
+        @endEdit="saveEditedName"
       />
       <div class="sub" v-if="cards">
         ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})
@@ -14,35 +14,35 @@
     </h1>
     <div class="buttonlist" v-if="cards">
       <button
-        :class="{active: appState === 'study' || appState === 'editCard'}"
+        :class="{ active: appState === 'study' || appState === 'editCard' }"
         @click="$store.commit('setAppState', 'study')"
       >
         <div>Study</div>
         <span class="keyicon">s</span>
       </button>
-      <button 
-        :class="{active: appState === 'addCard'}"
+      <button
+        :class="{ active: appState === 'addCard' }"
         @click="$store.commit('setAppState', 'addCard')"
       >
         <div>Add</div>
         <span class="keyicon">a</span>
       </button>
-      <button 
-        :class="{active: appState === 'setBrowse'}"
+      <button
+        :class="{ active: appState === 'setBrowse' }"
         @click="$store.commit('setAppState', 'setBrowse')"
       >
         <div>Browse</div>
         <span class="keyicon">b</span>
       </button>
       <button
-        :class="{active: appState === 'setStats'}"
+        :class="{ active: appState === 'setStats' }"
         @click="$store.commit('setAppState', 'setStats')"
       >
         <div>Stats</div>
         <span class="keyicon">t</span>
       </button>
       <button
-        :class="{active: appState === 'setSettings'}"
+        :class="{ active: appState === 'setSettings' }"
         @click="$store.commit('setAppState', 'setSettings')"
       >
         <div>Settings</div>
@@ -51,27 +51,11 @@
     </div>
     <br />
     <div class="setelements">
-      <CardCreator 
-        key="add"
-        v-if="appState === 'addCard' || !cards"
-      />
-      <CardBrowser 
-        key="browse"
-        v-else-if="appState === 'setBrowse'"
-      />
-      <SetSettings
-        key="settings"
-        v-else-if="appState === 'setSettings'"
-      />
-      <SetStats
-        key="stats"
-        v-else-if="appState === 'setStats'"
-      />
-      <StudyFrame
-        key="study"
-        v-else
-        :cards="cards"
-      />
+      <CardCreator key="add" v-if="appState === 'addCard' || !cards" />
+      <SetBrowser key="browse" v-else-if="appState === 'setBrowse'" />
+      <SetSettings key="settings" v-else-if="appState === 'setSettings'" />
+      <SetStats key="stats" v-else-if="appState === 'setStats'" />
+      <StudyFrame key="study" v-else :cards="cards" />
     </div>
   </div>
 </template>
@@ -80,7 +64,7 @@
 import EditableTextField from './EditableTextField'
 import CardCreator from './CardCreator'
 import StudyFrame from './StudyFrame'
-import CardBrowser from './CardBrowser'
+import SetBrowser from './SetBrowser'
 import SetSettings from './SetSettings'
 import SetStats from './SetStats'
 
@@ -105,7 +89,7 @@ export default {
     SetStats,
     CardCreator,
     StudyFrame,
-    CardBrowser,
+    SetBrowser,
   },
   data() {
     return {

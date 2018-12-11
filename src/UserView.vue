@@ -1,68 +1,40 @@
 <template>
   <div class="userview">
-    <CardInline
-      v-if="allCards.length > 0"
-      v-for="card in clampedCards"
-      :key="card.id"
-      v-bind="card"
-    />
-    <div v-else>No cards yet! Add some to a set to see them here.</div>
+    <h1>
+      All Cards
+      <!--
+        <span class="sub">
+          ({{ filteredCards.length
+          }}{{
+            filteredCards.length < allCards.length ? ' / ' + allCards.length : ''
+          }}
+          card{{ filteredCards.length === 1 ? '' : 's'
+          }}{{ filteredCards.length < allCards.length ? ' shown' : '' }})
+        </span>
+      -->
+    </h1>
+    <Browser :cards="allCards" :inline="true" />
   </div>
 </template>
 
 <script>
-import CardInline from './CardInline'
+import Browser from './Browser'
 
 export default {
   props: {},
   components: {
-    CardInline,
-  },
-  data() {
-    return { shownCount: 40 }
+    Browser,
   },
   computed: {
-    appState() {
-      return this.$store.state.appState
+    allSets() {
+      return this.$store.state.setList
     },
     allCards() {
-      const allSets = this.$store.state.setList
       const allCards = []
-      for (let set in allSets) {
-        allCards.push(
-          ...allSets[set].cards.map(card => {
-            card.setName = allSets[set].name
-            return card
-          })
-        )
+      for (let set in this.allSets) {
+        allCards.push(...this.allSets[set].cards)
       }
-      return allCards.sort((a, b) => b.id - a.id)
-    },
-    clampedCards() {
-      return this.allCards.slice(0, this.shownCount)
-    },
-  },
-  mounted() {
-    window.addEventListener('scroll', this.scroll)
-  },
-  beforeDestroy() {
-    window.removeEventListener('scroll', this.scroll)
-  },
-  methods: {
-    showMore() {
-      if (this.shownCount < this.allCards.length) this.shownCount += 20
-    },
-    scroll() {
-      const scrollPos =
-        Math.max(
-          document.body.scrollHeight,
-          document.body.offsetHeight,
-          document.documentElement.clientHeight,
-          document.documentElement.scrollHeight,
-          document.documentElement.offsetHeight
-        ) - window.innerHeight
-      console.log(window.pageYOffset, scrollPos)
-      if (scrollPos - window.pageYOffset < 500) this.showMore()
+      return allCards
     },
   },
 }

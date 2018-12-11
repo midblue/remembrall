@@ -235,7 +235,10 @@ export default () => {
         const cardToMove = state.setList[from].cards.find(
           card => card.id === id
         )
+        console.log(cardToMove)
         if (!cardToMove) return
+        // update set property
+        cardToMove.set = to
         // add to destination deck
         const newDestCards = state.setList[to].cards
         newDestCards.push(cardToMove)

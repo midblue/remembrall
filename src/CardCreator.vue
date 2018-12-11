@@ -77,7 +77,7 @@ export default {
         front: this.front,
         back: this.back,
         nextReview: 0,
-        set: this.$store.state.currentSetId,
+        set: parseInt(this.$store.state.currentSetId),
       })
       this.floatText = 'Card added.'
       setTimeout(() => (this.floatText = ''), 1500)

@@ -146,17 +146,26 @@ button {
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #eee;
+  border-bottom: 3px solid #eee;
+  border-right: 2px solid #eee;
 
-  button {
+  button,
+  select {
     flex-grow: 1;
     flex-shrink: 0;
     border-radius: 0;
     outline: 0;
     border: none;
     box-shadow: inset -1px -1px 0 0 #eee;
+
+    &:not(:last-child) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
   }
 
-  &.primary button {
+  &.primary button,
+  &.primary select {
     font-size: 1rem;
     padding: 15px;
   }

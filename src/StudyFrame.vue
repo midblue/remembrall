@@ -99,8 +99,8 @@
     <template v-if="doneForDay && cards.length > 0">
       <ReviewGraph
         :cards="updatedCards"
-        :slots="8"
-        :maxTime="1 * 26 * 60 * 60 * 1000"
+        :slots="7"
+        :maxTime="7 * 24 * 60 * 60 * 1000"
         title="Upcoming reviews:"
       />
     </template>

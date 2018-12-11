@@ -11,7 +11,7 @@
         :front="front"
         :back="back"
         :nextReview="nextReview"
-        :set="set"
+        :setId="set"
         :suspended="suspended"
       />
       <div class="front">
