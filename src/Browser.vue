@@ -35,19 +35,19 @@
 
       <template v-if="selectedCards.length">
         <div class="buttonlist withoverflow">
-          <button @click="deselectAll">Deselect All</button>
+          <button @click="deselectAll">
+            Deselect{{ isMobile ? '' : ' All' }}
+          </button>
           <button
-            @mouseover="moveAllPaneOpen = true"
-            @click="
-              $store.state.isMobile
-                ? (moveAllPaneOpen = !moveAllPaneOpen)
-                : false
-            "
-            @mouseout="moveAllPaneOpen = false"
+            @mouseover="isMobile ? false : (moveAllPaneOpen = true)"
+            @click="isMobile ? (moveAllPaneOpen = !moveAllPaneOpen) : false"
+            @mouseout="isMobile ? false : (moveAllPaneOpen = false)"
           >
-            Move {{ selectedCards.length }} Card{{
-              selectedCards.length === 1 ? '' : 's'
-            }}
+            Move<span v-if="!isMobile">
+              {{ selectedCards.length }} Card{{
+                selectedCards.length === 1 ? '' : 's'
+              }}</span
+            >
             <div class="secondarypanel" v-if="moveAllPaneOpen">
               <div
                 v-for="set in $store.state.setList"
@@ -60,14 +60,18 @@
             </div>
           </button>
           <button @click="suspendAll">
-            Un/Suspend {{ selectedCards.length }} Card{{
-              selectedCards.length === 1 ? '' : 's'
-            }}
+            Un/Suspend<span v-if="!isMobile">
+              {{ selectedCards.length }} Card{{
+                selectedCards.length === 1 ? '' : 's'
+              }}</span
+            >
           </button>
           <button @click="deleteAll">
-            Delete {{ selectedCards.length }} Card{{
-              selectedCards.length === 1 ? '' : 's'
-            }}
+            Delete<span v-if="!isMobile">
+              {{ selectedCards.length }} Card{{
+                selectedCards.length === 1 ? '' : 's'
+              }}</span
+            >
           </button>
         </div>
       </template>
@@ -275,24 +279,6 @@ export default {
 
 .buttonlist {
   margin-bottom: 10px;
-
-  &.withoverflow {
-    overflow: visible;
-  }
-
-  button {
-    position: relative;
-    overflow: visible;
-
-    &:first-of-type {
-      border-top-left-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
-    &:last-of-type {
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
-  }
 }
 
 .secondarypanel {

@@ -1,52 +1,47 @@
 <template>
-  <div>
-    <div
-      class="card roundframe"
-      :class="{ new: !totalReviews, mini, suspended }"
-    >
-      <CardTools
-        :id="id"
-        :totalReviews="totalReviews"
-        :ok="ok"
-        :front="front"
-        :back="back"
-        :nextReview="nextReview"
-        :setId="set"
-        :suspended="suspended"
-        class="topleft"
+  <div class="card roundframe" :class="{ new: !totalReviews, mini, suspended }">
+    <CardTools
+      :id="id"
+      :totalReviews="totalReviews"
+      :ok="ok"
+      :front="front"
+      :back="back"
+      :nextReview="nextReview"
+      :setId="set"
+      :suspended="suspended"
+      class="topleft"
+    />
+    <div class="front">
+      <EditableTextField
+        class="textfield"
+        :class="{
+          newcard: isNewCard,
+        }"
+        :text="reverse ? back : front"
+        @startEdit="startEdit"
+        @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
       />
-      <div class="front">
+      <StudyExtras
+        v-if="reverse && settings.languageTools && forStudy"
+        :text="back"
+      />
+    </div>
+    <div
+      class="back"
+      :class="{ pointer: showBack === false && forStudy }"
+      @click="showBack = true"
+    >
+      <div :class="{ hideanswer: !showBack && forStudy }">
         <EditableTextField
           class="textfield"
-          :class="{
-            newcard: isNewCard,
-          }"
-          :text="reverse ? back : front"
+          :text="reverse ? front : back"
           @startEdit="startEdit"
-          @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
+          @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
         />
         <StudyExtras
-          v-if="reverse && settings.languageTools && forStudy"
+          v-if="showBack && !reverse && settings.languageTools && forStudy"
           :text="back"
         />
-      </div>
-      <div
-        class="back"
-        :class="{ pointer: showBack === false && forStudy }"
-        @click="showBack = true"
-      >
-        <div :class="{ hideanswer: !showBack && forStudy }">
-          <EditableTextField
-            class="textfield"
-            :text="reverse ? front : back"
-            @startEdit="startEdit"
-            @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
-          />
-          <StudyExtras
-            v-if="showBack && !reverse && settings.languageTools && forStudy"
-            :text="back"
-          />
-        </div>
       </div>
     </div>
   </div>
@@ -157,7 +152,6 @@ export default {
   position: absolute;
   top: 0px;
   left: 0px;
-  z-index: 100;
 }
 
 .front,
@@ -224,8 +218,11 @@ export default {
 .card.mini {
   .textfield {
     font-size: 1rem;
-    padding: 20px 35px;
+    padding: 20px 30px;
     line-height: 1.2;
+  }
+  .back .textfield {
+    padding: 20px 15px;
   }
 }
 

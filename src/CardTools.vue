@@ -35,15 +35,18 @@
         <div class="button" @click="swapSides">Swap Front/Back</div>
         <div
           class="button"
+          ref="movetobutton"
           v-if="allSets.length > 1"
-          @mouseover="moveToSetOpen = true"
-          @click="
-            $store.state.isMobile ? (moveToSetOpen = !moveToSetOpen) : false
-          "
-          @mouseout="moveToSetOpen = false"
+          @mouseover="isMobile ? false : (moveToSetOpen = true)"
+          @click="isMobile ? (moveToSetOpen = !moveToSetOpen) : false"
+          @mouseout="isMobile ? false : (moveToSetOpen = false)"
         >
           Move to Set...
-          <div class="secondarypanel" v-if="moveToSetOpen">
+          <div
+            class="secondarypanel"
+            :class="{ mobile: isMobile }"
+            v-if="moveToSetOpen"
+          >
             <div
               v-for="set in allSets"
               v-if="set.id != realSetId"
@@ -90,6 +93,9 @@ export default {
     return { open: false, moveToSetOpen: false, realSetId: this.setId }
   },
   computed: {
+    isMobile() {
+      return this.$store.state.isMobile
+    },
     settings() {
       return this.$store.state.setList[this.$store.state.currentSetId].settings
     },
@@ -110,8 +116,14 @@ export default {
   mounted() {},
   methods: {
     msToString,
-    toggle() {
-      if (this.$store.state.isMobile) this.open = !this.open
+    toggle(e) {
+      if (
+        this.$store.state.isMobile &&
+        !e.path.includes(this.$refs.movetobutton)
+      )
+        this.open = !this.open
+      if (this.open) window.addEventListener('click', this.checkClickToClose)
+      else window.removeEventListener('click', this.checkClickToClose)
     },
     mouseover() {
       if (!this.$store.state.isMobile) this.open = true
@@ -154,6 +166,9 @@ export default {
       })
       this.open = false
     },
+    checkClickToClose(e) {
+      if (!e.path.includes(this.$el)) this.open = false
+    },
   },
 }
 </script>
@@ -189,7 +204,6 @@ export default {
 .cardtools {
   .icon {
     cursor: pointer;
-    z-index: 100;
     width: 30px;
     height: 30px;
     border-radius: 10px;
@@ -197,18 +211,17 @@ export default {
     align-items: center;
     justify-content: center;
     position: relative;
-
-    &:hover {
-      z-index: 101;
-    }
+    z-index: 2;
 
     svg {
+      z-index: 2;
       width: 50%;
       height: 50%;
       opacity: 0.1;
     }
 
     &.open {
+      z-index: 3;
       background: #eee;
       border-bottom-left-radius: 0px;
       border-bottom-right-radius: 0px;
@@ -221,7 +234,6 @@ export default {
 
     color: black;
     position: absolute;
-    z-index: 101;
     top: 100%;
     left: 0px;
     width: 150px;
@@ -244,6 +256,22 @@ export default {
 .secondarypanel {
   position: absolute;
   left: 100%;
-  top: 0;
+  top: 0px;
+
+  &.mobile {
+    position: relative;
+    left: -5px;
+    top: 12px;
+    color: #555;
+    font-size: 0.85em;
+
+    .button {
+      &:before {
+        color: #555;
+        content: '→';
+      }
+      border-radius: 0;
+    }
+  }
 }
 </style>

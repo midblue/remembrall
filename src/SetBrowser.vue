@@ -1,7 +1,7 @@
 <template>
   <div class="cardbrowser">
     <Browser :cards="setCards" />
-    <button @click="$store.commit('setAppState', 'addCard')">
+    <button @click="$store.commit('setAppState', 'addCard')" class="add">
       <div>Add Card</div>
     </button>
   </div>
@@ -29,5 +29,9 @@ export default {
   transition: all 0.5s;
   margin-bottom: 200px;
   font-size: 1rem;
+}
+.add {
+  margin-top: 40px;
+  width: 100%;
 }
 </style>

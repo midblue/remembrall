@@ -66,7 +66,7 @@ body {
 }
 
 .app {
-  min-height: 150vh;
+  min-height: 120vh;
 }
 
 .content {
@@ -123,7 +123,7 @@ a:visited {
 
 button {
   margin: 0;
-  border: 1px solid #eee;
+  border: 1px solid rgba(black, 0.1);
   background: white;
   font-size: 0.85rem;
   font-weight: 400;
@@ -142,12 +142,12 @@ button {
 
 .buttonlist {
   display: flex;
-  flex-wrap: wrap;
   border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid #eee;
-  border-bottom: 3px solid #eee;
-  border-right: 2px solid #eee;
+  overflow: visible;
+  border: 1px solid rgba(black, 0.1);
+  border-bottom: 3px solid rgba(black, 0.1);
+  // border-right: 2px solid rgba(black, 0.1);
+  flex-wrap: nowrap;
 
   button,
   select {
@@ -156,12 +156,27 @@ button {
     border-radius: 0;
     outline: 0;
     border: none;
-    box-shadow: inset -1px -1px 0 0 #eee;
+    box-shadow: inset -1px -1px 0 0 rgba(black, 0.1);
+    position: relative;
+    overflow: visible;
 
-    &:not(:last-child) {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
+    &:first-of-type {
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
     }
+    &:last-of-type {
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+      border-right: none;
+    }
+  }
+
+  select {
+    padding-left: 15px;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='24' height='24' viewBox='0 0 24 24'><path fill='#444' d='M7.406 7.828l4.594 4.594 4.594-4.594 1.406 1.406-6 6-6-6z'></path></svg>");
+    background-position: 98% 50%;
+    background-repeat: no-repeat;
   }
 
   &.primary button,

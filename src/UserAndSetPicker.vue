@@ -21,7 +21,7 @@
       <div class="sub">Loading...</div>
     </template>
     <template v-else>
-      <div class="buttonlist inlineblock">
+      <div class="buttonlist inlineblock" v-if="!isMobile">
         <button
           v-for="set in setList"
           :key="set.id"
@@ -45,10 +45,33 @@
           >
             ({{ dueReviews[set.id] }})
           </span></button
-        ><button @click="$store.commit('addSet')">
-          +<span v-if="!isMobile"> Add Set</span>
+        ><button @click="$store.commit('addSet')">+ Add Set</button>
+      </div>
+      <div v-else class="buttonlist">
+        <button
+          :key="setList[currentSetId].id"
+          class="active mainbutton"
+          :class="{ open: setPickerOpen }"
+          style="position: relative;"
+          @click="setPickerOpen = !setPickerOpen"
+        >
+          {{ setList[currentSetId].name }} ▾
+          <div class="secondarypanel" v-if="setPickerOpen">
+            <button
+              v-for="set in setList"
+              v-if="set.id != currentSetId"
+              @key="set.id"
+              @click="switchSet(set.id)"
+              :class="{
+                duecards: dueReviews[set.id] > 0,
+              }"
+            >
+              {{ set.name }}
+            </button>
+          </div>
         </button>
       </div>
+
       <div class="flex-ai">
         <div class="buttonlist inlineblock">
           <button
@@ -74,6 +97,7 @@ export default {
       isLoading: false,
       inputUsername: '',
       dueReviews: {},
+      setPickerOpen: false,
     }
   },
   computed: {
@@ -234,5 +258,37 @@ button:not(.active).duecards {
 .flex-ai {
   display: flex;
   align-items: center;
+}
+
+.buttonlist {
+  overflow: visible;
+}
+
+button.mainbutton {
+  min-width: 40vw;
+}
+
+button.open {
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.secondarypanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+
+  button {
+    width: 100%;
+    border-radius: 0;
+    border: 0;
+    box-shadow: 0 0 0 1px #eee;
+
+    &:last-of-type {
+      border-bottom-right-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+  }
 }
 </style>
