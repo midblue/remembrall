@@ -1,5 +1,5 @@
 <template>
-  <section class="app">
+  <section class="app" :class="{ mobile: isMobile }">
     <UserAndSetPicker />
     <RefreshHandler />
     <div class="content">
@@ -32,6 +32,9 @@ export default {
     RefreshHandler,
   },
   computed: {
+    isMobile() {
+      return this.$store.state.isMobile
+    },
     currentSet() {
       return this.$store.state.setList[this.$store.state.currentSetId]
     },
@@ -67,6 +70,10 @@ body {
 
 .app {
   min-height: 120vh;
+
+  &.mobile {
+    font-size: 14.5px;
+  }
 }
 
 .content {

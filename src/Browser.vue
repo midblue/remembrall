@@ -11,10 +11,10 @@
       />
       <div class="buttonlist">
         <select v-model="sortBy">
-          <option value="newest">Sort by Newest</option>
-          <option value="oldest">Sort by Oldest</option>
+          <option value="newest">{{ isMobile ? '' : 'Sort by ' }}Newest</option>
+          <option value="oldest">{{ isMobile ? '' : 'Sort by ' }}Oldest</option>
           <option value="sets" v-if="allPresentSets.length > 1"
-            >Sort by Set</option
+            >{{ isMobile ? 'By ' : 'Sort by ' }}Set</option
           >
         </select>
         <select v-model="typeFilter">

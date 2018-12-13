@@ -50,7 +50,7 @@
       <div v-else class="buttonlist">
         <button
           :key="setList[currentSetId].id"
-          class="active mainbutton"
+          class="mainbutton"
           :class="{ open: setPickerOpen }"
           style="position: relative;"
           @click="setPickerOpen = !setPickerOpen"
@@ -68,6 +68,7 @@
             >
               {{ set.name }}
             </button>
+            <button @click="$store.commit('addSet')">+ Add Set</button>
           </div>
         </button>
       </div>
