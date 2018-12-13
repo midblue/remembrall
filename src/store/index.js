@@ -137,24 +137,37 @@ export default () => {
           })
       },
       updateCard(state, card) {
-        const foundCardIndex = state.setList[
-          state.currentSetId
-        ].cards.findIndex(c => c.id === card.id)
+        let setWithCard
+        for (let set in state.setList)
+          if (
+            state.setList[set].cards &&
+            state.setList[set].cards.find(
+              currentSetCard => currentSetCard.id === card.id
+            )
+          ) {
+            setWithCard = parseInt(set)
+            break
+          }
+        if (!setWithCard)
+          return console.log('No card found by the id', card.id, 'in any deck.')
+        const foundCardIndex = state.setList[setWithCard].cards.findIndex(
+          c => c.id === card.id
+        )
         if (foundCardIndex !== undefined)
           for (let param in card)
             Vue.set(
-              state.setList[state.currentSetId].cards[foundCardIndex],
+              state.setList[setWithCard].cards[foundCardIndex],
               param,
               card[param]
             )
         // update set last updated
-        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
+        Vue.set(state.setList[setWithCard], 'lastUpdated', Date.now())
         // update db
         if (!state.pauseDbSets)
           dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
-            cards: state.setList[state.currentSetId].cards,
-            lastUpdated: state.setList[state.currentSetId].lastUpdated,
+            id: setWithCard,
+            cards: state.setList[setWithCard].cards,
+            lastUpdated: state.setList[setWithCard].lastUpdated,
           })
       },
       studyCard(state, card) {
@@ -217,7 +230,7 @@ export default () => {
             break
           }
         if (!setWithCard)
-          return console.log('No card found by that id in any deck.')
+          return console.log('No card found by the id', id, 'in any deck.')
         const newCards = setWithCard.cards.filter(card => card.id !== id)
         Vue.set(setWithCard, 'cards', newCards)
         // update set last updated
@@ -231,11 +244,10 @@ export default () => {
           })
       },
       moveCard(state, { id, from, to }) {
-        console.log(id, from, to)
+        if (from == to) return console.log('Same set!')
         const cardToMove = state.setList[from].cards.find(
           card => card.id === id
         )
-        console.log(cardToMove)
         if (!cardToMove) return
         // update set property
         cardToMove.set = to

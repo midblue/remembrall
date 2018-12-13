@@ -1,12 +1,12 @@
 <template>
   <div
     class="card"
-    :class="{ newcard: !totalReviews, checked, suspended }"
+    :class="{ newcard: !totalReviews, selected, suspended }"
     @click="click"
   >
-    <input type="checkbox" v-model="checked" />
-    <div class="cardtext">{{ front }}</div>
-    <div class="cardtext">{{ back }}</div>
+    <input type="checkbox" v-model="selected" />
+    <div class="cardtext">{{ shownFront }}</div>
+    <div class="cardtext">{{ shownBack }}</div>
     <div class="sub center">{{ $store.state.setList[set].name }}</div>
     <div style="position: relative;">
       <CardTools
@@ -57,13 +57,18 @@ export default {
     suspended: {
       default: false,
     },
+    forceDeselect: {
+      default: false,
+    },
   },
   components: {
     CardTools,
   },
   data() {
     return {
-      checked: false,
+      selected: false,
+      shownFront: '',
+      shownBack: '',
     }
   },
   computed: {
@@ -71,7 +76,24 @@ export default {
       return !this.totalReviews || this.totalReviews === 0
     },
   },
-  watch: {},
+  watch: {
+    front() {
+      this.updateText()
+    },
+    back() {
+      this.updateText()
+    },
+    selected(isSelected) {
+      if (isSelected) this.$emit('select', this.id)
+      else this.$emit('deselect', this.id)
+    },
+    forceDeselect(mustDeselect) {
+      if (mustDeselect) this.selected = false
+    },
+  },
+  mounted() {
+    this.updateText()
+  },
   methods: {
     click(e) {
       let isTools = false
@@ -80,7 +102,14 @@ export default {
           isTools = true
       })
       if (isTools) return
-      this.checked = !this.checked
+      this.selected = !this.selected
+    },
+    updateText() {
+      const ta = document.createElement('textarea')
+      ta.innerHTML = this.front
+      this.shownFront = ta.value
+      ta.innerHTML = this.back
+      this.shownBack = ta.value
     },
   },
 }
@@ -107,7 +136,7 @@ input[type='checkbox'] {
     background: #fbfbfb;
   }
 
-  &.checked {
+  &.selected {
     background: #eee;
   }
 

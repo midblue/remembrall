@@ -1,30 +1,73 @@
 <template>
   <div class="browser">
-    <input
-      class="searchbar"
-      @focus="$store.commit('setIsEditingText', true)"
-      @blur="$store.commit('setIsEditingText', false)"
-      ref="searchbar"
-      v-model="searchTerm"
-      placeholder="Type to filter..."
-    />
-    <div class="buttonlist">
-      <select v-model="typeFilter">
-        <option value="all">All Cards</option>
-        <option value="new">New</option>
-        <option value="notnew">Not New</option>
-        <option value="mastered">Mastered</option>
-        <option value="suspended">Suspended</option>
-        <option value="notsuspended">Not Suspended</option>
-      </select>
-      <select v-model="setFilter" v-if="Object.keys(allPresentSets).length > 1">
-        <option value="all">All Sets</option>
-        <option v-for="set in allPresentSets" :key="set.id" :value="set.id">{{
-          set.name
-        }}</option>
-      </select>
+    <div class="tools">
+      <input
+        class="searchbar"
+        @focus="$store.commit('setIsEditingText', true)"
+        @blur="$store.commit('setIsEditingText', false)"
+        ref="searchbar"
+        v-model="searchTerm"
+        placeholder="Type to filter..."
+      />
+      <div class="buttonlist">
+        <select v-model="typeFilter">
+          <option value="all">All Cards</option>
+          <option value="new">New</option>
+          <option value="notnew">Not New</option>
+          <option value="mastered">Mastered</option>
+          <option value="suspended">Suspended</option>
+          <option value="notsuspended">Not Suspended</option>
+        </select>
+        <select
+          v-model="setFilter"
+          v-if="Object.keys(allPresentSets).length > 1"
+        >
+          <option value="all">All Sets</option>
+          <option v-for="set in allPresentSets" :key="set.id" :value="set.id">{{
+            set.name
+          }}</option>
+        </select>
+      </div>
+
+      <template v-if="selectedCards.length">
+        <div class="buttonlist">
+          <button @click="deselectAll">Deselect All</button>
+          <button
+            @mouseover="moveAllPaneOpen = true"
+            @click="
+              $store.state.isMobile
+                ? (moveAllPaneOpen = !moveAllPaneOpen)
+                : false
+            "
+            @mouseout="moveAllPaneOpen = false"
+          >
+            Move {{ selectedCards.length }} Card{{
+              selectedCards.length === 1 ? '' : 's'
+            }}
+            <div class="secondarypanel" v-if="moveAllPaneOpen">
+              <div
+                v-for="set in $store.state.setList"
+                class="button"
+                @key="set.id"
+                @click="moveAll(set.id)"
+              >
+                {{ set.name }}
+              </div>
+            </div>
+          </button>
+          <button @click="suspendAll">
+            Un/Suspend {{ selectedCards.length }} Card{{
+              selectedCards.length === 1 ? '' : 's'
+            }}
+          </button>
+          <button @click="deleteAll">
+            Delete {{ selectedCards.length }} Card{{
+              selectedCards.length === 1 ? '' : 's'
+            }}
+          </button>
+        </div>
+      </template>
     </div>
-    <br />
 
     <template v-if="filteredCards.length">
       <CardInline
@@ -32,6 +75,9 @@
         v-for="card in clampedCards"
         :key="card.id"
         v-bind="card"
+        :forceDeselect="forceDeselect"
+        @select="select"
+        @deselect="deselect"
       />
       <div v-if="!inline" class="twoupcardlist">
         <Card
@@ -74,9 +120,15 @@ export default {
       typeFilter: 'all',
       setFilter: 'all',
       searchTerm: '',
+      selectedCards: [],
+      forceDeselect: false,
+      moveAllPaneOpen: false,
     }
   },
   computed: {
+    isMobile() {
+      return this.$store.state.isMobile
+    },
     allPresentSets() {
       return Object.keys(this.$store.state.setList)
         .filter(setId => this.cards.find(card => card.set === parseInt(setId)))
@@ -144,6 +196,54 @@ export default {
         ) - window.innerHeight
       if (scrollPos - window.pageYOffset < 500) this.showMore()
     },
+    select(cardId) {
+      const foundCard = this.cards.find(card => card.id === cardId)
+      if (!foundCard)
+        return console.log('Unable to find card to check by the id', cardId)
+      this.selectedCards.push(foundCard)
+    },
+    deselect(cardId) {
+      const preLength = this.selectedCards.length
+      this.selectedCards = this.selectedCards.filter(card => card.id !== cardId)
+      if (this.selectedCards.length !== preLength - 1)
+        console.log('Unable to find card', cardId, 'to deselect.')
+    },
+    deselectAll() {
+      this.forceDeselect = false
+      this.$nextTick(() => (this.forceDeselect = true))
+    },
+    moveAll(toSet) {
+      this.selectedCards.forEach(card => {
+        this.$store.commit('moveCard', {
+          id: card.id,
+          from: card.set,
+          to: toSet,
+        })
+      })
+    },
+    suspendAll() {
+      const alreadySuspended = this.selectedCards[0].suspended
+      this.selectedCards.forEach(card => {
+        this.$store.commit('updateCard', {
+          id: card.id,
+          suspended: !alreadySuspended,
+        })
+      })
+    },
+    deleteAll() {
+      if (
+        !confirm(
+          `Are you sure you want to delete ${this.selectedCards.length} card${
+            this.selectedCards.length === 1 ? '' : 's'
+          }?`
+        )
+      )
+        return
+      this.selectedCards.forEach(card => {
+        this.$store.commit('deleteCard', card.id)
+      })
+      this.selectedCards = []
+    },
   },
 }
 </script>
@@ -151,6 +251,52 @@ export default {
 <style lang="scss" scoped>
 .browser {
   width: 100%;
+}
+
+.tools {
+  position: sticky;
+  padding: 10px 0 1px 0;
+  top: 0;
+  z-index: 1000;
+  background: white;
+}
+
+.buttonlist {
+  margin-bottom: 10px;
+  overflow: visible;
+
+  button {
+    position: relative;
+    overflow: visible;
+
+    &:first-of-type {
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+    &:last-of-type {
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+  }
+}
+
+.secondarypanel {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background: #f5f5f5;
+  width: 100%;
+
+  & > div {
+    width: 100%;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 15px;
+
+    &:hover {
+      background: #eee;
+    }
+  }
 }
 
 .searchbar {

@@ -117,7 +117,6 @@ export default {
       if (!this.$store.state.isMobile) this.open = false
     },
     swapSides() {
-      // THESE UPDATES NEED TO HAVE SET FIELD, CURRENTLY USES CURRENTSETID
       this.$store.commit('updateCard', {
         id: this.id,
         front: this.back,
