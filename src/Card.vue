@@ -13,6 +13,7 @@
         :nextReview="nextReview"
         :setId="set"
         :suspended="suspended"
+        class="topleft"
       />
       <div class="front">
         <EditableTextField
@@ -150,6 +151,13 @@ export default {
   text-align: center;
   position: relative;
   overflow: initial;
+}
+
+.topleft {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 100;
 }
 
 .front,

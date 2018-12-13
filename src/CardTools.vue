@@ -21,45 +21,45 @@
           ></path>
         </g>
       </svg>
-    </div>
-    <div class="panel" :class="{ open }">
-      <div class="stats sub">
-        <template v-if="totalReviews > 0">
-          <div>
-            {{ totalReviews }} review{{ totalReviews === 1 ? '' : 's' }}
-          </div>
-          <div>{{ parseInt((ok / totalReviews) * 100) }}% success</div>
-          <!-- <div>Next review: {{ msToString(nextReview) }}</div> -->
-        </template>
-        <div v-else>This card is new.</div>
-      </div>
-      <div class="button" @click="swapSides">Swap Front/Back</div>
-      <div
-        class="button"
-        v-if="allSets.length > 1"
-        @mouseover="moveToSetOpen = true"
-        @click="
-          $store.state.isMobile ? (moveToSetOpen = !moveToSetOpen) : false
-        "
-        @mouseout="moveToSetOpen = false"
-      >
-        Move to Set...
-        <div class="secondarypanel" v-if="moveToSetOpen">
-          <div
-            v-for="set in allSets"
-            v-if="set.id != realSetId"
-            class="button"
-            @key="set.id"
-            @click="moveToSet(set.id)"
-          >
-            {{ set.name }}
+      <div class="panel" :class="{ open, left }">
+        <div class="stats sub">
+          <template v-if="totalReviews > 0">
+            <div>
+              {{ totalReviews }} review{{ totalReviews === 1 ? '' : 's' }}
+            </div>
+            <div>{{ parseInt((ok / totalReviews) * 100) }}% success</div>
+            <!-- <div>Next review: {{ msToString(nextReview) }}</div> -->
+          </template>
+          <div v-else>This card is new.</div>
+        </div>
+        <div class="button" @click="swapSides">Swap Front/Back</div>
+        <div
+          class="button"
+          v-if="allSets.length > 1"
+          @mouseover="moveToSetOpen = true"
+          @click="
+            $store.state.isMobile ? (moveToSetOpen = !moveToSetOpen) : false
+          "
+          @mouseout="moveToSetOpen = false"
+        >
+          Move to Set...
+          <div class="secondarypanel" v-if="moveToSetOpen">
+            <div
+              v-for="set in allSets"
+              v-if="set.id != realSetId"
+              class="button"
+              @key="set.id"
+              @click="moveToSet(set.id)"
+            >
+              {{ set.name }}
+            </div>
           </div>
         </div>
+        <div class="button" @click="suspendCard">
+          {{ suspended ? 'Unsuspend Card' : 'Suspend Card' }}
+        </div>
+        <div class="button" @click="deleteCard">Delete Card</div>
       </div>
-      <div class="button" @click="suspendCard">
-        {{ suspended ? 'Unsuspend Card' : 'Suspend Card' }}
-      </div>
-      <div class="button" @click="deleteCard">Delete Card</div>
     </div>
   </div>
   <div
@@ -82,6 +82,9 @@ export default {
     back: {},
     nextReview: {},
     suspended: {},
+    left: {
+      default: false,
+    },
   },
   data() {
     return { open: false, moveToSetOpen: false, realSetId: this.setId }
@@ -185,17 +188,19 @@ export default {
 
 .cardtools {
   .icon {
-    position: absolute;
     cursor: pointer;
     z-index: 100;
-    top: 0px;
-    left: 0px;
     width: 30px;
     height: 30px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+
+    &:hover {
+      z-index: 101;
+    }
 
     svg {
       width: 50%;
@@ -214,14 +219,22 @@ export default {
       display: none;
     }
 
+    color: black;
     position: absolute;
     z-index: 101;
-    top: 30px;
+    top: 100%;
     left: 0px;
     width: 150px;
     border-radius: 10px;
     border-top-left-radius: 0px;
     background: #eee;
+
+    &.left {
+      left: auto;
+      right: 0px;
+      border-radius: 10px;
+      border-top-right-radius: 0px;
+    }
 
     .stats {
       padding: 10px 20px;

@@ -30,7 +30,7 @@
       </div>
 
       <template v-if="selectedCards.length">
-        <div class="buttonlist">
+        <div class="buttonlist withoverflow">
           <button @click="deselectAll">Deselect All</button>
           <button
             @mouseover="moveAllPaneOpen = true"
@@ -263,7 +263,10 @@ export default {
 
 .buttonlist {
   margin-bottom: 10px;
-  overflow: visible;
+
+  &.withoverflow {
+    overflow: visible;
+  }
 
   button {
     position: relative;

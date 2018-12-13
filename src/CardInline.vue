@@ -18,6 +18,7 @@
         :back="back"
         :nextReview="nextReview"
         :suspended="suspended"
+        :left="true"
       />
     </div>
   </div>
