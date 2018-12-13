@@ -1,13 +1,15 @@
 <template>
   <div
     class="card"
-    :class="{ newcard: !totalReviews, selected, suspended }"
+    :class="{ newcard: !totalReviews, selected, suspended, noset: !showSet }"
     @click="click"
   >
     <input type="checkbox" v-model="selected" />
     <div class="cardtext">{{ shownFront }}</div>
     <div class="cardtext">{{ shownBack }}</div>
-    <div class="sub center">{{ $store.state.setList[set].name }}</div>
+    <div class="sub center" v-if="showSet">
+      {{ $store.state.setList[set].name }}
+    </div>
     <div style="position: relative;">
       <CardTools
         :id="id"
@@ -59,6 +61,9 @@ export default {
       default: false,
     },
     forceDeselect: {
+      default: false,
+    },
+    showSet: {
       default: false,
     },
   },
@@ -132,6 +137,10 @@ input[type='checkbox'] {
   grid-template-columns: 20px 30% 1fr 15% 30px;
   grid-gap: 10px;
   line-height: 1.3;
+
+  &.noset {
+    grid-template-columns: 20px 40% 1fr 30px;
+  }
 
   &:nth-child(2n) {
     background: #fbfbfb;

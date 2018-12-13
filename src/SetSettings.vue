@@ -1,14 +1,16 @@
 <template>
   <div class="settings">
     <div class="settingslist">
-      <Toggle
-        key="aadd"
-        :setTo="settings.autoAddNew"
-        label="Auto-add new cards as older cards are mastered"
-        @toggled="
-          updateSettings({ autoAddNew: !(settings.autoAddNew ? true : false) })
-        "
-      />
+      <!--
+        <Toggle
+          key="aadd"
+          :setTo="settings.autoAddNew"
+          label="Auto-add new cards as older cards are mastered"
+          @toggled="
+            updateSettings({ autoAddNew: !(settings.autoAddNew ? true : false) })
+          "
+        />
+      -->
 
       <p v-if="!settings.autoAddNew">
         <EditableTextField

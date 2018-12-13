@@ -10,6 +10,13 @@
         placeholder="Type to filter..."
       />
       <div class="buttonlist">
+        <select v-model="sortBy">
+          <option value="newest">Sort by Newest</option>
+          <option value="oldest">Sort by Oldest</option>
+          <option value="sets" v-if="allPresentSets.length > 1"
+            >Sort by Set</option
+          >
+        </select>
         <select v-model="typeFilter">
           <option value="all">All Cards</option>
           <option value="new">New</option>
@@ -18,10 +25,7 @@
           <option value="suspended">Suspended</option>
           <option value="notsuspended">Not Suspended</option>
         </select>
-        <select
-          v-model="setFilter"
-          v-if="Object.keys(allPresentSets).length > 1"
-        >
+        <select v-model="setFilter" v-if="allPresentSets.length > 1">
           <option value="all">All Sets</option>
           <option v-for="set in allPresentSets" :key="set.id" :value="set.id">{{
             set.name
@@ -76,6 +80,7 @@
         :key="card.id"
         v-bind="card"
         :forceDeselect="forceDeselect"
+        :showSet="allPresentSets.length > 1"
         @select="select"
         @deselect="deselect"
       />
@@ -119,6 +124,7 @@ export default {
       shownCount: this.inline ? 40 : 20,
       typeFilter: 'all',
       setFilter: 'all',
+      sortBy: 'newest',
       searchTerm: '',
       selectedCards: [],
       forceDeselect: false,
@@ -138,7 +144,13 @@ export default {
         }))
     },
     sortedCards() {
-      return this.cards.sort((a, b) => b.id - a.id)
+      return this.cards.sort((a, b) =>
+        this.sortBy === 'oldest'
+          ? a.id - b.id
+          : this.sortBy === 'sets'
+          ? b.set - a.set
+          : b.id - a.id
+      )
     },
     filteredCards() {
       return this.sortedCards
