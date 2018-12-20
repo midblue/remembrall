@@ -34,6 +34,9 @@
       <div :class="{ hideanswer: !showBack && forStudy }">
         <EditableTextField
           class="textfield"
+          :class="{
+            newcard: isNewCard,
+          }"
           :text="reverse ? front : back"
           @startEdit="startEdit"
           @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"

@@ -49,6 +49,14 @@
       </div>
       <div v-else class="buttonlist">
         <button
+          v-if="appState === 'user'"
+          class="mainbutton"
+          @click="$store.commit('setAppState', 'study')"
+        >
+          ← Back to Studying
+        </button>
+        <button
+          v-else
           :key="setList[currentSetId].id"
           class="mainbutton"
           :class="{ open: setPickerOpen }"
@@ -104,6 +112,9 @@ export default {
   computed: {
     currentUser() {
       return this.$store.state.currentUser
+    },
+    appState() {
+      return this.$store.state.appState
     },
     setList() {
       return this.$store.state.setList
