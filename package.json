@@ -7,7 +7,8 @@
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "golive": "npm run build && cp -rf ./dist/* ../personalsite2018/docs/remembrall/dist && cp -rf ./dist/* ../personalsite2018/static/remembrall/dist && cd ../personalsite2018 && git add . && git commit -m \"Updated Remembrall\" && git push && cd ../remembrall"
   },
   "dependencies": {
     "firebase": "^5.5.3",
