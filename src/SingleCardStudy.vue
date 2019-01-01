@@ -21,7 +21,7 @@
       <button
         class="showback"
         v-if="!showBack"
-        @click="showBack = true"
+        @click="showBackAction"
         key="showback"
       >
         Show Back
@@ -92,7 +92,7 @@ export default {
     return {
       showBack: false,
       startedCardTime: new Date(),
-      revealedBackTime: 0,
+      revealedBackTime: new Date(),
       averageTime: 7000,
       reviewsSoFar: 0,
     }
@@ -145,6 +145,10 @@ export default {
     window.removeEventListener('keyup', this.keyUp)
   },
   methods: {
+    showBackAction() {
+      this.showBack = true
+      this.revealedBackTime = new Date()
+    },
     answer(difficulty) {
       this.showBack = false
       this.reviewsSoFar++
@@ -251,9 +255,9 @@ export default {
       if (event.key === '1' && this.showBack) this.answer('again')
       else if (event.key === ' ') {
         event.preventDefault()
-        !this.showBack ? (this.showBack = true) : this.answer('ok')
+        !this.showBack ? this.showBackAction() : this.answer('ok')
       } else if (event.key === 'Enter')
-        !this.showBack ? (this.showBack = true) : this.answer('ok')
+        !this.showBack ? this.showBackAction() : this.answer('ok')
       else if (event.key === '2' && this.showBack) this.answer('ok')
     },
   },

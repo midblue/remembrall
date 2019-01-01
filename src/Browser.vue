@@ -22,6 +22,7 @@
           <option value="new">New</option>
           <option value="notnew">Not New</option>
           <option value="mastered">Mastered</option>
+          <option value="trouble">Trouble</option>
           <option value="suspended">Suspended</option>
           <option value="notsuspended">Not Suspended</option>
         </select>
@@ -179,6 +180,10 @@ export default {
               card.ok &&
               card.ok > 5 &&
               card.ok / (card.again ? card.again : 0) > 4) ||
+            (this.typeFilter === 'trouble' &&
+              card.again &&
+              card.again > 3 &&
+              card.again / (card.ok ? card.ok : 0) >= 0.5) ||
             (this.typeFilter === 'suspended' && card.suspended) ||
             (this.typeFilter === 'notsuspended' && !card.suspended)
           )

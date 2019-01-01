@@ -29,7 +29,7 @@
             active:
               parseInt(currentSetId) === parseInt(set.id) &&
               appState !== 'user',
-            duecards: dueReviews[set.id] > 0,
+            // duecards: dueReviews[set.id] > 0,
           }"
           @click="switchSet(set.id)"
         >

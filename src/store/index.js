@@ -294,11 +294,16 @@ export default () => {
           let setObject = {}
           docs.forEach(doc => {
             const set = doc.data()
+            if (!set.lastUpdated) return
             setObject[set.id] = set
           })
 
           // just until everyone has all sets added
           for (let set in setObject) {
+            if (!setObject[set].cards) {
+              console.log(setObject)
+              continue
+            }
             setObject[set].cards = setObject[set].cards.map(card => ({
               ...card,
               set: parseInt(set),
@@ -308,11 +313,12 @@ export default () => {
           // first ever load
           if (!state.currentUser && empty) {
             console.log('first')
-            dbManager.newUser(username)
-            if (Object.keys(setObject).length === 0) {
-              setObject = newSetObject()
-              dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
-            }
+            alert('new user')
+            // dbManager.newUser(username)
+            // if (Object.keys(setObject).length === 0) {
+            //   setObject = newSetObject()
+            //   dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
+            // }
           }
 
           // refresh
