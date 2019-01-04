@@ -282,7 +282,9 @@ export default () => {
     actions: {
       logInAs({ commit, state }, username) {
         dbManager.getAllSets(username).then(res => {
-          const { docs, empty } = res
+          console.log(res)
+          const { docs, empty, sets, isOnline } = res
+          console.log(docs, empty, sets, isOnline)
 
           // falsely empty state (disconnect)
           if (empty && username === state.currentUser) {
@@ -291,15 +293,18 @@ export default () => {
           }
 
           // get all sets from response
-          let setObject = {}
-          docs.forEach(doc => {
-            const set = doc.data()
-            if (!set.lastUpdated) return
-            setObject[set.id] = set
-          })
+          let setObject = sets || {}
+          if (!sets && docs) {
+            docs.forEach(doc => {
+              const set = doc.data()
+              if (!set.lastUpdated) return
+              setObject[set.id] = set
+            })
+          }
 
           // just until everyone has all sets added
           for (let set in setObject) {
+            console.log(set)
             if (!setObject[set].cards) {
               console.log(setObject)
               continue
@@ -313,12 +318,11 @@ export default () => {
           // first ever load
           if (!state.currentUser && empty) {
             console.log('first')
-            alert('new user')
-            // dbManager.newUser(username)
-            // if (Object.keys(setObject).length === 0) {
-            //   setObject = newSetObject()
-            //   dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
-            // }
+            dbManager.newUser(username)
+            if (Object.keys(setObject).length === 0) {
+              setObject = newSetObject()
+              dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
+            }
           }
 
           // refresh

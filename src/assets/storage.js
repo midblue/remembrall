@@ -36,6 +36,7 @@ exports.set = function(key, value) {
 }
 
 exports.remove = function(key) {
+  // not working???
   if (localStorageAvailable === undefined) storageCheck()
   if (localStorageAvailable) localStorage.removeItem(key)
   else setCookie(key, '', true)
