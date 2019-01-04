@@ -1,6 +1,6 @@
 {
   "name": "remembrall",
-  "description": "A Vue.js project",
+  "description": "Spaced repetition flash cards for language learning.",
   "version": "1.0.0",
   "author": "Jasper Stephenson <jasperstephenson@gmail.com>",
   "license": "MIT",
