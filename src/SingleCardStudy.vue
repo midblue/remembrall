@@ -44,6 +44,16 @@
         </button>
       </template>
     </div>
+    <br />
+    <div class="centertext">
+      <button
+        @click="$emit('postpone')"
+        style="padding-right: 15%; padding-left: 15%"
+      >
+        Postpone
+        <div><span class="keyicon">P</span></div>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -259,6 +269,7 @@ export default {
       } else if (event.key === 'Enter')
         !this.showBack ? this.showBackAction() : this.answer('ok')
       else if (event.key === '2' && this.showBack) this.answer('ok')
+      else if (event.key === 'p') this.$emit('postpone')
     },
   },
 }

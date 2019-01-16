@@ -74,15 +74,7 @@ export default {
       //   this.$el.innerHTML
       // )
       if (!this.isEditing) {
-        this.displayText = ''
-        this.$el.innerHTML = ''
-        this.$nextTick(() => {
-          this.displayText = newText
-          if (!newText && this.placeholder && !this.isEditing) {
-            this.displayText = this.placeholder
-            this.isPlaceholder = true
-          }
-        })
+        this.resetTextTo(newText)
       }
     },
 
@@ -123,6 +115,17 @@ export default {
       })
       this.$emit('startEdit', this.displayText)
     },
+    resetTextTo(newText) {
+      this.displayText = ''
+      this.$el.innerHTML = ''
+      this.$nextTick(() => {
+        this.displayText = newText
+        if (!newText && this.placeholder && !this.isEditing) {
+          this.displayText = this.placeholder
+          this.isPlaceholder = true
+        }
+      })
+    },
     commitEdit() {
       if (window.getSelection) window.getSelection().removeAllRanges()
       else if (document.selection) document.selection.empty()
@@ -132,11 +135,7 @@ export default {
       this.shiftDown = false
       const finalText = this.sanitize(this.$el.innerHTML)
       if (finalText.length > 0) this.$emit('endEdit', finalText)
-      else {
-        this.displayText = ''
-        this.$nextTick(() => (this.displayText = this.placeholder))
-        this.isPlaceholder = true
-      }
+      else this.resetTextTo(this.text)
     },
     keyDown(event) {
       if (!this.isEditing || this.disableEdits) return
@@ -146,6 +145,10 @@ export default {
       if (event.key === 'Enter' && this.metaDown) this.commitEdit()
       if (event.key === 'Tab' && this.shiftDown) this.$emit('prev', event)
       if (event.key === 'Tab') this.$emit('next', event)
+      if (event.key === 'Escape') {
+        this.resetTextTo(this.text)
+        this.$nextTick(this.commitEdit)
+      }
     },
     keyUp(event) {
       if (!this.isEditing || this.disableEdits) return
@@ -179,8 +182,38 @@ export default {
       e.stopPropagation()
       e.preventDefault()
       const clipboardData = e.clipboardData || window.clipboardData
-      const pastedData = clipboardData.getData('Text')
-      this.displayText = this.sanitize(pastedData)
+      const pastedData = this.sanitize(clipboardData.getData('Text'))
+      const existingText = this.sanitize(this.$el.innerHTML)
+
+      let caretPosition = 0,
+        selection,
+        range
+      if (window.getSelection) {
+        selection = window.getSelection()
+        if (selection.rangeCount) {
+          range = selection.getRangeAt(0)
+          if (range.commonAncestorContainer.parentNode == this.$el) {
+            caretPosition = range.endOffset
+          }
+        }
+      } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange()
+        if (range.parentElement() == this.$el) {
+          var tempEl = document.createElement('span')
+          this.$el.insertBefore(tempEl, this.$el.firstChild)
+          var tempRange = range.duplicate()
+          tempRange.moveToElementText(tempEl)
+          tempRange.setEndPoint('EndToEnd', range)
+          caretPosition = tempRange.text.length
+        }
+      } // this only works if there's only one line (i.e. one div)
+      // console.log(caretPosition)
+
+      const newText =
+        existingText.substring(0, caretPosition) +
+        pastedData +
+        existingText.substring(caretPosition)
+      this.displayText = newText
       this.$emit('changeText', this.displayText)
     },
   },

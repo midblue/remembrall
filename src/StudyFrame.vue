@@ -17,7 +17,7 @@
       :text="displayTimeMod"
       :color="
         displayTimeMod
-          ? displayTimeMod.toLowerCase().indexOf('again') !== -1
+          ? displayTimeMod === 'Again!'
             ? '#fa4'
             : '#0c6'
           : 'green'
@@ -48,6 +48,7 @@
         v-bind="cardToStudy"
         :reverse="settings.studyReverse"
         @done="finishedCurrentCard"
+        @postpone="postponeCurrentCard"
       />
     </template>
 
@@ -303,6 +304,12 @@ export default {
       this.cardsToStudy.shift()
       if (timeMod === undefined) return
       const text = timeMod ? '+' + msToString(timeMod) : 'Again!'
+      this.displayTimeMod = null
+      this.$nextTick(() => (this.displayTimeMod = text))
+    },
+    postponeCurrentCard() {
+      this.cardsToStudy.push(this.cardsToStudy.shift())
+      const text = 'Postponed!'
       this.displayTimeMod = null
       this.$nextTick(() => (this.displayTimeMod = text))
     },
