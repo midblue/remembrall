@@ -15,6 +15,7 @@
       :forStudy="true"
       :showBack="showBack"
       :set="set"
+      @showBack="showBackAction"
     />
 
     <div class="buttonlist primary">

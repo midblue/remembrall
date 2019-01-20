@@ -29,7 +29,7 @@
     <div
       class="back"
       :class="{ pointer: showBack === false && forStudy }"
-      @click="showBack = true"
+      @click="$emit('showBack')"
     >
       <div :class="{ hideanswer: !showBack && forStudy }">
         <EditableTextField
