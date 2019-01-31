@@ -20,6 +20,8 @@
         :back="back"
         :nextReview="nextReview"
         :suspended="suspended"
+        :imageURL="imageURL"
+        @setImageURL="setImageURL"
         :left="true"
       />
     </div>
@@ -60,6 +62,7 @@ export default {
     suspended: {
       default: false,
     },
+    imageURL: {},
     forceDeselect: {
       default: false,
     },
@@ -116,6 +119,12 @@ export default {
       this.shownFront = ta.value
       ta.innerHTML = this.back
       this.shownBack = ta.value
+    },
+    setImageURL(url) {
+      this.$store.commit('updateCard', {
+        id: this.id,
+        imageURL: url,
+      })
     },
   },
 }

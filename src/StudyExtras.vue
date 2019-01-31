@@ -1,8 +1,9 @@
 <template>
   <div class="sub extras" v-if="text">
-    <a v-if="speaker" @click="speakWord" class="fakelink">Speak it</a>
-    <span v-if="speaker"> ・ </span>
-    <a target="_blank" :href="pronunciationLink">Native</a> <span> ・ </span>
+    <template v-if="speaker">
+      <a @click="speakWord" class="fakelink">Speak it</a><span> ・ </span>
+    </template>
+    <a target="_blank" :href="pronunciationLink">Native</a><span> ・ </span>
     <a target="_blank" :href="translationLink">Translation</a>
   </div>
 </template>

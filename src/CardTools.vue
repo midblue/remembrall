@@ -21,6 +21,7 @@
           ></path>
         </g>
       </svg>
+
       <div class="panel" :class="{ open, left }">
         <div class="stats sub">
           <template v-if="totalReviews > 0">
@@ -32,7 +33,14 @@
           </template>
           <div v-else>This card is new.</div>
         </div>
+
         <div class="button" @click="swapSides">Swap Front/Back</div>
+
+        <div class="button" v-if="imageURL" @click="removeImageURL">
+          Remove Image
+        </div>
+        <div class="button" v-else @click="addImageURL">Set Image</div>
+
         <div
           class="button"
           ref="movetobutton"
@@ -58,9 +66,11 @@
             </div>
           </div>
         </div>
+
         <div class="button" @click="suspendCard">
           {{ suspended ? 'Unsuspend Card' : 'Suspend Card' }}
         </div>
+
         <div class="button" @click="deleteCard">Delete Card</div>
       </div>
     </div>
@@ -88,6 +98,7 @@ export default {
     left: {
       default: false,
     },
+    imageURL: {},
   },
   data() {
     return { open: false, moveToSetOpen: false, realSetId: this.setId }
@@ -168,6 +179,14 @@ export default {
     },
     checkClickToClose(e) {
       if (!e.path.includes(this.$el)) this.open = false
+    },
+    addImageURL() {
+      const link = window.prompt('Enter an image url!')
+      if (!link) return
+      this.$emit('setImageURL', link)
+    },
+    removeImageURL() {
+      this.$emit('setImageURL', '')
     },
   },
 }

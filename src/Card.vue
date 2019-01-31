@@ -9,6 +9,8 @@
       :nextReview="nextReview"
       :setId="set"
       :suspended="suspended"
+      :imageURL="imageURL"
+      @setImageURL="setImageURL"
       class="topleft"
     />
     <div class="front">
@@ -41,6 +43,7 @@
           @startEdit="startEdit"
           @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
         />
+        <img v-if="imageURL" :src="imageURL" />
         <StudyExtras
           v-if="showBack && !reverse && settings.languageTools && forStudy"
           :text="back"
@@ -89,6 +92,7 @@ export default {
     suspended: {
       default: false,
     },
+    imageURL: {},
     forStudy: {
       default: true,
     },
@@ -140,6 +144,12 @@ export default {
         [side]: newValue,
       })
     },
+    setImageURL(url) {
+      this.$store.commit('updateCard', {
+        id: this.id,
+        imageURL: url,
+      })
+    },
   },
 }
 </script>
@@ -162,6 +172,7 @@ export default {
   transition: 0.2s;
   overflow: hidden;
   background: #f8f8f8;
+  position: relative;
 }
 
 .front {
@@ -171,6 +182,12 @@ export default {
 .back {
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
+
+  img {
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 300px;
+  }
 }
 
 .textfield {

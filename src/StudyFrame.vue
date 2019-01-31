@@ -52,13 +52,38 @@
       />
     </template>
 
+    <template v-else-if="doneForDay && reviewsAreLeftOver">
+      <div class="padtb centertext">
+        <h3>Done for now!</h3>
+        <div>
+          There {{ reviewsLeftOver === 1 ? 'is' : 'are' }}
+          <b>{{ reviewsLeftOver }}</b> more card{{
+            reviewsLeftOver === 1 ? '' : 's'
+          }}
+          due to be reviewed. If you want to study more cards today, change the
+          setting below.
+        </div>
+        <p class="singlesetting">
+          <EditableTextField
+            class="visibletextfield"
+            :text="`${settings.maxReviewsPerDay}`"
+            :lineBreaksAllowed="false"
+            @endEdit="updateMaxReviewsPerDay"
+          />&nbsp;&nbsp; <b>Max reviews per day (0 for no limit)</b>
+        </p>
+        <br />
+        <br />
+        <p v-if="nextReviewIn">Otherwise, come back tomorrow to study more.</p>
+      </div>
+    </template>
+
     <template v-else-if="doneForDay && newCardsAreLeftOver">
       <div class="padtb centertext">
         <h3>Done for now!</h3>
         <div>
-          There {{ newCardsLeftOver.length === 1 ? 'is' : 'are' }}
-          <b>{{ newCardsLeftOver.length }}</b> new card{{
-            newCardsLeftOver.length === 1 ? '' : 's'
+          There {{ newCardsLeftOver === 1 ? 'is' : 'are' }}
+          <b>{{ newCardsLeftOver }}</b> new card{{
+            newCardsLeftOver === 1 ? '' : 's'
           }}
           remaining to be learned. If you want to study more new cards, change
           the setting below.
@@ -152,6 +177,10 @@ export default {
     newToday() {
       return this.$store.state.setList[this.$store.state.currentSetId].newToday
     },
+    reviewsToday() {
+      return this.$store.state.setList[this.$store.state.currentSetId]
+        .reviewsToday
+    },
     doneForDay() {
       return this.doneReviewing && this.doneWithNewCards
     },
@@ -189,9 +218,9 @@ export default {
     },
     newCardsLeftOver() {
       if (!this.newCardsAreLeftOver) return 0
-      return this.updatedCards
-        .filter(card => card.totalReviews === 0 || !card.totalReviews)
-        .sort((a, b) => (a.id > b.id ? 1 : -1))
+      return this.updatedCards.filter(
+        card => card.totalReviews === 0 || !card.totalReviews
+      ).length
     },
     dueCards() {
       const now = Date.now()
@@ -203,7 +232,17 @@ export default {
         .sort((a, b) => (a.nextReview > b.nextReview ? 1 : -1))
     },
     doneReviewing() {
-      return this.dueCards.length === 0
+      return (
+        this.dueCards.length === 0 ||
+        (this.settings.maxReviewsPerDay &&
+          this.reviewsToday >= this.settings.maxReviewsPerDay)
+      )
+    },
+    reviewsAreLeftOver() {
+      return this.doneReviewing && this.dueCards.length
+    },
+    reviewsLeftOver() {
+      return this.dueCards.length
     },
     allStudyableCards() {
       let cards = this.doneWithNewCards
@@ -215,6 +254,11 @@ export default {
       return this.cardsToStudy[0]
     },
     nextReviewIn() {
+      if (
+        this.settings.maxReviewsPerDay &&
+        this.reviewsToday >= this.settings.maxReviewsPerDay
+      )
+        return 'a day'
       const reviewableCards = this.doneForDay
         ? this.updatedCards.filter(
             card => card.totalReviews && card.totalReviews > 0
@@ -319,6 +363,10 @@ export default {
     updateMaxNewPerDay(newValue) {
       const parsedValue = parseInt(newValue) || 10
       this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
+    },
+    updateMaxReviewsPerDay(newValue) {
+      const parsedValue = parseInt(newValue) || 0
+      this.$store.commit('updateSetSettings', { maxReviewsPerDay: parsedValue })
     },
   },
 }

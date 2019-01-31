@@ -93,6 +93,7 @@ a:visited {
 .sub {
   font-size: 0.85rem;
   opacity: 0.6;
+  font-weight: 500;
 }
 
 .centertext {

@@ -15,6 +15,7 @@
       :forStudy="true"
       :showBack="showBack"
       :set="set"
+      :imageURL="imageURL"
       @showBack="showBackAction"
     />
 
@@ -86,6 +87,7 @@ export default {
     totalReviews: {
       default: 0,
     },
+    imageURL: {},
     created: {
       default: () => new Date().getTime(),
     },
@@ -210,7 +212,7 @@ export default {
 
       const bonusMultipliers = {
         answerTime: 1,
-        maturity: 1.5,
+        maturity: 0.8,
         successRatio: 0.8,
         length: 0.3,
       }

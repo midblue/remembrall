@@ -24,6 +24,24 @@
         <b>New cards per day</b>
       </p>
 
+      <p>
+        <EditableTextField
+          class="visibletextfield marright"
+          :text="
+            `${
+              settings.maxReviewsPerDay === 0
+                ? 0
+                : settings.maxReviewsPerDay || 0
+            }`
+          "
+          :lineBreaksAllowed="false"
+          @endEdit="updateMaxReviewsPerDay"
+        />
+        <b style="position: relative"
+          >Max reviews per day <span class="below sub">(0 for no limit)</span>
+        </b>
+      </p>
+
       <select v-model="selectedLanguageTools" class="marright">
         <option v-for="(language, key) in languages" :key="key" :value="key">{{
           language
@@ -136,7 +154,9 @@ export default {
     deleteSet() {
       if (
         confirm(
-          `Do you really want to delete the set "${this.currentSet.name}"?`
+          `Do you really want to delete the set "${
+            this.currentSet.name
+          }" with ${this.currentSet.cards.length} cards?`
         )
       ) {
         this.$store.commit('deleteSet', this.currentSet.id)
@@ -152,6 +172,10 @@ export default {
       const parsedValue =
         parseInt(newValue) === 0 ? 0 : parseInt(newValue) || 10
       this.$store.commit('updateSetSettings', { maxNewPerDay: parsedValue })
+    },
+    updateMaxReviewsPerDay(newValue) {
+      const parsedValue = parseInt(newValue) === 0 ? 0 : parseInt(newValue) || 0
+      this.$store.commit('updateSetSettings', { maxReviewsPerDay: parsedValue })
     },
     downloadSet() {
       downloadObjectAsJson(
@@ -200,6 +224,12 @@ p {
   // display: grid;
   // grid-gap: 10px;
   // grid-template-columns: 60px 1fr;
+}
+
+.below {
+  position: absolute;
+  left: 0;
+  top: 100%;
 }
 
 button {
