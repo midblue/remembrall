@@ -8,7 +8,9 @@
       placeholder="Hint"
       @startEdit="focus"
       @next="tab"
+      @setImageURL="setImageURL"
     />
+    <img v-if="imageURL" :src="imageURL" />
     <EditableTextField
       class="textfield back"
       :focus="setFocus === 'back'"
@@ -16,6 +18,7 @@
       placeholder="Answer"
       @startEdit="focus"
       @prev="shiftTab"
+      @setImageURL="setImageURL"
     />
 
     <FloatingText :text="floatText" offset="-30" />
@@ -36,6 +39,7 @@ export default {
     return {
       front: '',
       back: '',
+      imageURL: undefined,
       metaDown: false,
       floatText: '',
       isDuplicate: false,
@@ -71,11 +75,12 @@ export default {
   },
   methods: {
     newCard() {
-      if (!this.front || !this.back) return
+      if ((!this.front && !this.imageURL) || !this.back) return
       this.$store.commit('addCard', {
         id: Date.now(),
         front: this.front,
         back: this.back,
+        imageURL: this.imageURL,
         nextReview: 0,
         set: parseInt(this.$store.state.currentSetId),
       })
@@ -84,6 +89,7 @@ export default {
       this.$nextTick(() => {
         this.front = ''
         this.back = ''
+        this.imageURL = undefined
         this.isDuplicate = false
         this.setFocus = null
         this.$nextTick(() => (this.setFocus = 'front'))
@@ -108,6 +114,9 @@ export default {
       e.preventDefault()
       this.setFocus = null
       this.$nextTick(() => (this.setFocus = 'front'))
+    },
+    setImageURL(url) {
+      this.imageURL = url
     },
   },
 }
@@ -173,6 +182,11 @@ export default {
   .back {
     border-top: 1px solid #ddd;
     transition: 0.2s;
+  }
+  img {
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 300px;
   }
 
   button {

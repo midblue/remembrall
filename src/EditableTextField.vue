@@ -183,6 +183,14 @@ export default {
       e.preventDefault()
       const clipboardData = e.clipboardData || window.clipboardData
       const pastedData = this.sanitize(clipboardData.getData('Text'))
+      if (/.(jpe?g|png|gif|webm|bmp)$/gi.test(pastedData)) {
+        return this.$emit('setImageURL', pastedData)
+      }
+      if (/^data:/gi.test(pastedData)) {
+        return alert(
+          `that's image data, not a link! make sure you get an image url that ends in .jpg, .png, .gif, etc.`
+        )
+      }
       const existingText = this.sanitize(this.$el.innerHTML)
 
       let caretPosition = 0,

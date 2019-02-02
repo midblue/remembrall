@@ -22,7 +22,9 @@
         :text="reverse ? back : front"
         @startEdit="startEdit"
         @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
+        @setImageURL="setImageURL"
       />
+      <img v-if="imageURL && !reverse" :src="imageURL" />
       <StudyExtras
         v-if="reverse && settings.languageTools && forStudy"
         :text="back"
@@ -42,8 +44,9 @@
           :text="reverse ? front : back"
           @startEdit="startEdit"
           @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
+          @setImageURL="setImageURL"
         />
-        <img v-if="imageURL" :src="imageURL" />
+        <img v-if="imageURL && reverse" :src="imageURL" />
         <StudyExtras
           v-if="showBack && !reverse && settings.languageTools && forStudy"
           :text="back"
@@ -182,12 +185,11 @@ export default {
 .back {
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
-
-  img {
-    margin: 0 auto;
-    max-width: 100%;
-    max-height: 300px;
-  }
+}
+img {
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 300px;
 }
 
 .textfield {
@@ -243,6 +245,10 @@ export default {
   }
   .back .textfield {
     padding: 20px 15px;
+  }
+  img {
+    max-width: 80%;
+    max-height: 100px;
   }
 }
 
