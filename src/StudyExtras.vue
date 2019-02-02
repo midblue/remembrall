@@ -27,14 +27,11 @@ export default {
       return this.$store.state.setList[this.$store.state.currentSetId].settings
     },
     searchString() {
-      let searchString = this.text
-      let linebreakPos = this.text.indexOf('\n')
-      if (linebreakPos !== -1)
-        searchString = this.text.substring(0, linebreakPos)
-      return searchString
+      return this.text.replace(/\n.*/g, '')
     },
     searchWord() {
       return this.searchString
+        .replace(/\(.*\)/g, '')
         .toLowerCase()
         .split(/[ /;.,?¿!+]/)
         .reduce(

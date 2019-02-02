@@ -26,12 +26,18 @@
       <div>Add Card</div>
       <div class="keyicon">⌘-Enter</div>
     </button>
+
+    <button @click="autoSetImage">
+      <div>Auto-Set Image</div>
+      <div class="keyicon">⌘-i</div>
+    </button>
   </div>
 </template>
 
 <script>
 import FloatingText from './FloatingText'
 import EditableTextField from './EditableTextField'
+const keys = require('../keys.js')
 
 export default {
   props: {},
@@ -98,6 +104,11 @@ export default {
     keyDown(event) {
       if (event.key === 'Meta') this.metaDown = true
       if (event.key === 'Enter' && this.metaDown) this.$nextTick(this.newCard)
+      if (event.key === 'i' && this.metaDown) {
+        event.preventDefault()
+        event.stopPropagation()
+        this.autoSetImage()
+      }
     },
     keyUp(event) {
       if (event.key === 'Meta') this.metaDown = false
@@ -118,7 +129,44 @@ export default {
     setImageURL(url) {
       this.imageURL = url
     },
+    autoSetImage() {
+      const keyword = (this.front || this.back)
+        .replace(/\n.*/g, '')
+        .replace(/\(.*\)/g, '')
+        .toLowerCase()
+        .split(/[ /;.,?¿!+]/)
+        .reduce(
+          (longestString, currString) =>
+            currString.length > longestString.length
+              ? currString
+              : longestString,
+          ''
+        )
+      this.loadingImage = true
+      findImagesForKeyword(keyword, 1).then(image => {
+        if (image) {
+          image = image[0]
+          this.imageURL = image
+        }
+        this.loadingImage = false
+      })
+    },
   },
+}
+
+function findImagesForKeyword(keyword, count) {
+  const urlBase = `https://www.googleapis.com/customsearch/v1?imgSize=large&imgType=photo&searchType=image&key=${
+    keys.GOOGLE
+  }&cx=${keys.GSEARCH}`
+  const query = encodeURI(keyword)
+  return new Promise(resolve => {
+    fetch(`${urlBase}&q=${query}&num=${count}`)
+      .then(res => res.json())
+      .then(json => {
+        if (!json.items) resolve([])
+        else resolve(json.items.map(image => image.link))
+      })
+  })
 }
 </script>
 
