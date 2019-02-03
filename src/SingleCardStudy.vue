@@ -62,7 +62,7 @@
 <script>
 import EditableTextField from './EditableTextField'
 import Card from './Card'
-import { msToString } from './assets/commonFunctions'
+import { msToString, getRandomImage } from './assets/commonFunctions'
 
 const minimumTimeMod = 30 * 60 * 1000 // 30m
 const difficultyModifiers = {
@@ -108,6 +108,7 @@ export default {
       revealedBackTime: new Date(),
       averageTime: 7000,
       reviewsSoFar: 0,
+      metaDown: false,
     }
   },
   computed: {
@@ -264,6 +265,24 @@ export default {
       return newTimeMod
     },
     keyDown(event) {
+      if (event.key === 'Meta') this.metaDown = true
+      else if (event.key === 'i' && this.metaDown) {
+        if (this.imageURL)
+          this.$store.commit('updateCard', {
+            id: this.id,
+            imageURL: '',
+          })
+        else
+          getRandomImage(this.front || this.back).then(image => {
+            console.log(image)
+            if (image)
+              this.$store.commit('updateCard', {
+                id: this.id,
+                imageURL: image,
+              })
+          })
+      }
+
       if (!this.isStudying || this.isEditingText) return
       if (event.key === '1' && this.showBack) this.answer('again')
       else if (event.key === ' ') {
@@ -273,6 +292,9 @@ export default {
         !this.showBack ? this.showBackAction() : this.answer('ok')
       else if (event.key === '2' && this.showBack) this.answer('ok')
       else if (event.key === 'p') this.$emit('postpone')
+    },
+    keyUp(event) {
+      if (event.key === 'Meta') this.metaDown = false
     },
   },
 }

@@ -14,7 +14,7 @@ exports.msToString = function(ms) {
   else return Math.round(ms / 1000 / 60 / 60 / 24 / 365) + 'y'
 }
 
-exports.findImagesForKeyword = function(keyword, count) {
+function findImagesForKeyword(keyword, count) {
   const urlBase = `https://www.googleapis.com/customsearch/v1?imgSize=large&imgType=photo&searchType=image&key=${
     keys.GOOGLE
   }&cx=${keys.GSEARCH}`
@@ -28,8 +28,9 @@ exports.findImagesForKeyword = function(keyword, count) {
       })
   })
 }
+exports.findImagesForKeyword = findImagesForKeyword
 
-exports.getKeyWord = function(text) {
+function getKeyWord(text) {
   return text
     .replace(/\(.*\)/g, '')
     .toLowerCase()
@@ -39,4 +40,16 @@ exports.getKeyWord = function(text) {
         currString.length > longestString.length ? currString : longestString,
       ''
     )
+}
+exports.getKeyWord = getKeyWord
+
+exports.getRandomImage = function(text) {
+  const numberOfImages = 10
+  const keyword = getKeyWord(text)
+  return new Promise(resolve => {
+    findImagesForKeyword(keyword, numberOfImages).then(images => {
+      if (images) resolve(images[Math.floor(Math.random() * numberOfImages)])
+      else resolve()
+    })
+  })
 }

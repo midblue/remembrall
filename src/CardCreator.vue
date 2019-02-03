@@ -57,7 +57,6 @@ export default {
       front: '',
       back: '',
       imageURL: '',
-      loadingImage: false,
       metaDown: false,
       floatText: '',
       isDuplicate: false,
@@ -143,14 +142,8 @@ export default {
     },
     autoSetImage() {
       if (this.imageURL) return (this.imageURL = '')
-      const keyword = getKeyWord(this.front || this.back)
-      this.loadingImage = true
-      findImagesForKeyword(keyword, 1).then(image => {
-        if (image) {
-          image = image[0]
-          this.imageURL = image
-        }
-        this.loadingImage = false
+      getRandomImage(this.front || this.back).then(image => {
+        if (image) this.imageURL = image
       })
     },
   },
