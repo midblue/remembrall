@@ -1,19 +1,18 @@
 <template>
-  <div
+  <input
+    type="text"
     class="editabletext"
     :class="{
       editabletextediting: isEditing,
-      placeholder: isPlaceholder,
     }"
-    :contenteditable="isEditing"
+    :placeholder="placeholder"
     @focus="startEdit"
     @click="startEdit"
-    @input="$emit('changeText', sanitize($el.innerHTML))"
     @blur="commitEdit"
     @paste="paste"
     tabindex="0"
-    v-html="displayText"
-  ></div>
+    v-model="displayText"
+  />
 </template>
 
 <script>
@@ -57,7 +56,6 @@ export default {
       isEditing: false,
       metaDown: false,
       shiftDown: false,
-      isPlaceholder: this.text.length === 0,
     }
   },
   model: {
@@ -71,6 +69,9 @@ export default {
         this.resetTextTo(newText)
       }
     },
+		displayText(newText) {
+			this.$emit('changeText', sanitize($el.innerHTML))
+		}
 
     disableEdits(isDisabled) {
       this.isEditing = false
@@ -164,101 +165,62 @@ export default {
     },
     sanitize(text) {
       const sanitizedText = text
-        .replace(/<div>/g, '\n')
+        .replace(/<\/div>/g, '\n')
         .replace(/<br\s?\/?>/g, '\n')
         .replace(/<[^>]*>/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/^[\s\n\t]*/g, '')
-      // .replace(/[\s\n\t]*$/g, '')
+        .replace(/[\s\n\t]*$/g, '')
       return sanitizedText
     },
     paste(e) {
       e.stopPropagation()
       e.preventDefault()
-
-      // get clipboard data
       const clipboardData = e.clipboardData || window.clipboardData
       const pastedData = this.sanitize(clipboardData.getData('Text'))
-
-      // check for image
-      if (/.(jpe?g|png|gif|webm|bmp)$/gi.test(pastedData))
+      if (/.(jpe?g|png|gif|webm|bmp)$/gi.test(pastedData)) {
         return this.$emit('setImageURL', pastedData)
-      if (/^data:/gi.test(pastedData))
+      }
+      if (/^data:/gi.test(pastedData)) {
         return alert(
           `that's image data, not a link! make sure you get an image url that ends in .jpg, .png, .gif, etc.`
         )
+      }
+      const existingText = this.sanitize(this.$el.innerHTML)
 
-      const existingText = document.activeElement.innerText
-      const selected = getSelectedText(this.$el)
+      let caretPosition = 0,
+        selection,
+        range
+      if (window.getSelection) {
+        selection = window.getSelection()
+        if (selection.rangeCount) {
+          range = selection.getRangeAt(0)
+          if (range.commonAncestorContainer.parentNode == this.$el) {
+            caretPosition = range.endOffset
+          }
+        }
+      } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange()
+        if (range.parentElement() == this.$el) {
+          var tempEl = document.createElement('span')
+          this.$el.insertBefore(tempEl, this.$el.firstChild)
+          var tempRange = range.duplicate()
+          tempRange.moveToElementText(tempEl)
+          tempRange.setEndPoint('EndToEnd', range)
+          caretPosition = tempRange.text.length
+        }
+      } // this only works if there's only one line (i.e. one div)
+      console.log(caretPosition)
 
       const newText =
-        existingText.substring(0, selected.start) +
+        existingText.substring(0, caretPosition) +
         pastedData +
-        existingText.substring(selected.end)
+        existingText.substring(caretPosition)
       this.displayText = newText
-      this.$emit('changeText', newText)
-      this.$nextTick(this.moveCursorToEnd)
-    },
-    moveCursorToEnd() {
-      let range, selection
-      if (document.createRange) {
-        range = document.createRange()
-        range.selectNodeContents(this.$el)
-        range.collapse(false)
-        selection = window.getSelection()
-        selection.removeAllRanges()
-        selection.addRange(range)
-      } else if (document.selection) {
-        range = document.body.createTextRange()
-        range.moveToElementText(this.$el)
-        range.collapse(false)
-        range.select()
-      }
+      this.$emit('changeText', this.displayText)
     },
   },
-}
-
-function getSelectedText(el) {
-  const getTextSelection = () => {
-    const selection = window.getSelection()
-    if (selection != null && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0)
-      return {
-        start: getTextLength(el, range.startContainer, range.startOffset),
-        end: getTextLength(el, range.endContainer, range.endOffset),
-      }
-    } else return null
-  }
-
-  const getTextLength = function(parent, node, offset) {
-    let textLength = 0
-    // console.log('1', node, node.nodeName)
-    if (node.nodeName === '#text') textLength += offset
-    else
-      for (let i = 0; i < offset; i++)
-        textLength += getNodeTextLength(node.childNodes[i])
-    if (node !== parent)
-      textLength += getTextLength(parent, node.parentNode, getNodeOffset(node))
-    return textLength
-  }
-
-  const getNodeTextLength = function(node) {
-    let textLength = 0
-    // console.log('2', node, node.nodeName)
-    if (node.nodeName === 'BR') textLength = 1
-    else if (node.nodeName === '#text') textLength = node.nodeValue.length
-    else if (node.childNodes !== null)
-      for (let i = 0; i < node.childNodes.length; i++)
-        textLength += getNodeTextLength(node.childNodes[i])
-    return textLength
-  }
-
-  const getNodeOffset = function(node) {
-    return node == null ? -1 : 1 + getNodeOffset(node.previousSibling)
-  }
-
-  return getTextSelection(document.activeElement)
 }
 </script>
 
