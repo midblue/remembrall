@@ -10,6 +10,7 @@
       :setId="set"
       :suspended="suspended"
       :imageURL="imageURL"
+      @loadingImage="loadingImage = true"
       @setImageURL="setImageURL"
       class="topleft"
     />
@@ -24,7 +25,7 @@
         @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
         @setImageURL="setImageURL"
       />
-      <img v-if="imageURL && !reverse" :src="imageURL" />
+      <ImageLoader :url="imageURL" v-if="imageURL && !reverse" />
       <StudyExtras
         v-if="reverse && settings.languageTools && forStudy"
         :text="back"
@@ -46,7 +47,7 @@
           @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
           @setImageURL="setImageURL"
         />
-        <img v-if="imageURL && reverse" :src="imageURL" />
+        <ImageLoader :url="imageURL" v-if="imageURL && reverse" />
         <StudyExtras
           v-if="showBack && !reverse && settings.languageTools && forStudy"
           :text="back"
@@ -60,6 +61,7 @@
 import EditableTextField from './EditableTextField'
 import CardTools from './CardTools'
 import StudyExtras from './StudyExtras'
+import ImageLoader from './ImageLoader'
 
 export default {
   props: {
@@ -110,6 +112,12 @@ export default {
     EditableTextField,
     CardTools,
     StudyExtras,
+    ImageLoader,
+  },
+  data() {
+    return {
+      loadingImage: false,
+    }
   },
   computed: {
     settings() {
@@ -122,7 +130,11 @@ export default {
       return !this.totalReviews || this.totalReviews === 0
     },
   },
-  watch: {},
+  watch: {
+    loadingImage(newValue) {
+      console.log('load')
+    },
+  },
   mounted() {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
@@ -152,6 +164,7 @@ export default {
         id: this.id,
         imageURL: url,
       })
+      this.loadingImage = false
     },
   },
 }
@@ -185,13 +198,6 @@ export default {
 .back {
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
-}
-img {
-  margin: 0 auto;
-  margin-top: -15px;
-  max-width: 90%;
-  max-height: 250px;
-  padding-bottom: 10px;
 }
 
 .textfield {

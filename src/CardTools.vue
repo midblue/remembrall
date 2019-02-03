@@ -85,7 +85,7 @@
 import {
   msToString,
   getKeyWord,
-  findImagesForKeyword,
+  getRandomImage,
 } from './assets/commonFunctions'
 
 export default {
@@ -193,12 +193,9 @@ export default {
       this.$emit('setImageURL', link)
     },
     autoAddImageURL() {
-      const keyword = getKeyWord(this.front || this.back)
-      findImagesForKeyword(keyword, 1).then(image => {
-        if (image) {
-          image = image[0]
-          this.$emit('setImageURL', image)
-        }
+      this.$emit('loadingImage')
+      getRandomImage(this.front || this.back).then(image => {
+        if (image) this.$emit('setImageURL', image)
       })
     },
     removeImageURL() {

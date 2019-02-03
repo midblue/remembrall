@@ -11,7 +11,7 @@
       @setImageURL="setImageURL"
     />
     <div class="imagecontainer" v-if="imageURL">
-      <img :src="imageURL" />
+      <ImageLoader :url="imageURL" />
     </div>
     <EditableTextField
       class="textfield back"
@@ -48,7 +48,8 @@
 <script>
 import FloatingText from './FloatingText'
 import EditableTextField from './EditableTextField'
-import { findImagesForKeyword, getKeyWord } from './assets/commonFunctions'
+import ImageLoader from './ImageLoader'
+import { getRandomImage } from './assets/commonFunctions'
 
 export default {
   props: {},
@@ -66,6 +67,7 @@ export default {
   components: {
     FloatingText,
     EditableTextField,
+    ImageLoader,
   },
   computed: {
     cards() {
@@ -163,10 +165,9 @@ export default {
 
   .imagecontainer {
     background: #f8f8f8;
-    padding-bottom: 20px;
     text-align: center;
 
-    img {
+    & > * {
       margin: 0 auto;
       max-width: 80%;
       max-height: 250px;

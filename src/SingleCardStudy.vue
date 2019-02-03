@@ -272,15 +272,19 @@ export default {
             id: this.id,
             imageURL: '',
           })
-        else
+        else {
+          this.$store.commit('updateCard', {
+            id: this.id,
+            imageURL: 'loading',
+          })
           getRandomImage(this.front || this.back).then(image => {
-            console.log(image)
             if (image)
               this.$store.commit('updateCard', {
                 id: this.id,
                 imageURL: image,
               })
           })
+        }
       }
 
       if (!this.isStudying || this.isEditingText) return
