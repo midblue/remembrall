@@ -8,6 +8,7 @@
   </div>
 </template>
 <script>
+import { getKeyWord } from './assets/commonFunctions.js'
 export default {
   props: {
     text: {
@@ -30,17 +31,7 @@ export default {
       return this.text.replace(/\n.*/g, '')
     },
     searchWord() {
-      return this.searchString
-        .replace(/\(.*\)/g, '')
-        .toLowerCase()
-        .split(/[ /;.,?¿!+]/)
-        .reduce(
-          (longestString, currString) =>
-            currString.length > longestString.length
-              ? currString
-              : longestString,
-          ''
-        )
+      return getKeyWord(this.searchString)
     },
     pronunciationLink() {
       return `https://forvo.com/word/${this.searchWord}/#${

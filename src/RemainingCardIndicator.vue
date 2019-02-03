@@ -28,15 +28,21 @@ export default {
   },
   components: {},
   data() {
-    return {}
+    return {
+      adjustedStartedWith: this.toStudy.length,
+    }
   },
-  computed: {
-    adjustedStartedWith() {
-      if (this.toStudy.length > this.startedWith) return this.toStudy.length
-      return this.startedWith
+  computed: {},
+  watch: {
+    toStudy(newToStudy) {
+      if (newToStudy.length > this.startedWith)
+        this.adjustedStartedWith = newToStudy.length
+    },
+    startedWith(newStartedWith) {
+      if (newStartedWith >= this.toStudy.length)
+        this.adjustedStartedWith = newStartedWith
     },
   },
-  watch: {},
   mounted() {},
   beforeDestroy() {},
   methods: {},

@@ -10,7 +10,9 @@
       @next="tab"
       @setImageURL="setImageURL"
     />
-    <img v-if="imageURL" :src="imageURL" />
+    <div class="imagecontainer" v-if="imageURL">
+      <img :src="imageURL" />
+    </div>
     <EditableTextField
       class="textfield back"
       :focus="setFocus === 'back'"
@@ -22,22 +24,31 @@
     />
 
     <FloatingText :text="floatText" offset="-30" />
-    <button @click="newCard">
-      <div>Add Card</div>
-      <div class="keyicon">⌘-Enter</div>
-    </button>
+    <div class="buttonlist">
+      <button @click="newCard">
+        <div>Add Card</div>
+        <div class="keyicon">⌘-Enter</div>
+      </button>
+    </div>
 
-    <button @click="autoSetImage">
-      <div>Auto-Set Image</div>
-      <div class="keyicon">⌘-i</div>
-    </button>
+    <center>
+      <span class="sub" style="position: relative; top: -5px;"
+        >Paste an image link to add your own image. Or,</span
+      >
+      <br />
+      <button @click="autoSetImage">
+        <div v-if="!imageURL">Auto-Set Image</div>
+        <div v-else>Remove Image</div>
+        <div class="keyicon">⌘-i</div>
+      </button>
+    </center>
   </div>
 </template>
 
 <script>
 import FloatingText from './FloatingText'
 import EditableTextField from './EditableTextField'
-const keys = require('../keys.js')
+import { findImagesForKeyword, getKeyWord } from './assets/commonFunctions'
 
 export default {
   props: {},
@@ -45,7 +56,8 @@ export default {
     return {
       front: '',
       back: '',
-      imageURL: undefined,
+      imageURL: '',
+      loadingImage: false,
       metaDown: false,
       floatText: '',
       isDuplicate: false,
@@ -95,7 +107,7 @@ export default {
       this.$nextTick(() => {
         this.front = ''
         this.back = ''
-        this.imageURL = undefined
+        this.imageURL = ''
         this.isDuplicate = false
         this.setFocus = null
         this.$nextTick(() => (this.setFocus = 'front'))
@@ -130,18 +142,8 @@ export default {
       this.imageURL = url
     },
     autoSetImage() {
-      const keyword = (this.front || this.back)
-        .replace(/\n.*/g, '')
-        .replace(/\(.*\)/g, '')
-        .toLowerCase()
-        .split(/[ /;.,?¿!+]/)
-        .reduce(
-          (longestString, currString) =>
-            currString.length > longestString.length
-              ? currString
-              : longestString,
-          ''
-        )
+      if (this.imageURL) return (this.imageURL = '')
+      const keyword = getKeyWord(this.front || this.back)
       this.loadingImage = true
       findImagesForKeyword(keyword, 1).then(image => {
         if (image) {
@@ -152,21 +154,6 @@ export default {
       })
     },
   },
-}
-
-function findImagesForKeyword(keyword, count) {
-  const urlBase = `https://www.googleapis.com/customsearch/v1?imgSize=large&imgType=photo&searchType=image&key=${
-    keys.GOOGLE
-  }&cx=${keys.GSEARCH}`
-  const query = encodeURI(keyword)
-  return new Promise(resolve => {
-    fetch(`${urlBase}&q=${query}&num=${count}`)
-      .then(res => res.json())
-      .then(json => {
-        if (!json.items) resolve([])
-        else resolve(json.items.map(image => image.link))
-      })
-  })
 }
 </script>
 
@@ -179,6 +166,18 @@ function findImagesForKeyword(keyword, count) {
 
   & > * {
     display: block;
+  }
+
+  .imagecontainer {
+    background: #f8f8f8;
+    padding-bottom: 20px;
+    text-align: center;
+
+    img {
+      margin: 0 auto;
+      max-width: 80%;
+      max-height: 250px;
+    }
   }
 
   .textfield {
@@ -231,15 +230,12 @@ function findImagesForKeyword(keyword, count) {
     border-top: 1px solid #ddd;
     transition: 0.2s;
   }
-  img {
-    margin: 0 auto;
-    max-width: 100%;
-    max-height: 300px;
-  }
 
-  button {
+  .buttonlist {
+    display: flex;
     width: 100%;
     margin-top: 20px;
+    margin-bottom: 20px;
   }
 }
 </style>

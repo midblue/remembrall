@@ -12,7 +12,7 @@
         ({{ cards.length }} card{{ cards.length === 1 ? '' : 's' }})
       </div>
     </h1>
-    <div class="buttonlist" v-if="cards">
+    <div class="buttonlist">
       <button
         :class="{ active: appState === 'study' || appState === 'editCard' }"
         @click="$store.commit('setAppState', 'study')"
@@ -51,7 +51,10 @@
     </div>
     <br />
     <div class="setelements">
-      <CardCreator key="add" v-if="appState === 'addCard' || !cards" />
+      <CardCreator
+        key="add"
+        v-if="appState === 'addCard' || (!cards && appState === 'study')"
+      />
       <SetBrowser key="browse" v-else-if="appState === 'setBrowse'" />
       <SetSettings key="settings" v-else-if="appState === 'setSettings'" />
       <SetStats key="stats" v-else-if="appState === 'setStats'" />

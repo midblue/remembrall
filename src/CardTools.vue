@@ -39,7 +39,10 @@
         <div class="button" v-if="imageURL" @click="removeImageURL">
           Remove Image
         </div>
-        <div class="button" v-else @click="addImageURL">Set Image</div>
+        <template v-else>
+          <div class="button" @click="addImageURL">Set Image</div>
+          <div class="button" @click="autoAddImageURL">Auto-Set Image</div>
+        </template>
 
         <div
           class="button"
@@ -68,10 +71,10 @@
         </div>
 
         <div class="button" @click="suspendCard">
-          {{ suspended ? 'Unsuspend Card' : 'Suspend Card' }}
+          {{ suspended ? 'Unsuspend' : 'Suspend' }}
         </div>
 
-        <div class="button" @click="deleteCard">Delete Card</div>
+        <div class="button" @click="deleteCard">Delete</div>
       </div>
     </div>
   </div>
@@ -79,7 +82,11 @@
 </template>
 
 <script>
-import { msToString } from './assets/commonFunctions'
+import {
+  msToString,
+  getKeyWord,
+  findImagesForKeyword,
+} from './assets/commonFunctions'
 
 export default {
   props: {
@@ -184,6 +191,15 @@ export default {
       const link = window.prompt('Enter an image url!')
       if (!link) return
       this.$emit('setImageURL', link)
+    },
+    autoAddImageURL() {
+      const keyword = getKeyWord(this.front || this.back)
+      findImagesForKeyword(keyword, 1).then(image => {
+        if (image) {
+          image = image[0]
+          this.$emit('setImageURL', image)
+        }
+      })
     },
     removeImageURL() {
       this.$emit('setImageURL', '')

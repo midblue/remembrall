@@ -156,7 +156,9 @@ export default {
         confirm(
           `Do you really want to delete the set "${
             this.currentSet.name
-          }" with ${this.currentSet.cards.length} cards?`
+          }" with ${
+            this.currentSet.cards ? this.currentSet.cards.length : 0
+          } cards?`
         )
       ) {
         this.$store.commit('deleteSet', this.currentSet.id)

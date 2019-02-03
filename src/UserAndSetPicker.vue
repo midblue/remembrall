@@ -200,17 +200,27 @@ export default {
         ) {
           this.$store.commit('resetSetDay', set)
         }
-        const maxNew = this.setList[set].settings.maxNewPerDay
+        const maxNew = this.setList[set].settings
+          ? this.setList[set].settings.maxNewPerDay
+          : 999999
         const newToday = this.setList[set].newToday
-        const dueInDeck = this.setList[set].cards.reduce(
-          (dueCount, card) =>
-            card.nextReview < now &&
-            card.totalReviews &&
-            card.totalReviews > 0 &&
-            !card.suspended
-              ? dueCount + 1
-              : dueCount,
-          0
+        if (!this.setList[set].cards) return (this.dueReviews[set] = 0)
+        const dueInDeck = Math.min(
+          this.setList[set].cards.reduce(
+            (dueCount, card) =>
+              card.nextReview < now &&
+              card.totalReviews &&
+              card.totalReviews > 0 &&
+              !card.suspended
+                ? dueCount + 1
+                : dueCount,
+            0
+          ),
+          this.setList[set].settings &&
+            this.setList[set].settings.maxReviewsPerDay
+            ? this.setList[set].settings.maxReviewsPerDay -
+                this.setList[set].reviewsToday
+            : 999999
         )
         const newInDeck = this.setList[set].cards.reduce(
           (dueCount, card) =>

@@ -294,16 +294,13 @@ export default () => {
           let setObject = {}
           docs.forEach(doc => {
             const set = doc.data()
-            if (!set.lastUpdated) return
+            // if (!set.lastUpdated) return
             setObject[set.id] = set
           })
 
-          // just until everyone has all sets added
+          // just until everyone has this updated, give each card a set prop
           for (let set in setObject) {
-            if (!setObject[set].cards) {
-              console.log(setObject)
-              continue
-            }
+            if (!setObject[set].cards) continue
             setObject[set].cards = setObject[set].cards.map(card => ({
               ...card,
               set: parseInt(set),

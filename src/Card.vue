@@ -188,8 +188,10 @@ export default {
 }
 img {
   margin: 0 auto;
-  max-width: 100%;
-  max-height: 300px;
+  margin-top: -15px;
+  max-width: 90%;
+  max-height: 250px;
+  padding-bottom: 10px;
 }
 
 .textfield {
@@ -247,6 +249,7 @@ img {
     padding: 20px 15px;
   }
   img {
+    margin-top: -10px;
     max-width: 80%;
     max-height: 100px;
   }

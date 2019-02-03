@@ -223,6 +223,9 @@ export default {
       ).length
     },
     dueCards() {
+      const possibleAdditionalDueCardsToday = !this.settings.maxReviewsPerDay
+        ? 99999
+        : this.settings.maxReviewsPerDay - (this.reviewsToday || 0)
       const now = Date.now()
       return this.updatedCards
         .filter(
@@ -230,6 +233,12 @@ export default {
             card.totalReviews && card.totalReviews > 0 && card.nextReview < now
         )
         .sort((a, b) => (a.nextReview > b.nextReview ? 1 : -1))
+        .slice(
+          0,
+          possibleAdditionalDueCardsToday > 0
+            ? possibleAdditionalDueCardsToday
+            : 0
+        )
     },
     doneReviewing() {
       return (
