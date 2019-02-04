@@ -267,24 +267,17 @@ export default {
     keyDown(event) {
       if (event.key === 'Meta') this.metaDown = true
       else if (event.key === 'i' && this.metaDown) {
-        if (this.imageURL)
-          this.$store.commit('updateCard', {
-            id: this.id,
-            imageURL: '',
-          })
-        else {
-          this.$store.commit('updateCard', {
-            id: this.id,
-            imageURL: 'loading',
-          })
-          getRandomImage(this.front || this.back).then(image => {
-            if (image)
-              this.$store.commit('updateCard', {
-                id: this.id,
-                imageURL: image,
-              })
-          })
-        }
+        this.$store.commit('updateCard', {
+          id: this.id,
+          imageURL: 'loading',
+        })
+        getRandomImage(this.front || this.back).then(image => {
+          if (image)
+            this.$store.commit('updateCard', {
+              id: this.id,
+              imageURL: image,
+            })
+        })
       }
 
       if (!this.isStudying || this.isEditingText) return

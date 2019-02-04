@@ -143,7 +143,6 @@ export default {
       this.imageURL = url
     },
     autoSetImage() {
-      if (this.imageURL) return (this.imageURL = '')
       getRandomImage(this.front || this.back).then(image => {
         if (image) this.imageURL = image
       })

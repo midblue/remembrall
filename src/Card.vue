@@ -10,7 +10,6 @@
       :setId="set"
       :suspended="suspended"
       :imageURL="imageURL"
-      @loadingImage="loadingImage = true"
       @setImageURL="setImageURL"
       class="topleft"
     />
@@ -49,8 +48,9 @@
         />
         <ImageLoader :url="imageURL" v-if="imageURL && reverse" />
         <StudyExtras
-          v-if="showBack && !reverse && settings.languageTools && forStudy"
+          v-if="!reverse && settings.languageTools && forStudy"
           :text="back"
+          :shown="showBack"
         />
       </div>
     </div>
@@ -114,11 +114,6 @@ export default {
     StudyExtras,
     ImageLoader,
   },
-  data() {
-    return {
-      loadingImage: false,
-    }
-  },
   computed: {
     settings() {
       return this.$store.state.setList[this.$store.state.currentSetId].settings
@@ -128,11 +123,6 @@ export default {
     },
     isNewCard() {
       return !this.totalReviews || this.totalReviews === 0
-    },
-  },
-  watch: {
-    loadingImage(newValue) {
-      console.log('load')
     },
   },
   mounted() {
@@ -164,7 +154,6 @@ export default {
         id: this.id,
         imageURL: url,
       })
-      this.loadingImage = false
     },
   },
 }

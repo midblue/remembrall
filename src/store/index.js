@@ -69,11 +69,15 @@ export default () => {
         // update set last updated
         Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
-            name: state.setList[state.currentSetId].name,
-            lastUpdated: state.setList[state.currentSetId].lastUpdated,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: state.currentSetId,
+              name: state.setList[state.currentSetId].name,
+              lastUpdated: state.setList[state.currentSetId].lastUpdated,
+            },
+            `updating set name`
+          )
       },
       updateSetSettings(state, newSettings) {
         for (let param in newSettings) {
@@ -88,11 +92,15 @@ export default () => {
         // update set last updated
         Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
-            settings: state.setList[state.currentSetId].settings,
-            lastUpdated: state.setList[state.currentSetId].lastUpdated,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: state.currentSetId,
+              settings: state.setList[state.currentSetId].settings,
+              lastUpdated: state.setList[state.currentSetId].lastUpdated,
+            },
+            `updating set settings`
+          )
       },
       addSet(state) {
         const newSet = blankSet()
@@ -111,12 +119,18 @@ export default () => {
       resetSetDay(state, setId) {
         Vue.set(state.setList[setId], 'newToday', 0)
         Vue.set(state.setList[setId], 'reviewsToday', 0)
+        Vue.set(state.setList[setId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: setId,
-            newToday: 0,
-            reviewsToday: 0,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: setId,
+              newToday: 0,
+              reviewsToday: 0,
+              lastUpdated: state.setList[setId].lastUpdated,
+            },
+            `resetting set day`
+          )
       },
 
       // cards
@@ -130,11 +144,15 @@ export default () => {
         // update set last updated
         Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
-            cards: state.setList[state.currentSetId].cards,
-            lastUpdated: state.setList[state.currentSetId].lastUpdated,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: state.currentSetId,
+              cards: state.setList[state.currentSetId].cards,
+              lastUpdated: state.setList[state.currentSetId].lastUpdated,
+            },
+            `adding card`
+          )
       },
       updateCard(state, card) {
         let setWithCard
@@ -164,11 +182,15 @@ export default () => {
         Vue.set(state.setList[setWithCard], 'lastUpdated', Date.now())
         // update db
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: setWithCard,
-            cards: state.setList[setWithCard].cards,
-            lastUpdated: state.setList[setWithCard].lastUpdated,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: setWithCard,
+              cards: state.setList[setWithCard].cards,
+              lastUpdated: state.setList[setWithCard].lastUpdated,
+            },
+            `updating card`
+          )
       },
       studyCard(state, card) {
         const foundCardIndex = state.setList[
@@ -211,13 +233,17 @@ export default () => {
         Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
         // update Db
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: state.currentSetId,
-            lastUpdated: state.setList[state.currentSetId].lastUpdated,
-            newToday: state.setList[state.currentSetId].newToday,
-            reviewsToday: state.setList[state.currentSetId].reviewsToday,
-            cards: state.setList[state.currentSetId].cards,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: state.currentSetId,
+              lastUpdated: state.setList[state.currentSetId].lastUpdated,
+              newToday: state.setList[state.currentSetId].newToday,
+              reviewsToday: state.setList[state.currentSetId].reviewsToday,
+              cards: state.setList[state.currentSetId].cards,
+            },
+            `studying card`
+          )
       },
       deleteCard(state, id) {
         let setWithCard
@@ -258,11 +284,15 @@ export default () => {
         // update set last updated
         Vue.set(state.setList[to], 'lastUpdated', Date.now())
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: to,
-            cards: state.setList[to].cards,
-            lastUpdated: state.setList[to].lastUpdated,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: to,
+              cards: state.setList[to].cards,
+              lastUpdated: state.setList[to].lastUpdated,
+            },
+            `moving card to new set`
+          )
         // delete from source deck
         const newSourceCards = state.setList[from].cards.filter(
           card => card.id !== id
@@ -272,11 +302,15 @@ export default () => {
         Vue.set(state.setList[from], 'lastUpdated', Date.now())
         // update db
         if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: state.setList[from].id,
-            cards: state.setList[from].cards,
-            lastUpdated: state.setList[from].lastUpdated,
-          })
+          dbManager.updateSet(
+            state.currentUser,
+            {
+              id: state.setList[from].id,
+              cards: state.setList[from].cards,
+              lastUpdated: state.setList[from].lastUpdated,
+            },
+            `deleting moved card from old set`
+          )
       },
     },
     actions: {

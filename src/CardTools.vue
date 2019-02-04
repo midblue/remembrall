@@ -193,7 +193,7 @@ export default {
       this.$emit('setImageURL', link)
     },
     autoAddImageURL() {
-      this.$emit('loadingImage')
+      this.$emit('setImageURL', 'loading')
       getRandomImage(this.front || this.back).then(image => {
         if (image) this.$emit('setImageURL', image)
       })

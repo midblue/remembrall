@@ -1,13 +1,16 @@
 <template>
-  <div class="sub extras" v-if="text">
+  <div class="extras" v-if="text">
+    <StudyExtrasJA :text="text" v-if="settings.languageTools === 'ja'" />
     <template v-if="speaker">
-      <a @click="speakWord" class="fakelink">Speak it</a><span> ・ </span>
+      <a @click="speakWord" class="fakelink sub">Speak it</a><span> ・ </span>
     </template>
-    <a target="_blank" :href="pronunciationLink">Native</a><span> ・ </span>
-    <a target="_blank" :href="translationLink">Translation</a>
+    <a target="_blank" :href="pronunciationLink" class="sub">Native</a
+    ><span> ・ </span>
+    <a target="_blank" :href="translationLink" class="sub">Translation</a>
   </div>
 </template>
 <script>
+import StudyExtrasJA from './StudyExtrasJA'
 import { getKeyWord } from './assets/commonFunctions.js'
 export default {
   props: {
@@ -17,7 +20,11 @@ export default {
     autoSpeak: {
       default: false,
     },
+    shown: {
+      default: false,
+    },
   },
+  components: { StudyExtrasJA },
   data() {
     return {
       speaker: null,
@@ -48,6 +55,9 @@ export default {
     settings(newSettings) {
       this.speaker.lang = newSettings.languageTools
     },
+    shown(willShow) {
+      if (willShow && this.settings.autoSpeak) this.speakWord()
+    },
   },
   mounted() {
     if (window.speechSynthesis) {
@@ -55,7 +65,6 @@ export default {
       this.speaker.lang = this.settings.languageTools
       this.speaker.volume = 0.4
     }
-    if (this.settings.autoSpeak) this.speakWord()
   },
   methods: {
     speakWord() {
