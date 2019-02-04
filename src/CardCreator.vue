@@ -37,11 +37,15 @@
       >
       <br />
       <button @click="autoSetImage">
-        <div v-if="!imageURL">Auto-Set Image</div>
-        <div v-else>Remove Image</div>
+        <div>Auto-Set Image</div>
         <div class="keyicon">⌘-i</div>
       </button>
+      <br /><br />
+      <button v-if="imageURL" @click="imageURL = ''">
+        <div>Remove Image</div>
+      </button>
     </center>
+    <br /><br />
   </div>
 </template>
 
