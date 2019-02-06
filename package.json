@@ -6,8 +6,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --hot",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "dev": "webpack-dev-server --mode=development --hot",
+    "build": "webpack --progress --mode=production --hide-modules",
     "golive": "npm run build && cp -rf ./dist/* ../personalsite2018/docs/remembrall/dist && cp -rf ./dist/* ../personalsite2018/static/remembrall/dist && cd ../personalsite2018 && git add . && git commit -m \"Updated Remembrall\" && git push && cd ../remembrall"
   },
   "dependencies": {
@@ -29,12 +29,14 @@
     "cross-env": "^5.0.5",
     "css-loader": "^0.28.7",
     "file-loader": "^1.1.4",
-    "node-sass": "^4.5.3",
+    "json-loader": "^0.5.7",
+    "node-sass": "^4.11.0",
     "postcss-loader": "^3.0.0",
-    "sass-loader": "^6.0.6",
-    "vue-loader": "^13.0.5",
+    "sass-loader": "^7.1.0",
+    "vue-loader": "^15.6.2",
     "vue-template-compiler": "^2.4.4",
-    "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.9.1"
+    "webpack": "^4.29.2",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.1.14"
   }
 }

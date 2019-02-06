@@ -30,11 +30,11 @@ function findImagesForKeyword(keyword, count = 10, offset = 0) {
 }
 exports.findImagesForKeyword = findImagesForKeyword
 
-function getKeyWord(text) {
+function getKeyWord(text, allowSpaces = false) {
   return text
     .replace(/\(.*\)/g, '')
     .toLowerCase()
-    .split(/[ /;.,?¿!+]/)
+    .split(allowSpaces ? /[/;.,?¿!+()\[\]{}<>]/ : /[  ・/;.,?¿!+()\[\]{}<>]/)
     .reduce(
       (longestString, currString) =>
         currString.length > longestString.length ? currString : longestString,
@@ -45,7 +45,7 @@ exports.getKeyWord = getKeyWord
 
 exports.getRandomImage = function(text) {
   const numberOfImages = 10
-  const keyword = getKeyWord(text)
+  const keyword = getKeyWord(text, true)
   const offset = Math.ceil(Math.random() * 50)
   return new Promise(resolve => {
     findImagesForKeyword(keyword, numberOfImages, offset).then(images => {

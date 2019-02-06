@@ -146,5 +146,11 @@ img {
   max-width: 90%;
   max-height: 250px;
   padding-bottom: 10px;
+  transition: all 0.5s;
+
+  @media (max-width: 768px) {
+    max-height: 200px;
+    padding-bottom: 5px;
+  }
 }
 </style>

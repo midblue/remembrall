@@ -193,6 +193,11 @@ export default {
   padding: 45px 30px;
   white-space: pre-wrap;
   font-size: 1.5rem;
+  transition: padding 0.5s;
+
+  @media (max-width: 768px) {
+    padding: 35px 25px;
+  }
 
   &.editabletextediting {
     background: rgba(0, 0, 0, 0.05);

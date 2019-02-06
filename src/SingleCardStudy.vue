@@ -1,5 +1,10 @@
 <template>
   <div>
+    <AutoSpeaker
+      v-if="settings.languageTools"
+      :text="textToSpeak"
+      :language="settings.languageTools"
+    />
     <Card
       class="card"
       :id="id"
@@ -60,8 +65,8 @@
 </template>
 
 <script>
-import EditableTextField from './EditableTextField'
 import Card from './Card'
+import AutoSpeaker from './AutoSpeaker'
 import { msToString, getRandomImage } from './assets/commonFunctions'
 
 const minimumTimeMod = 30 * 60 * 1000 // 30m
@@ -100,6 +105,7 @@ export default {
   },
   components: {
     Card,
+    AutoSpeaker,
   },
   data() {
     return {
@@ -109,6 +115,7 @@ export default {
       averageTime: 7000,
       reviewsSoFar: 0,
       metaDown: false,
+      textToSpeak: '',
     }
   },
   computed: {
@@ -148,11 +155,23 @@ export default {
     id(newId) {
       this.startedCardTime = new Date()
       this.showBack = false
+      if (this.settings.autoSpeakFront) {
+        this.textToSpeak = (this.reverse ? this.back : this.front).replace(
+          /\n.*/g,
+          ''
+        )
+      }
     },
   },
   mounted() {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
+    if (this.settings.autoSpeakFront) {
+      this.textToSpeak = (this.reverse ? this.back : this.front).replace(
+        /\n.*/g,
+        ''
+      )
+    }
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.keyDown)

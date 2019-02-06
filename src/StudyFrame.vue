@@ -208,12 +208,12 @@ export default {
       )
     },
     newCardsAreLeftOver() {
+      const newCardsCount = this.updatedCards.filter(
+        card => card.totalReviews === 0 || !card.totalReviews
+      ).length
       return (
-        this.updatedCards.filter(
-          card => card.totalReviews === 0 || !card.totalReviews
-        ).length +
-          this.newToday >
-        this.settings.maxNewPerDay
+        newCardsCount > 0 &&
+        newCardsCount + this.newToday > this.settings.maxNewPerDay
       )
     },
     newCardsLeftOver() {
@@ -359,12 +359,21 @@ export default {
       const text = timeMod ? '+' + msToString(timeMod) : 'Again!'
       this.displayTimeMod = null
       this.$nextTick(() => (this.displayTimeMod = text))
+      this.preloadNextImage()
     },
     postponeCurrentCard() {
       this.cardsToStudy.push(this.cardsToStudy.shift())
       const text = 'Postponed!'
       this.displayTimeMod = null
       this.$nextTick(() => (this.displayTimeMod = text))
+      this.preloadNextImage()
+    },
+    preloadNextImage() {
+      const nextCard = this.cardsToStudy[1]
+      if (!nextCard || !nextCard.imageURL) return
+      const preload = new Image()
+      preload.src = nextCard.imageURL
+      console.log('preloaded', nextCard.imageURL)
     },
     refreshCards() {
       this.updatedCards = [...this.cards.filter(card => !card.suspended)]

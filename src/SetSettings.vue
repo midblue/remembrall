@@ -58,6 +58,17 @@
           updateSettings({ autoSpeak: !(settings.autoSpeak ? true : false) })
         "
       />
+      <Toggle
+        v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
+        key="autospeakfront"
+        :setTo="settings.autoSpeakFront"
+        label="Auto-speak card fronts"
+        @toggled="
+          updateSettings({
+            autoSpeakFront: !(settings.autoSpeakFront ? true : false),
+          })
+        "
+      />
 
       <Toggle
         key="rev"
