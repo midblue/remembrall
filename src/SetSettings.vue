@@ -42,6 +42,28 @@
         </b>
       </p>
 
+      <Toggle
+        key="rev"
+        :setTo="settings.studyReverse"
+        label="Study cards back-to-front"
+        @toggled="
+          updateSettings({
+            studyReverse: !(settings.studyReverse ? true : false),
+          })
+        "
+      />
+
+      <Toggle
+        key="mix"
+        :setTo="settings.shuffleCards"
+        label="Shuffle cards (new & reviews)"
+        @toggled="
+          updateSettings({
+            shuffleCards: !(settings.shuffleCards ? true : false),
+          })
+        "
+      />
+
       <select v-model="selectedLanguageTools" class="marright">
         <option v-for="(language, key) in languages" :key="key" :value="key">{{
           language
@@ -70,27 +92,16 @@
         "
       />
 
-      <Toggle
-        key="rev"
-        :setTo="settings.studyReverse"
-        label="Study cards back-to-front"
-        @toggled="
-          updateSettings({
-            studyReverse: !(settings.studyReverse ? true : false),
-          })
-        "
+      <input
+        type="range"
+        min="50"
+        max="150"
+        v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
+        key="speechspeed"
+        class="slider"
+        v-model="speechSpeed"
       />
-
-      <Toggle
-        key="mix"
-        :setTo="settings.shuffleCards"
-        label="Shuffle cards (new & reviews)"
-        @toggled="
-          updateSettings({
-            shuffleCards: !(settings.shuffleCards ? true : false),
-          })
-        "
-      />
+      <b>Speech Speed: {{ speechSpeed / 100 }}</b>
 
       <!--
         <Toggle
@@ -126,6 +137,8 @@ export default {
   data() {
     return {
       selectedLanguageTools: null,
+      speechSpeed: 80,
+      speechSpeedUpdateTimer: null,
       languages: {
         none: 'None',
         ar: 'Arabic',
@@ -153,12 +166,20 @@ export default {
   },
   mounted() {
     this.selectedLanguageTools = this.settings.languageTools || 'none'
+    this.speechSpeed = this.settings.speechSpeed * 100 || 80
   },
   beforeDestroy() {},
   watch: {
     selectedLanguageTools(newSelection) {
       let newTools = newSelection === 'none' ? null : newSelection
       this.updateSettings({ languageTools: newTools })
+    },
+    speechSpeed() {
+      clearTimeout(this.speechSpeedUpdateTimer)
+      this.speechSpeedUpdateTimer = setTimeout(
+        () => this.updateSettings({ speechSpeed: this.speechSpeed / 100 }),
+        1000
+      )
     },
   },
   methods: {

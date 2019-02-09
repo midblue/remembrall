@@ -66,7 +66,6 @@
 
 <script>
 import Card from './Card'
-import AutoSpeaker from './AutoSpeaker'
 import { msToString, getRandomImage } from './assets/commonFunctions'
 
 const minimumTimeMod = 30 * 60 * 1000 // 30m
@@ -104,8 +103,8 @@ export default {
     },
   },
   components: {
-    Card,
-    AutoSpeaker,
+    Card: () => import('./Card'),
+    AutoSpeaker: () => import('./AutoSpeaker'),
   },
   data() {
     return {

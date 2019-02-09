@@ -28,6 +28,7 @@
       <StudyExtras
         v-if="reverse && settings.languageTools && forStudy"
         :text="back"
+        :secondaryText="front"
       />
     </div>
     <div
@@ -50,6 +51,7 @@
         <StudyExtras
           v-if="!reverse && settings.languageTools && forStudy"
           :text="back"
+          :secondaryText="front"
           :shown="showBack"
         />
       </div>

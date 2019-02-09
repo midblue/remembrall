@@ -19,17 +19,12 @@
 </template>
 
 <script>
-import UserAndSetPicker from './UserAndSetPicker.vue'
-import RefreshHandler from './RefreshHandler.vue'
-import SetView from './SetView.vue'
-import UserView from './UserView.vue'
-
 export default {
   components: {
-    SetView,
-    UserView,
-    UserAndSetPicker,
-    RefreshHandler,
+    SetView: () => import('./SetView'),
+    UserView: () => import('./UserView'),
+    UserAndSetPicker: () => import('./UserAndSetPicker'),
+    RefreshHandler: () => import('./RefreshHandler'),
   },
   computed: {
     isMobile() {

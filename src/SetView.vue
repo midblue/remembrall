@@ -64,13 +64,6 @@
 </template>
 
 <script>
-import EditableTextField from './EditableTextField'
-import CardCreator from './CardCreator'
-import StudyFrame from './StudyFrame'
-import SetBrowser from './SetBrowser'
-import SetSettings from './SetSettings'
-import SetStats from './SetStats'
-
 export default {
   props: {
     id: {},
@@ -87,12 +80,12 @@ export default {
     },
   },
   components: {
-    EditableTextField,
-    SetSettings,
-    SetStats,
-    CardCreator,
-    StudyFrame,
-    SetBrowser,
+    EditableTextField: () => import('./EditableTextField'),
+    SetSettings: () => import('./SetSettings'),
+    SetStats: () => import('./SetStats'),
+    CardCreator: () => import('./CardCreator'),
+    StudyFrame: () => import('./StudyFrame'),
+    SetBrowser: () => import('./SetBrowser'),
   },
   data() {
     return {

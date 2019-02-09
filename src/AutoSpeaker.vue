@@ -1,4 +1,4 @@
-<template> </template>
+<template></template>
 <script>
 import { getKeyWord } from './assets/commonFunctions.js'
 export default {
@@ -33,6 +33,7 @@ export default {
       this.speaker = new SpeechSynthesisUtterance()
       this.speaker.lang = this.language
       this.speaker.volume = 0.4
+      this.speaker.rate = this.settings.speechSpeed || 0.8
     }
   },
   methods: {

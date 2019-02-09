@@ -5,9 +5,12 @@
       :text="textToSpeak"
       :language="settings.languageTools"
     />
-    <StudyExtrasJA :text="text" v-if="settings.languageTools === 'ja'" />
-    <a @click="textToSpeak = searchString" class="fakelink sub">Speak it</a
-    ><span> ・ </span>
+    <StudyExtrasJA
+      :text="text"
+      :secondaryText="secondaryText"
+      v-if="settings.languageTools === 'ja'"
+    />
+    <a @click="speakWord" class="fakelink sub">Speak it</a><span> ・ </span>
     <a target="_blank" :href="pronunciationLink" class="sub">Native</a
     ><span> ・ </span>
     <a target="_blank" :href="translationLink" class="sub">Translation</a>
@@ -21,6 +24,9 @@ import { getKeyWord } from './assets/commonFunctions.js'
 export default {
   props: {
     text: {
+      default: '',
+    },
+    secondaryText: {
       default: '',
     },
     autoSpeak: {
@@ -59,12 +65,16 @@ export default {
   },
   watch: {
     shown(willShow) {
-      if (willShow && this.settings.autoSpeak)
-        this.textToSpeak = this.searchString
+      if (willShow && this.settings.autoSpeak) this.speakWord()
     },
   },
   mounted() {},
-  methods: {},
+  methods: {
+    speakWord() {
+      this.textToSpeak = this.searchString
+      setTimeout(() => (this.textToSpeak = ''), 300)
+    },
+  },
 }
 </script>
 <style scoped lang="scss">

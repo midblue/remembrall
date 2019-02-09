@@ -20,12 +20,15 @@
   </div>
 </template>
 <script>
-const keys = require('./assets/keys')
+const keys = require('../keys')
 // const jishoApi = require('unofficial-jisho-api')
 // const jisho = new jishoApi()
 export default {
   props: {
     text: {
+      default: '',
+    },
+    secondaryText: {
       default: '',
     },
   },
@@ -54,7 +57,12 @@ export default {
   methods: {
     getKanjiData() {
       const kanjiInText = Array.from(
-        new Set(this.text.replace(/[^\u4e00-\u9faf]/g, ''))
+        new Set(
+          `${this.text.replace(
+            /[^\u4e00-\u9faf]/g,
+            ''
+          )}${this.secondaryText.replace(/[^\u4e00-\u9faf]/g, '')}`
+        )
       )
       this.kanjiList = kanjiInText.map(character => ({
         character: character,

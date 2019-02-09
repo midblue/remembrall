@@ -2,6 +2,7 @@
   <div class="userview">
     <h1>
       All Cards
+      <span class="sub">({{ allCards.length }} total cards)</span>
       <!--
         <span class="sub">
           ({{ filteredCards.length
