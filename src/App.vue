@@ -3,17 +3,19 @@
     <UserAndSetPicker />
     <RefreshHandler />
     <div class="content">
-      <SetView
-        v-if="currentSet && appState !== 'user'"
-        :key="currentSet.id"
-        :id="currentSet.id"
-        :name="currentSet.name"
-        :cards="currentSet.cards"
-        :lastStudied="currentSet.lastStudied"
-        :newToday="currentSet.newToday"
-        :reviewsToday="currentSet.reviewsToday"
-      />
-      <UserView v-if="appState === 'user'" />
+      <transition-group appear name="list" tag="div">
+        <SetView
+          v-if="currentSet && appState !== 'user'"
+          :key="currentSet.id"
+          :id="currentSet.id"
+          :name="currentSet.name"
+          :cards="currentSet.cards"
+          :lastStudied="currentSet.lastStudied"
+          :newToday="currentSet.newToday"
+          :reviewsToday="currentSet.reviewsToday"
+        />
+        <UserView v-if="appState === 'user'" key="user" />
+      </transition-group>
     </div>
   </section>
 </template>
@@ -77,10 +79,20 @@ body {
 }
 
 .content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  position: relative;
+  width: 600px;
+  padding: 0 20px;
+  margin: 40px auto 20vh auto;
+  max-width: 100vw;
+
+  @media (max-width: 768px) {
+    margin-top: 30px;
+  }
+
+  & > div {
+    width: 100%;
+    position: relative;
+  }
 }
 
 a,
@@ -205,5 +217,17 @@ select {
 .roundframe {
   overflow: hidden;
   border-radius: 10px;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.25s;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.list-enter,
+.list-leave-to {
+  opacity: 0;
 }
 </style>

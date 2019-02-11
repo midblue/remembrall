@@ -136,11 +136,9 @@ export default {
 
 <style lang="scss" scoped>
 h1 {
+  margin-top: 0;
   margin-bottom: 0.75rem;
-
-  @media (max-width: 768px) {
-    margin-top: 0.5rem;
-  }
+  height: 2rem;
 
   div {
     display: inline-block;
@@ -150,22 +148,14 @@ h1 {
   padding-right: 10px;
 }
 
-.setview {
-  width: 550px;
-  max-width: 100vw;
-  min-height: 120vh;
-  padding: 0 20px;
-}
-
 .setelements {
-  display: block;
-  position: relative;
+  // position: relative;
 
   & > *,
   & > * > * {
     width: 100%;
-    position: absolute;
-    top: 0;
+    // position: absolute;
+    // top: 0;
   }
 }
 </style>

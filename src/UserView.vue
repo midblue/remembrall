@@ -42,10 +42,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.userview {
-  width: 550px;
-  max-width: 100vw;
-  padding: 0 20px;
-  margin-bottom: 50vh;
+h1 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
 }
 </style>

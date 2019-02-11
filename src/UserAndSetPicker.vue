@@ -253,14 +253,16 @@ export default {
   justify-content: space-between;
   width: 100%;
   background: #ddd;
-  margin-bottom: 30px;
-  height: 50px;
-  transition: 0.5s;
+  height: 35px;
+  // transition: 0.5s;
   position: relative;
   z-index: 10;
+  // box-shadow: inset 0 -30px 30px -30px rgba(black, 0.1);
 
   @media (max-width: 768px) {
+    height: 45px;
     padding: 0 20px;
+    // box-shadow: none;
   }
 
   &.fullscreen {
@@ -306,15 +308,19 @@ button:not(.active).duecards {
       box-shadow: none;
       border: none;
       transition: background 0.2s;
-      padding-left: 15px;
-      padding-right: 15px;
+      @media (min-width: 769px) {
+        padding: 0 15px;
+      }
+      &:hover {
+        background: rgba(white, 0.5);
+      }
 
       &.active {
         background: white;
       }
-
-      &:hover {
+      @media (max-width: 768px) {
         background: rgba(white, 0.5);
+        margin-right: 3px;
       }
     }
 
@@ -328,7 +334,7 @@ button:not(.active).duecards {
 button.mainbutton {
   position: relative;
   z-index: 100;
-  min-width: 20vw;
+  min-width: 25vw;
   box-shadow: 0 0 1000px 1000px rgba(black, 0);
   transition: box-shadow 0.3s;
 }
