@@ -7,15 +7,18 @@
     }"
   >
     <template v-if="!currentUser && !isLoading">
-      <div><b>Enter your username.</b></div>
+      <h1><b>Enter your username.</b></h1>
       <div>
         <input
+          class="username"
           v-model="inputUsername"
           placeholder="username"
           ref="usernameInput"
         />
       </div>
-      <div><button @click="logInAs">Go</button></div>
+      <div>
+        <button class="loginbutton" @click="logInAs">Go</button>
+      </div>
     </template>
     <template v-else-if="isLoading">
       <div class="sub">Loading...</div>
@@ -253,7 +256,7 @@ export default {
   justify-content: space-between;
   width: 100%;
   background: #ddd;
-  height: 35px;
+  height: 40px;
   // transition: 0.5s;
   position: relative;
   z-index: 10;
@@ -278,6 +281,20 @@ export default {
       margin-bottom: 20px;
     }
   }
+}
+
+.username {
+  border-radius: 7px;
+  border: 1px solid #eee;
+  font-size: 1.2rem;
+  font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
+  padding: 10px 10px;
+}
+.loginbutton {
+  border-radius: 7px;
+  font-size: 1.2rem;
+  font-family: 'Avenir Neue', 'Avenir', 'Helvetica', sans-serif;
+  padding: 20px 50px;
 }
 
 button:not(.active).duecards {

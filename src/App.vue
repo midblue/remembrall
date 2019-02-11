@@ -72,6 +72,9 @@ body {
 
 .app {
   min-height: 100vh;
+  width: 100vw;
+  position: absolute;
+  top: 0;
 
   &.mobile {
     font-size: 14.5px;
