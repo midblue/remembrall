@@ -21,7 +21,7 @@
       <div class="sub">Loading...</div>
     </template>
     <template v-else>
-      <div class="buttonlist inlineblock" v-if="!isMobile">
+      <div class="buttonlist fullheight inlineblock" v-if="!isMobile">
         <button
           v-for="set in setList"
           :key="set.id"
@@ -47,7 +47,7 @@
           </span></button
         ><button @click="$store.commit('addSet')">+ Add Set</button>
       </div>
-      <div v-else class="buttonlist" ref="mainButton">
+      <div v-else class="buttonlist fullheight" ref="mainButton">
         <button
           v-if="appState === 'user'"
           class="mainbutton"
@@ -82,7 +82,7 @@
       </div>
 
       <div class="flex-ai">
-        <div class="buttonlist inlineblock">
+        <div class="buttonlist fullheight inlineblock">
           <button
             @click="$store.commit('setAppState', 'user')"
             :class="{ active: appState === 'user' }"
@@ -252,9 +252,9 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #eee;
+  background: #ddd;
   margin-bottom: 30px;
-  height: 70px;
+  height: 50px;
   transition: 0.5s;
   position: relative;
   z-index: 10;
@@ -289,16 +289,46 @@ button:not(.active).duecards {
 .flex-ai {
   display: flex;
   align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .buttonlist {
   overflow: visible;
+
+  &.fullheight {
+    border-radius: 0;
+    border: none;
+    height: 100%;
+
+    button {
+      background: rgba(white, 0);
+      box-shadow: none;
+      border: none;
+      transition: background 0.2s;
+      padding-left: 15px;
+      padding-right: 15px;
+
+      &.active {
+        background: white;
+      }
+
+      &:hover {
+        background: rgba(white, 0.5);
+      }
+    }
+
+    & > * {
+      height: 100%;
+      border-radius: 0;
+    }
+  }
 }
 
 button.mainbutton {
   position: relative;
   z-index: 100;
-  min-width: 40vw;
+  min-width: 20vw;
   box-shadow: 0 0 1000px 1000px rgba(black, 0);
   transition: box-shadow 0.3s;
 }
@@ -307,6 +337,7 @@ button.open {
   border-bottom-right-radius: 0px !important;
   border-bottom-left-radius: 0px !important;
   box-shadow: 0 0 1000px 1000px rgba(black, 0.3);
+  background: white !important;
 }
 
 .secondarypanel {
@@ -314,6 +345,7 @@ button.open {
   top: 100%;
   left: 0;
   width: 100%;
+  background: #eee;
 
   button {
     width: 100%;

@@ -67,7 +67,7 @@ export default {
       )
       this.kanjiList = kanjiInText.map(character => ({
         character: character,
-        message: 'loading...',
+        meaning: 'loading...',
       }))
       Array.from(kanjiInText).forEach((character, index) => {
         // const SEARCH_KANJI = '車'
