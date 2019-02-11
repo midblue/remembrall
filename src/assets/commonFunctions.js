@@ -43,12 +43,13 @@ function getKeyWord(text, allowSpaces = false) {
 }
 exports.getKeyWord = getKeyWord
 
+let currOffset = 1
 exports.getRandomImage = function(text) {
-  const numberOfImages = 10
   const keyword = getKeyWord(text, true)
-  const offset = Math.ceil(Math.random() * 50)
+  currOffset = (currOffset % 99) + 1
+  console.log(currOffset)
   return new Promise(resolve => {
-    findImagesForKeyword(keyword, numberOfImages, offset).then(images => {
+    findImagesForKeyword(keyword, 1, currOffset).then(images => {
       if (images) resolve(images[Math.floor(Math.random() * images.length)])
       else resolve()
     })

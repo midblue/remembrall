@@ -94,14 +94,14 @@
 
       <input
         type="range"
-        min="50"
-        max="150"
+        min="1"
+        max="10"
         v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
         key="speechspeed"
         class="slider"
-        v-model="speechSpeed"
+        v-model="displaySpeechSpeed"
       />
-      <b>Speech Speed: {{ speechSpeed / 100 }}</b>
+      <b>Speech Speed: {{ Math.round(displaySpeechSpeed) }}</b>
 
       <!--
         <Toggle
@@ -137,7 +137,7 @@ export default {
   data() {
     return {
       selectedLanguageTools: null,
-      speechSpeed: 80,
+      displaySpeechSpeed: 4,
       speechSpeedUpdateTimer: null,
       languages: {
         none: 'None',
@@ -166,7 +166,7 @@ export default {
   },
   mounted() {
     this.selectedLanguageTools = this.settings.languageTools || 'none'
-    this.speechSpeed = this.settings.speechSpeed * 100 || 80
+    this.displaySpeechSpeed = (this.settings.speechSpeed - 0.5) * 9 + 1 || 4 // .5 - 1.5 -> 1 - 10
   },
   beforeDestroy() {},
   watch: {
@@ -174,10 +174,13 @@ export default {
       let newTools = newSelection === 'none' ? null : newSelection
       this.updateSettings({ languageTools: newTools })
     },
-    speechSpeed() {
+    displaySpeechSpeed() {
       clearTimeout(this.speechSpeedUpdateTimer)
       this.speechSpeedUpdateTimer = setTimeout(
-        () => this.updateSettings({ speechSpeed: this.speechSpeed / 100 }),
+        () =>
+          this.updateSettings({
+            speechSpeed: (this.displaySpeechSpeed - 1) / 9 + 0.5,
+          }),
         1000
       )
     },

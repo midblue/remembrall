@@ -47,7 +47,7 @@
           </span></button
         ><button @click="$store.commit('addSet')">+ Add Set</button>
       </div>
-      <div v-else class="buttonlist">
+      <div v-else class="buttonlist" ref="mainButton">
         <button
           v-if="appState === 'user'"
           class="mainbutton"
@@ -154,6 +154,10 @@ export default {
       this.isLoading = false
       this.updateDueReviews()
     },
+    setPickerOpen(opening) {
+      if (opening) window.addEventListener('click', this.checkClickToClose)
+      else window.removeEventListener('click', this.checkClickToClose)
+    },
   },
   mounted() {
     window.addEventListener('keydown', this.keyDown)
@@ -233,6 +237,10 @@ export default {
           dueInDeck + Math.min(maxNew - Math.min(newToday, maxNew), newInDeck)
       }
     },
+    checkClickToClose(e) {
+      console.log(e.path)
+      if (!e.path.includes(this.$refs.mainButton)) this.setPickerOpen = false
+    },
   },
 }
 </script>
@@ -257,6 +265,7 @@ export default {
 
   &.fullscreen {
     height: 100vh;
+    position: fixed;
     justify-content: center;
   }
 
@@ -287,12 +296,17 @@ button:not(.active).duecards {
 }
 
 button.mainbutton {
+  position: relative;
+  z-index: 100;
   min-width: 40vw;
+  box-shadow: 0 0 1000px 1000px rgba(black, 0);
+  transition: box-shadow 0.3s;
 }
 
 button.open {
-  border-bottom-right-radius: 0px;
-  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px !important;
+  border-bottom-left-radius: 0px !important;
+  box-shadow: 0 0 1000px 1000px rgba(black, 0.3);
 }
 
 .secondarypanel {
@@ -305,9 +319,15 @@ button.open {
     width: 100%;
     border-radius: 0;
     border: 0;
-    box-shadow: 0 0 0 1px #eee;
+    border-top: 1px solid #eee;
+    // box-shadow: 0 0 0 1px #eee;
+
+    &:first-of-type {
+      border-radius: 0;
+    }
 
     &:last-of-type {
+      border-radius: 0;
       border-bottom-right-radius: 10px;
       border-bottom-left-radius: 10px;
     }

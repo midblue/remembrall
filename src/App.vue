@@ -19,12 +19,17 @@
 </template>
 
 <script>
+import SetView from './SetView'
+import UserView from './UserView'
+import UserAndSetPicker from './UserAndSetPicker'
+import RefreshHandler from './RefreshHandler'
+
 export default {
   components: {
-    SetView: () => import('./SetView'),
-    UserView: () => import('./UserView'),
-    UserAndSetPicker: () => import('./UserAndSetPicker'),
-    RefreshHandler: () => import('./RefreshHandler'),
+    SetView,
+    UserView,
+    UserAndSetPicker,
+    RefreshHandler,
   },
   computed: {
     isMobile() {
@@ -64,7 +69,7 @@ body {
 }
 
 .app {
-  min-height: 120vh;
+  min-height: 100vh;
 
   &.mobile {
     font-size: 14.5px;

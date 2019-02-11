@@ -3,6 +3,7 @@
     <div
       class="kanji sub"
       v-for="kanji in kanjiList"
+      v-if="kanji.meaning"
       :key="kanji.character"
       @mouseover="examplesToShow = kanji.examples"
       @mouseout="examplesToShow = null"
