@@ -199,6 +199,7 @@ export default {
 
   @media (max-width: 768px) {
     padding: 35px 25px;
+    font-size: 1.4rem;
   }
 
   &.editabletextediting {

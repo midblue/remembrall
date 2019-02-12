@@ -92,16 +92,19 @@
         "
       />
 
-      <input
-        type="range"
-        min="1"
-        max="10"
+      <template
         v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
-        key="speechspeed"
-        class="slider"
-        v-model="displaySpeechSpeed"
-      />
-      <b>Speech Speed: {{ Math.round(displaySpeechSpeed) }}</b>
+      >
+        <input
+          type="range"
+          min="1"
+          max="10"
+          key="speechspeed"
+          class="slider"
+          v-model="displaySpeechSpeed"
+        />
+        <b>Speech Speed: {{ Math.round(displaySpeechSpeed) }}</b>
+      </template>
 
       <!--
         <Toggle

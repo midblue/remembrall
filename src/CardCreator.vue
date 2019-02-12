@@ -10,7 +10,7 @@
       @next="tab"
       @setImageURL="setImageURL"
     />
-    <div class="imagecontainer" v-if="imageURL">
+    <div class="imagecontainer" v-if="imageURL" @click="imageURL = ''">
       <ImageLoader :url="imageURL" />
     </div>
     <EditableTextField
@@ -40,10 +40,10 @@
         <div>Auto-Set Image</div>
         <div class="keyicon">⌘-i</div>
       </button>
-      <br /><br />
-      <button v-if="imageURL" @click="imageURL = ''">
-        <div>Remove Image</div>
-      </button>
+      <br />
+      <div v-if="imageURL" class="sub" style="position: relative; top: 5px;">
+        (click image to remove it)
+      </div>
     </center>
     <br /><br />
   </div>

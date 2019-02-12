@@ -83,8 +83,8 @@ body {
 
 .content {
   position: relative;
-  width: 600px;
-  padding: 0 20px;
+  width: 650px;
+  padding: 0 7vw;
   margin: 40px auto 20vh auto;
   max-width: 100vw;
 
@@ -228,6 +228,9 @@ select {
   position: absolute;
   top: 0;
   width: 100%;
+}
+.list-leave-active {
+  transition: all 0.1s;
 }
 .list-enter,
 .list-leave-to {

@@ -194,7 +194,7 @@ export default {
       this.$refs.usernameInput.focus()
     },
     switchSet(id) {
-      this.$store.commit('setAppState', 'study') // app hangs if it stays on settings
+      if (this.appState === 'user') this.$store.commit('setAppState', 'study') // app hangs if it stays on settings
       this.$store.commit('setCurrentSetId', id)
     },
     updateDueReviews() {
@@ -255,15 +255,16 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: #ddd;
-  height: 40px;
+  background: #333;
+  height: 43px;
+  padding-top: 3px;
   // transition: 0.5s;
   position: relative;
   z-index: 10;
   // box-shadow: inset 0 -30px 30px -30px rgba(black, 0.1);
 
   @media (max-width: 768px) {
-    height: 45px;
+    height: 40px;
     padding: 0 20px;
     // box-shadow: none;
   }
@@ -272,6 +273,7 @@ export default {
     height: 100vh;
     position: fixed;
     justify-content: center;
+    background: #eee;
   }
 
   &.vertical {
@@ -325,18 +327,25 @@ button:not(.active).duecards {
       box-shadow: none;
       border: none;
       transition: background 0.2s;
+      color: white;
+
       @media (min-width: 769px) {
-        padding: 0 15px;
+        padding: 0 15px 2px 15px;
+        border-top-right-radius: 5px;
+        border-top-left-radius: 5px;
       }
+
       &:hover {
-        background: rgba(white, 0.5);
+        background: rgba(#09c, 0.3);
       }
 
       &.active {
         background: white;
+        color: black;
       }
+
       @media (max-width: 768px) {
-        background: rgba(white, 0.5);
+        background: rgba(white, 0.2);
         margin-right: 3px;
       }
     }
@@ -361,6 +370,7 @@ button.open {
   border-bottom-left-radius: 0px !important;
   box-shadow: 0 0 1000px 1000px rgba(black, 0.3);
   background: white !important;
+  color: black !important;
 }
 
 .secondarypanel {
@@ -368,13 +378,14 @@ button.open {
   top: 100%;
   left: 0;
   width: 100%;
-  background: #eee;
 
   button {
     width: 100%;
     border-radius: 0;
     border: 0;
     border-top: 1px solid #eee;
+    background: #ddd !important;
+    color: black !important;
     // box-shadow: 0 0 0 1px #eee;
 
     &:first-of-type {

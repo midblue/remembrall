@@ -9,7 +9,6 @@ firebase.initializeApp({
   storageBucket: keys.storageBucket,
 })
 const db = firebase.firestore()
-db.settings({ timestampsInSnapshots: true })
 
 const userCollectionName = 'users'
 const setCollectionName = 'sets'

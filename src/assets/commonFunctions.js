@@ -47,7 +47,6 @@ let currOffset = 1
 exports.getRandomImage = function(text) {
   const keyword = getKeyWord(text, true)
   currOffset = (currOffset % 99) + 1
-  console.log(currOffset)
   return new Promise(resolve => {
     findImagesForKeyword(keyword, 1, currOffset).then(images => {
       if (images) resolve(images[Math.floor(Math.random() * images.length)])
