@@ -54,3 +54,34 @@ exports.getRandomImage = function(text) {
     })
   })
 }
+
+exports.getNumberDueInSet = function(set) {
+  const now = Date.now()
+  const maxNew = set.settings ? set.settings.maxNewPerDay : 999999
+  const newToday = set.newToday
+  if (!set.cards) return 0
+
+  const dueInDeck = Math.min(
+    set.cards.reduce(
+      (dueCount, card) =>
+        card.nextReview < now &&
+        card.totalReviews &&
+        card.totalReviews > 0 &&
+        !card.suspended
+          ? dueCount + 1
+          : dueCount,
+      0
+    ),
+    set.settings && set.settings.maxReviewsPerDay
+      ? set.settings.maxReviewsPerDay - set.reviewsToday
+      : 999999
+  )
+  const newInDeck = set.cards.reduce(
+    (dueCount, card) =>
+      (!card.totalReviews || card.totalReviews === 0) && !card.suspended
+        ? dueCount + 1
+        : dueCount,
+    0
+  )
+  return dueInDeck + Math.min(maxNew - Math.min(newToday, maxNew), newInDeck)
+}

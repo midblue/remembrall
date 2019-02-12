@@ -107,6 +107,9 @@ export default {
     isEditingText() {
       return this.$store.state.isEditingText
     },
+    setList() {
+      return this.$store.state.setList
+    },
   },
   mounted() {
     window.addEventListener('keyup', this.keyUp)
@@ -129,6 +132,8 @@ export default {
       if (event.key === 'b') this.$store.commit('setAppState', 'setBrowse')
       if (event.key === 't') this.$store.commit('setAppState', 'setStats')
       if (event.key === 'e') this.$store.commit('setAppState', 'setSettings')
+      if (event.key === 'ArrowRight') this.$store.dispatch('goToNextSet')
+      if (event.key === 'ArrowLeft') this.$store.dispatch('goToPreviousSet')
     },
   },
 }

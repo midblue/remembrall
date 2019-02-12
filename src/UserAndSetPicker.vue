@@ -100,6 +100,7 @@
 
 <script>
 const { get } = require('./assets/storage')
+const { getNumberDueInSet } = require('./assets/commonFunctions')
 
 export default {
   props: {},
@@ -194,50 +195,18 @@ export default {
       this.$refs.usernameInput.focus()
     },
     switchSet(id) {
-      if (this.appState === 'user') this.$store.commit('setAppState', 'study') // app hangs if it stays on settings
       this.$store.commit('setCurrentSetId', id)
     },
     updateDueReviews() {
-      const now = Date.now()
       this.dueReviews = {}
-      for (let set in this.setList) {
+      for (let setId in this.setList) {
         if (
-          new Date(this.setList[set].lastUpdated).getDate() !==
+          new Date(this.setList[setId].lastUpdated).getDate() !==
           new Date().getDate()
         ) {
-          this.$store.commit('resetSetDay', set)
+          this.$store.commit('resetSetDay', setId)
         }
-        const maxNew = this.setList[set].settings
-          ? this.setList[set].settings.maxNewPerDay
-          : 999999
-        const newToday = this.setList[set].newToday
-        if (!this.setList[set].cards) return (this.dueReviews[set] = 0)
-        const dueInDeck = Math.min(
-          this.setList[set].cards.reduce(
-            (dueCount, card) =>
-              card.nextReview < now &&
-              card.totalReviews &&
-              card.totalReviews > 0 &&
-              !card.suspended
-                ? dueCount + 1
-                : dueCount,
-            0
-          ),
-          this.setList[set].settings &&
-            this.setList[set].settings.maxReviewsPerDay
-            ? this.setList[set].settings.maxReviewsPerDay -
-                this.setList[set].reviewsToday
-            : 999999
-        )
-        const newInDeck = this.setList[set].cards.reduce(
-          (dueCount, card) =>
-            (!card.totalReviews || card.totalReviews === 0) && !card.suspended
-              ? dueCount + 1
-              : dueCount,
-          0
-        )
-        this.dueReviews[set] =
-          dueInDeck + Math.min(maxNew - Math.min(newToday, maxNew), newInDeck)
+        this.dueReviews[setId] = getNumberDueInSet(this.setList[setId])
       }
     },
     checkClickToClose(e) {

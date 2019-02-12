@@ -2,6 +2,7 @@ import Vuex from 'vuex'
 import Vue from 'vue'
 const storage = require('../assets/storage')
 const dbManager = require('../assets/dbManager')
+const { getNumberDueInSet } = require('../assets/commonFunctions')
 
 Vue.use(Vuex)
 
@@ -39,6 +40,7 @@ export default () => {
       },
       setCurrentSetId(state, newSetId) {
         state.currentSetId = newSetId
+        if (state.appState === 'user') state.appState === 'study'
         storage.set('currentSetId', newSetId)
       },
       logOut(state) {
@@ -386,6 +388,27 @@ export default () => {
           )
           commit('setPauseDbSets', false)
         })
+      },
+      goToNextSet({ commit, state }, thatHasDueCards = false) {
+        let allIds = Object.keys(state.setList)
+        if (thatHasDueCards)
+          allIds = allIds.filter(id => getNumberDueInSet(state.setList[id]) > 0)
+        if (allIds.length === 0) return
+        const nextSetId =
+          allIds[(allIds.indexOf(state.currentSetId) + 1) % allIds.length]
+        commit('setCurrentSetId', nextSetId)
+      },
+      goToPreviousSet({ commit, state }, thatHasDueCards = false) {
+        let allIds = Object.keys(state.setList)
+        if (thatHasDueCards)
+          allIds = allIds.filter(id => getNumberDueInSet(state.setList[id]) > 0)
+        if (allIds.length === 0) return
+        const previousSetId =
+          allIds[
+            (allIds.indexOf(state.currentSetId) - 1 + allIds.length) %
+              allIds.length
+          ]
+        commit('setCurrentSetId', previousSetId)
       },
     },
   })
