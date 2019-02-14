@@ -116,16 +116,18 @@ a:visited {
 }
 
 .keyicon {
+  font-family: 'Avenir Neue', 'Avenir', 'Raleway', 'Helvetica', sans-serif;
   display: inline-block;
   border: 1px solid rgba(black, 0.3);
   background: rgba(black, 0.05);
   color: rgba(black, 0.7);
   text-transform: uppercase;
+  line-height: 1;
   font-weight: 600;
   font-size: 0.7em;
-  padding: 1px 5px;
+  padding: 2px 4px;
   text-align: center;
-  min-width: 18px;
+  min-width: 16px;
   border-radius: 4px;
   box-shadow: 0 2px 0px rgba(black, 0.2);
   margin-bottom: 2px;

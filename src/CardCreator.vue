@@ -1,33 +1,35 @@
 <template>
   <div class="cardcreator">
-    <EditableTextField
-      class="textfield front"
-      :class="{ duplicate: isDuplicate }"
-      :focus="setFocus === 'front'"
-      v-model="front"
-      placeholder="Hint"
-      @startEdit="focus"
-      @next="tab"
-      @setImageURL="setImageURL"
-    />
-    <div class="imagecontainer" v-if="imageURL" @click="imageURL = ''">
-      <ImageLoader :url="imageURL" />
+    <div class="cardframe">
+      <EditableTextFieldMarkdown
+        class="textfield front"
+        :class="{ duplicate: isDuplicate }"
+        :focus="setFocus === 'front'"
+        v-model="front"
+        placeholder="Hint"
+        @startEdit="focus"
+        @next="tab"
+        @setImageURL="setImageURL"
+      />
+      <div class="imagecontainer" v-if="imageURL" @click="imageURL = ''">
+        <ImageLoader :url="imageURL" />
+      </div>
+      <EditableTextFieldMarkdown
+        class="textfield back"
+        :focus="setFocus === 'back'"
+        v-model="back"
+        placeholder="Answer"
+        @startEdit="focus"
+        @prev="shiftTab"
+        @setImageURL="setImageURL"
+      />
     </div>
-    <EditableTextField
-      class="textfield back"
-      :focus="setFocus === 'back'"
-      v-model="back"
-      placeholder="Answer"
-      @startEdit="focus"
-      @prev="shiftTab"
-      @setImageURL="setImageURL"
-    />
 
     <FloatingText :text="floatText" offset="-30" />
     <div class="buttonlist">
       <button @click="newCard">
         <div>Add Card</div>
-        <div class="keyicon">⌘-Enter</div>
+        <kbd class="keyicon">⌘-Enter</kbd>
       </button>
     </div>
 
@@ -38,7 +40,7 @@
       <br />
       <button @click="autoSetImage">
         <div>Auto-Set Image</div>
-        <div class="keyicon">⌘-i</div>
+        <kbd class="keyicon">⌘-i</kbd>
       </button>
       <br />
       <div v-if="imageURL" class="sub" style="position: relative; top: 5px;">
@@ -51,7 +53,7 @@
 
 <script>
 import FloatingText from './FloatingText'
-import EditableTextField from './EditableTextField'
+import EditableTextFieldMarkdown from './EditableTextFieldMarkdown'
 import ImageLoader from './ImageLoader'
 import { getRandomImage } from './assets/commonFunctions'
 
@@ -70,7 +72,7 @@ export default {
   },
   components: {
     FloatingText,
-    EditableTextField,
+    EditableTextFieldMarkdown,
     ImageLoader,
   },
   computed: {
@@ -166,6 +168,12 @@ export default {
     display: block;
   }
 
+  .cardframe {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+  }
+
   .imagecontainer {
     background: #f8f8f8;
     text-align: center;
@@ -180,7 +188,6 @@ export default {
   .textfield {
     background: #f8f8f8;
     padding: 50px 20px;
-    white-space: pre-wrap;
     font-size: 1.5rem;
     text-align: center;
     transition: background 0.2s;

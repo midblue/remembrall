@@ -40,7 +40,7 @@ export default () => {
       },
       setCurrentSetId(state, newSetId) {
         state.currentSetId = newSetId
-        if (state.appState === 'user') state.appState === 'study'
+        if (state.appState === 'user') state.appState = 'study'
         storage.set('currentSetId', newSetId)
       },
       logOut(state) {

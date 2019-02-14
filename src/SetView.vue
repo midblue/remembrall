@@ -18,35 +18,35 @@
         @click="$store.commit('setAppState', 'study')"
       >
         <div>Study</div>
-        <span class="keyicon">s</span>
+        <kbd class="keyicon">s</kbd>
       </button>
       <button
         :class="{ active: appState === 'addCard' }"
         @click="$store.commit('setAppState', 'addCard')"
       >
         <div>Add</div>
-        <span class="keyicon">a</span>
+        <kbd class="keyicon">a</kbd>
       </button>
       <button
         :class="{ active: appState === 'setBrowse' }"
         @click="$store.commit('setAppState', 'setBrowse')"
       >
         <div>Browse</div>
-        <span class="keyicon">b</span>
+        <kbd class="keyicon">b</kbd>
       </button>
       <button
         :class="{ active: appState === 'setStats' }"
         @click="$store.commit('setAppState', 'setStats')"
       >
         <div>Stats</div>
-        <span class="keyicon">t</span>
+        <kbd class="keyicon">t</kbd>
       </button>
       <button
         :class="{ active: appState === 'setSettings' }"
         @click="$store.commit('setAppState', 'setSettings')"
       >
         <div>Settings</div>
-        <span class="keyicon">e</span>
+        <kbd class="keyicon">e</kbd>
       </button>
     </div>
     <br />

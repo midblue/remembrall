@@ -32,7 +32,7 @@
         key="showback"
       >
         Show Back
-        <div><span class="keyicon">Space</span></div>
+        <div><kbd class="keyicon">Space</kbd></div>
       </button>
       <template v-else>
         <button
@@ -41,12 +41,12 @@
           @click="answer('again')"
         >
           Wrong
-          <div><span class="keyicon">1</span></div></button
+          <div><kbd class="keyicon">1</kbd></div></button
         ><button key="ok" v-if="timeBonuses.ok" @click="answer('ok')">
           Right
           <div>
-            <span class="keyicon">2</span> <span v-if="!isMobile"> / </span>
-            <span class="keyicon">Space</span>
+            <kbd class="keyicon">2</kbd> <span v-if="!isMobile"> / </span>
+            <kbd class="keyicon">Space</kbd>
           </div>
         </button>
       </template>

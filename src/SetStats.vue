@@ -23,7 +23,11 @@
     </p>
     <p>
       Success Rate:
-      <b>{{ oks && agains ? (oks / (agains + oks)).toFixed(3) * 100 : 0 }}%</b>
+      <b
+        >{{
+          oks && agains ? Math.round((oks / (agains + oks)) * 10000) / 100 : 0
+        }}%</b
+      >
       <span class="sub" v-if="oks && agains"
         >({{ oks }} oks / {{ agains }} agains)</span
       >

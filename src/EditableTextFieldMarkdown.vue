@@ -12,11 +12,17 @@
     @blur="commitEdit"
     @paste="paste"
     tabindex="0"
-    v-html="displayText"
+    v-html="isEditing ? displayText : displayMarkdown"
   ></div>
 </template>
 
 <script>
+const markdownit = require('markdown-it')({
+  breaks: true,
+  html: true,
+  typographer: true,
+})
+
 export default {
   props: {
     text: {
@@ -64,14 +70,34 @@ export default {
     prop: 'text',
     event: 'changeText',
   },
-  computed: {},
+  computed: {
+    displayMarkdown() {
+      let markdown = (this.displayText.length > 0
+        ? this.displayText
+        : this.text
+      )
+        .split('\n')
+        .map(string => {
+          const output = markdownit.render(string)
+          return output || '<br />'
+        })
+        .join('')
+        .replace(/(<br \/>)*$/, '')
+      // .replace(/<br ?\/?>\n?/gim, '')
+      // .replace(/<\/?p>/gm, '')
+      // console.log(markdown, this.displayText)
+      // markdown = markdown
+      //   .replace(/\n/, '<br />')
+      //   .replace(/><br \/></, '><')
+      return markdown
+    },
+  },
   watch: {
     text(newText) {
       if (!this.isEditing) {
         this.resetTextTo(newText)
       }
     },
-
     disableEdits(isDisabled) {
       this.isEditing = false
       this.metaDown = false
@@ -128,8 +154,10 @@ export default {
       this.metaDown = false
       this.shiftDown = false
       const finalText = this.sanitize(this.$el.innerHTML)
-      if (finalText.length > 0) this.$emit('endEdit', finalText)
-      else this.resetTextTo(this.text)
+      if (finalText.length > 0) {
+        this.displayText = finalText
+        this.$emit('endEdit', finalText)
+      } else this.resetTextTo(this.text)
     },
     keyDown(event) {
       if (!this.isEditing || this.disableEdits) return
@@ -165,12 +193,18 @@ export default {
     sanitize(text) {
       const sanitizedText = text
         .replace(/<div>/g, '\n')
-        .replace(/<br\s?\/?>/g, '\n')
+        .replace(/\n<br ?\/?>/g, '\n')
+        .replace(/<br ?\/?>/g, '\n')
         .replace(/<[^>]*>/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
         .replace(/^[\s\n\t]*/g, '')
       // .replace(/[\s\n\t]*$/g, '')
+      console.log(text)
+      console.log()
+      console.log(sanitizedText)
+      console.log()
+      console.log()
       return sanitizedText
     },
     paste(e) {
@@ -265,6 +299,7 @@ function getSelectedText(el) {
 <style lang="scss">
 .editabletext {
   cursor: pointer;
+  white-space: normal;
 
   &.placeholder {
     color: rgba(black, 0.2);
@@ -272,6 +307,24 @@ function getSelectedText(el) {
 
   &.editabletextediting {
     cursor: text;
+    white-space: pre-wrap;
+  }
+
+  p,
+  div,
+  h1,
+  h2,
+  h3,
+  h4,
+  ul,
+  ol {
+    padding: 0;
+    margin: 0;
+  }
+  ul,
+  ol {
+    padding: 0 10% 0 10%;
+    text-align: left;
   }
 }
 </style>

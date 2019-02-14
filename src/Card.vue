@@ -14,7 +14,7 @@
       class="topleft"
     />
     <div class="front">
-      <EditableTextField
+      <EditableTextFieldMarkdown
         class="textfield"
         :class="{
           newcard: isNewCard,
@@ -37,7 +37,7 @@
       @click="$emit('showBack')"
     >
       <div :class="{ hideanswer: !showBack && forStudy }">
-        <EditableTextField
+        <EditableTextFieldMarkdown
           class="textfield"
           :class="{
             newcard: isNewCard,
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import EditableTextField from './EditableTextField'
+import EditableTextFieldMarkdown from './EditableTextFieldMarkdown'
 import CardTools from './CardTools'
 import StudyExtras from './StudyExtras'
 import ImageLoader from './ImageLoader'
@@ -111,7 +111,7 @@ export default {
     },
   },
   components: {
-    EditableTextField,
+    EditableTextFieldMarkdown,
     CardTools,
     StudyExtras,
     ImageLoader,
@@ -193,7 +193,6 @@ export default {
 
 .textfield {
   padding: 45px 30px;
-  white-space: pre-wrap;
   font-size: 1.5rem;
   transition: padding 0.5s;
 

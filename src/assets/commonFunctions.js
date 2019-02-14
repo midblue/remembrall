@@ -33,6 +33,8 @@ exports.findImagesForKeyword = findImagesForKeyword
 function getKeyWord(text, allowSpaces = false) {
   return text
     .replace(/\(.*\)/g, '')
+    .replace(/[*_-]/g, '')
+    .split('\n')[0]
     .toLowerCase()
     .split(allowSpaces ? /[/;.,?¿!+()\[\]{}<>]/ : /[  ・/;.,?¿!+()\[\]{}<>]/)
     .reduce(
