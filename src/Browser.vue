@@ -39,27 +39,22 @@
           <button @click="deselectAll">
             Deselect{{ isMobile ? '' : ' All' }}
           </button>
-          <button
-            @mouseover="isMobile ? false : (moveAllPaneOpen = true)"
-            @click="isMobile ? (moveAllPaneOpen = !moveAllPaneOpen) : false"
-            @mouseout="isMobile ? false : (moveAllPaneOpen = false)"
-          >
-            Move<span v-if="!isMobile">
-              {{ selectedCards.length }} Card{{
+          <Dropdown
+            :label="
+              `Move ${!isMobile ? selectedCards.length : ''} Card${
                 selectedCards.length === 1 ? '' : 's'
-              }}</span
+              }`
+            "
+          >
+            <div
+              v-for="set in $store.state.setList"
+              class="button"
+              @key="set.id"
+              @click="moveAll(set.id)"
             >
-            <div class="secondarypanel" v-if="moveAllPaneOpen">
-              <div
-                v-for="set in $store.state.setList"
-                class="button"
-                @key="set.id"
-                @click="moveAll(set.id)"
-              >
-                {{ set.name }}
-              </div>
+              {{ set.name }}
             </div>
-          </button>
+          </Dropdown>
           <button @click="suspendAll">
             Un/Suspend<span v-if="!isMobile">
               {{ selectedCards.length }} Card{{
@@ -110,6 +105,7 @@
 <script>
 import CardInline from './CardInline'
 import Card from './Card'
+import Dropdown from './Dropdown'
 
 export default {
   props: {
@@ -123,6 +119,7 @@ export default {
   components: {
     CardInline,
     Card,
+    Dropdown,
   },
   data() {
     return {
@@ -133,7 +130,6 @@ export default {
       searchTerm: '',
       selectedCards: [],
       forceDeselect: false,
-      moveAllPaneOpen: false,
     }
   },
   computed: {
@@ -230,6 +226,7 @@ export default {
         console.log('Unable to find card', cardId, 'to deselect.')
     },
     deselectAll() {
+      this.selectedCards = []
       this.forceDeselect = false
       this.$nextTick(() => (this.forceDeselect = true))
     },
@@ -284,25 +281,6 @@ export default {
 
 .buttonlist {
   margin-bottom: 10px;
-}
-
-.secondarypanel {
-  position: absolute;
-  left: 0;
-  top: 100%;
-  background: #f5f5f5;
-  width: 100%;
-
-  & > div {
-    width: 100%;
-    overflow: hidden;
-    text-align: center;
-    padding: 10px 15px;
-
-    &:hover {
-      background: #eee;
-    }
-  }
 }
 
 .searchbar {

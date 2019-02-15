@@ -188,7 +188,11 @@ export default {
       const possibleAdditionalNewCardsToday =
         (this.settings.maxNewPerDay || 0) - (this.newToday || 0)
       return this.updatedCards
-        .filter(card => !card.totalReviews)
+        .filter(
+          card =>
+            !card.totalReviews &&
+            (!card.nextReview || card.nextReview < Date.now())
+        )
         .sort((a, b) =>
           // this.settings.shuffleCards
           // ? Math.random() - 0.5:
@@ -362,10 +366,17 @@ export default {
       this.preloadNextImage()
     },
     postponeCurrentCard() {
-      this.cardsToStudy.push(this.cardsToStudy.shift())
-      const text = 'Postponed!'
+      const card = this.cardsToStudy.shift()
+      const timeToPostpone = 4 * 60 * 60 * 1000
+      this.$store.commit('updateCard', {
+        id: card.id,
+        nextReview: new Date(Date.now() + timeToPostpone).getTime(),
+      })
       this.displayTimeMod = null
-      this.$nextTick(() => (this.displayTimeMod = text))
+      this.$nextTick(
+        () =>
+          (this.displayTimeMod = 'Postponed for ' + msToString(timeToPostpone))
+      )
       this.preloadNextImage()
     },
     preloadNextImage() {
