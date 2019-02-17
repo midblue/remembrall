@@ -7,6 +7,7 @@
     />
     <Card
       class="card"
+      ref="card"
       :id="id"
       :front="front"
       :back="back"
@@ -161,6 +162,10 @@ export default {
           ''
         )
       }
+      const topOfCardVisible =
+        this.$el.getBoundingClientRect().top + window.scrollY - 10
+      if (topOfCardVisible > window.scrollY + 100) return
+      window.scrollTo(0, topOfCardVisible)
     },
   },
   mounted() {
@@ -181,6 +186,17 @@ export default {
     showBackAction() {
       this.showBack = true
       this.revealedBackTime = new Date()
+      const cardRect = this.$refs.card.$el.getBoundingClientRect()
+      const bottomOfCardVisible =
+        cardRect.top +
+        window.scrollY +
+        cardRect.height -
+        window.innerHeight +
+        (this.isMobile ? 70 : 120)
+      console.log(window.scrollY, bottomOfCardVisible)
+      if (bottomOfCardVisible <= 0 || bottomOfCardVisible < window.scrollY)
+        return
+      window.scrollTo(0, bottomOfCardVisible)
     },
     answer(difficulty) {
       this.showBack = false
@@ -322,5 +338,26 @@ export default {
 }
 .showback {
   width: 100%;
+}
+.buttonlist.primary {
+  @media (max-width: 768px) {
+    position: relative;
+    z-index: 1000;
+    width: 100%;
+    border-radius: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    border-bottom: none;
+
+    button {
+      background: #eee;
+      border-radius: 0;
+
+      &:hover {
+        background: #ddd;
+      }
+    }
+  }
 }
 </style>

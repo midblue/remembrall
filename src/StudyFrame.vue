@@ -367,7 +367,7 @@ export default {
     },
     postponeCurrentCard() {
       const card = this.cardsToStudy.shift()
-      const timeToPostpone = 4 * 60 * 60 * 1000
+      const timeToPostpone = 1 * 60 * 60 * 1000 // 1 hr
       this.$store.commit('updateCard', {
         id: card.id,
         nextReview: new Date(Date.now() + timeToPostpone).getTime(),

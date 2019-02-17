@@ -200,11 +200,6 @@ export default {
         .replace(/&amp;/g, '&')
         .replace(/^[\s\n\t]*/g, '')
       // .replace(/[\s\n\t]*$/g, '')
-      console.log(text)
-      console.log()
-      console.log(sanitizedText)
-      console.log()
-      console.log()
       return sanitizedText
     },
     paste(e) {

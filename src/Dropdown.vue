@@ -2,7 +2,7 @@
   <button
     @mouseover="isMobile ? false : (paneOpen = true)"
     @click="isMobile ? (paneOpen = !paneOpen) : false"
-    @mouseout="mouseOut"
+    @mouseleave="isMobile ? false : (paneOpen = false)"
   >
     {{ label }}
     <div class="secondarypanel" ref="secondaryPanel" v-if="paneOpen">
@@ -31,19 +31,7 @@ export default {
   },
   mounted() {},
   beforeDestroy() {},
-  methods: {
-    mouseOut(e) {
-      if (!this.isMobile) {
-        if (
-          e.toElement === this.$el ||
-          e.toElement.parentNode === this.$el ||
-          e.toElement.parentNode === this.$refs.secondaryPanel
-        )
-          return
-        this.paneOpen = false
-      }
-    },
-  },
+  methods: {},
 }
 </script>
 

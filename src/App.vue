@@ -64,6 +64,7 @@ html,
 body {
   margin: 0;
   font-family: 'Avenir Neue', 'Avenir', 'Raleway', 'Helvetica', sans-serif;
+  scroll-behavior: smooth;
 }
 
 * {

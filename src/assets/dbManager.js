@@ -7,7 +7,7 @@ setInterval(() => {
   if (!currentlyUpdating && pendingUpdates.length) {
     currentlyUpdating = true
     const newUpdate = pendingUpdates.shift()
-    console.log('attempting', newUpdate)
+    // console.log('attempting', newUpdate)
 
     if (newUpdate.type === 'newUser') {
       firestore.newUser(newUpdate.user).then(res => {

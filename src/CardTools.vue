@@ -2,9 +2,9 @@
   <div
     class="cardtools"
     v-if="id"
-    @mouseover="mouseover"
+    @mouseover="!isMobile ? (open = true) : false"
     @click="toggle"
-    @mouseout="mouseout"
+    @mouseleave="!isMobile ? (open = false) : false"
   >
     <div class="icon" :class="{ open }">
       <svg
@@ -48,15 +48,16 @@
           class="button"
           ref="movetobutton"
           v-if="allSets.length > 1"
-          @mouseover="isMobile ? false : (moveToSetOpen = true)"
+          @mouseover="!isMobile ? (moveToSetOpen = true) : false"
           @click="isMobile ? (moveToSetOpen = !moveToSetOpen) : false"
-          @mouseout="isMobile ? false : (moveToSetOpen = false)"
+          @mouseleave="!isMobile ? (moveToSetOpen = false) : false"
         >
           Move to Set...
           <div
             class="secondarypanel"
             :class="{ mobile: isMobile }"
             v-if="moveToSetOpen"
+            ref="secondaryPanel"
           >
             <div
               v-for="set in allSets"
@@ -142,12 +143,6 @@ export default {
         this.open = !this.open
       if (this.open) window.addEventListener('click', this.checkClickToClose)
       else window.removeEventListener('click', this.checkClickToClose)
-    },
-    mouseover() {
-      if (!this.$store.state.isMobile) this.open = true
-    },
-    mouseout() {
-      if (!this.$store.state.isMobile) this.open = false
     },
     swapSides() {
       this.$store.commit('updateCard', {
