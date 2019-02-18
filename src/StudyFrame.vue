@@ -297,6 +297,7 @@ export default {
     },
     doneForDay(isDone) {
       if (isDone) {
+        window.scrollTo(0, 0)
         this.$nextTick(this.refreshCards)
         this.startedWith = 0
       }

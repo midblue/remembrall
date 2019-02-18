@@ -193,7 +193,6 @@ export default {
         cardRect.height -
         window.innerHeight +
         (this.isMobile ? 70 : 120)
-      console.log(window.scrollY, bottomOfCardVisible)
       if (bottomOfCardVisible <= 0 || bottomOfCardVisible < window.scrollY)
         return
       window.scrollTo(0, bottomOfCardVisible)
