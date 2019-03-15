@@ -295,7 +295,12 @@ export default {
         (!this.timeMod || isNaN(this.timeMod) ? 0 : this.timeMod) *
         difficultyModifiers[difficulty]
       if (newTimeMod < minimumTimeMod) newTimeMod = minimumTimeMod
-      if (difficulty === 'again') newTimeMod = 0
+      if (difficulty === 'again') {
+        newTimeMod = 0
+        let oncePerDayTimeMod = 10 * 60 * 60 * 1000 /* 10h */
+        if (this.settings.oncePerDay && newTimeMod < oncePerDayTimeMod)
+          newTimeMod = oncePerDayTimeMod
+      }
       return newTimeMod
     },
     keyDown(event) {
@@ -318,10 +323,13 @@ export default {
       if (event.key === '1' && this.showBack) this.answer('again')
       else if (event.key === ' ') {
         event.preventDefault()
+        event.stopPropagation()
         !this.showBack ? this.showBackAction() : this.answer('ok')
-      } else if (event.key === 'Enter')
+      } else if (event.key === 'Enter') {
+        event.preventDefault()
+        event.stopPropagation()
         !this.showBack ? this.showBackAction() : this.answer('ok')
-      else if (event.key === '2' && this.showBack) this.answer('ok')
+      } else if (event.key === '2' && this.showBack) this.answer('ok')
       else if (event.key === 'p') this.$emit('postpone')
     },
     keyUp(event) {

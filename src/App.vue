@@ -111,6 +111,9 @@ a:visited {
   opacity: 0.6;
   font-weight: 500;
 }
+.fade {
+  opacity: 0.6;
+}
 
 .centertext {
   text-align: center;

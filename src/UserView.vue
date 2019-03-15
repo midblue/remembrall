@@ -1,7 +1,14 @@
 <template>
   <div class="userview">
     <h1>
-      All Cards
+      Hi, {{ currentUser }}!
+      <div class="buttonlist" style="display: inline-block;">
+        <button @click="logOut">Log out</button>
+      </div>
+    </h1>
+    <br />
+    <h1>
+      All Your Cards
       <span class="sub">({{ allCards.length }} total cards)</span>
       <!--
         <span class="sub">
@@ -27,6 +34,9 @@ export default {
     Browser,
   },
   computed: {
+    currentUser() {
+      return this.$store.state.currentUser
+    },
     allSets() {
       return this.$store.state.setList
     },
@@ -36,6 +46,11 @@ export default {
         allCards.push(...this.allSets[set].cards)
       }
       return allCards
+    },
+  },
+  methods: {
+    logOut() {
+      this.$store.commit('logOut')
     },
   },
 }

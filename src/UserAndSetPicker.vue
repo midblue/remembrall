@@ -91,7 +91,7 @@
             :class="{ active: appState === 'user' }"
           >
             {{ currentUser }}</button
-          ><button @click="logOut">Log out</button>
+          ><button v-if="!isMobile" @click="logOut">Log out</button>
         </div>
       </div>
     </template>

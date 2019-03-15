@@ -35,7 +35,7 @@ export default {
   computed: {},
   watch: {
     toStudy(newToStudy) {
-      if (newToStudy.length > this.startedWith)
+      if (newToStudy.length >= this.startedWith)
         this.adjustedStartedWith = newToStudy.length
     },
     startedWith(newStartedWith) {

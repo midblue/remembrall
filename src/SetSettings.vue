@@ -64,6 +64,15 @@
         "
       />
 
+      <Toggle
+        key="once"
+        :setTo="settings.oncePerDay"
+        label="Only see cards once per day"
+        @toggled="
+          updateSettings({ oncePerDay: !(settings.oncePerDay ? true : false) })
+        "
+      />
+
       <select v-model="selectedLanguageTools" class="marright">
         <option v-for="(language, key) in languages" :key="key" :value="key">{{
           language
