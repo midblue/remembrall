@@ -264,6 +264,9 @@ export default {
           this.timeBonuses[difficulty]
       }
       newTimeMod = Math.floor(newTimeMod)
+      let oncePerDayTimeMod = 10 * 60 * 60 * 1000 /* 10h */
+      if (this.settings.oncePerDay && newTimeMod < oncePerDayTimeMod)
+        newTimeMod = oncePerDayTimeMod
 
       console.log('old time mod:', msToString(this.timeMod))
       console.log('new time mod:', msToString(newTimeMod))
@@ -295,12 +298,7 @@ export default {
         (!this.timeMod || isNaN(this.timeMod) ? 0 : this.timeMod) *
         difficultyModifiers[difficulty]
       if (newTimeMod < minimumTimeMod) newTimeMod = minimumTimeMod
-      if (difficulty === 'again') {
-        newTimeMod = 0
-        let oncePerDayTimeMod = 10 * 60 * 60 * 1000 /* 10h */
-        if (this.settings.oncePerDay && newTimeMod < oncePerDayTimeMod)
-          newTimeMod = oncePerDayTimeMod
-      }
+      if (difficulty === 'again') newTimeMod = 0
       return newTimeMod
     },
     keyDown(event) {
