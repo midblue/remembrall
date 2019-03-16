@@ -6,6 +6,8 @@
         <button @click="logOut">Log out</button>
       </div>
     </h1>
+    <div>You've studied {{ totalStudiedToday }} cards today.</div>
+    <br />
     <br />
     <h1>
       All Your Cards
@@ -39,6 +41,15 @@ export default {
     },
     allSets() {
       return this.$store.state.setList
+    },
+    totalStudiedToday() {
+      let total = 0
+      for (let set in this.allSets) {
+        total +=
+          (this.allSets[set].newToday || 0) +
+          (this.allSets[set].reviewsToday || 0)
+      }
+      return total
     },
     allCards() {
       const allCards = []

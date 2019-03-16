@@ -264,6 +264,8 @@ export default {
           this.timeBonuses[difficulty]
       }
       newTimeMod = Math.floor(newTimeMod)
+
+      // check for once-per-day setting
       let oncePerDayTimeMod = 10 * 60 * 60 * 1000 /* 10h */
       if (this.settings.oncePerDay && newTimeMod < oncePerDayTimeMod)
         newTimeMod = oncePerDayTimeMod
