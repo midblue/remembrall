@@ -292,6 +292,12 @@ function getSelectedText(el) {
 </script>
 
 <style lang="scss">
+.editabletext.editabletextediting:empty {
+  &:before {
+    content: '\feff'; /* ZERO WIDTH NO-BREAK SPACE */
+  }
+}
+
 .editabletext {
   cursor: pointer;
   white-space: normal;

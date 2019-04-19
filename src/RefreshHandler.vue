@@ -1,10 +1,7 @@
 <template>
-	<div
-		class="refreshtakeover"
-		:class="{on: pauseDbSets}"
-	>
-		<span>Loading data...</span>
-	</div>
+  <div class="refreshtakeover" :class="{ on: pauseDbSets }">
+    <span>Loading data...</span>
+  </div>
 </template>
 
 <script>
@@ -55,7 +52,7 @@ export default {
   z-index: 2000;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   display: flex;
   align-items: center;

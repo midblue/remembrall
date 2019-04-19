@@ -6,13 +6,14 @@
         <button @click="logOut">Log out</button>
       </div>
     </h1>
-    <div>You've studied {{ totalStudiedToday }} cards today.</div>
-    <br />
-    <br />
-    <h1>
-      All Your Cards
-      <span class="sub">({{ allCards.length }} total cards)</span>
-      <!--
+    <template v-if="allCards.length > 0">
+      <div>You've studied {{ totalStudiedToday }} cards today.</div>
+      <br />
+      <br />
+      <h1>
+        All Your Cards
+        <span class="sub">({{ allCards.length }} total cards)</span>
+        <!--
         <span class="sub">
           ({{ filteredCards.length
           }}{{
@@ -21,9 +22,9 @@
           card{{ filteredCards.length === 1 ? '' : 's'
           }}{{ filteredCards.length < allCards.length ? ' shown' : '' }})
         </span>
-      -->
-    </h1>
-    <Browser :cards="allCards" :inline="true" />
+      --></h1>
+      <Browser :cards="allCards" :inline="true" />
+    </template>
   </div>
 </template>
 

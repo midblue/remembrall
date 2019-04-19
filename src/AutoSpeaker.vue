@@ -28,16 +28,16 @@ export default {
       if (newText) this.speakWord()
     },
   },
-  mounted() {
-    if (window.speechSynthesis) {
+  methods: {
+    spawnSpeaker() {
+      if (!window.speechSynthesis) return
       this.speaker = new SpeechSynthesisUtterance()
       this.speaker.lang = this.language
       this.speaker.volume = 0.4
       this.speaker.rate = this.settings.speechSpeed || 0.8
-    }
-  },
-  methods: {
+    },
     speakWord() {
+      this.spawnSpeaker()
       if (!this.speaker) return
       this.speaker.text = this.text
       window.speechSynthesis.speak(this.speaker)

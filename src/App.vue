@@ -4,6 +4,20 @@
     <RefreshHandler />
     <div class="content">
       <transition-group appear name="list" tag="div">
+        <div
+          key="nosets"
+          v-if="
+            Object.keys($store.state.setList).length === 0 &&
+              appState !== 'user'
+          "
+        >
+          <center><h1 style="margin: 50px auto">No sets yet!</h1></center>
+          <div class="buttonlist">
+            <button @click="$store.commit('addSet')">
+              + Add Your First Set
+            </button>
+          </div>
+        </div>
         <SetView
           v-if="currentSet && appState !== 'user'"
           :key="currentSet.id"
@@ -14,7 +28,7 @@
           :newToday="currentSet.newToday"
           :reviewsToday="currentSet.reviewsToday"
         />
-        <UserView v-if="appState === 'user'" key="user" />
+        <UserView v-if="appState === 'user' && currentUser" key="user" />
       </transition-group>
     </div>
   </section>
@@ -36,6 +50,9 @@ export default {
   computed: {
     isMobile() {
       return this.$store.state.isMobile
+    },
+    currentUser() {
+      return this.$store.state.currentUser
     },
     currentSet() {
       return this.$store.state.setList[this.$store.state.currentSetId]
@@ -73,7 +90,7 @@ body {
 
 .app {
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   position: absolute;
   top: 0;
 
@@ -87,7 +104,7 @@ body {
   width: 650px;
   padding: 0 7vw;
   margin: 40px auto 20vh auto;
-  max-width: 100vw;
+  max-width: 100%;
 
   @media (max-width: 768px) {
     margin-top: 30px;

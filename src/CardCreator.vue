@@ -12,7 +12,7 @@
         @setImageURL="setImageURL"
       />
       <div class="imagecontainer" v-if="imageURL" @click="imageURL = ''">
-        <ImageLoader :url="imageURL" />
+        <ImageLoader :url="imageURL"/>
       </div>
       <EditableTextFieldMarkdown
         class="textfield back"
@@ -25,7 +25,7 @@
       />
     </div>
 
-    <FloatingText :text="floatText" offset="-30" />
+    <FloatingText :text="floatText" offset="-30"/>
     <div class="buttonlist">
       <button @click="newCard">
         <div>Add Card</div>
@@ -34,20 +34,24 @@
     </div>
 
     <center>
-      <span class="sub" style="position: relative; top: -5px;"
-        >Paste an image link to add your own image. Or,</span
-      >
-      <br />
+      <span
+        class="sub"
+        style="position: relative; top: -5px;"
+      >Paste an image link to add your own image. Or,</span>
+      <br>
       <button @click="autoSetImage">
         <div>Auto-Set Image</div>
-        <kbd class="keyicon">⌘-i</kbd>
+        <kbd class="keyicon">{{ isFirefox ? 'ctrl': '⌘' }}-i</kbd>
       </button>
-      <br />
-      <div v-if="imageURL" class="sub" style="position: relative; top: 5px;">
-        (click image to remove it)
-      </div>
+      <br>
+      <div
+        v-if="imageURL"
+        class="sub"
+        style="position: relative; top: 5px;"
+      >(click image to remove it)</div>
     </center>
-    <br /><br />
+    <br>
+    <br>
   </div>
 </template>
 
@@ -68,6 +72,7 @@ export default {
       floatText: '',
       isDuplicate: false,
       setFocus: 'front',
+      isFirefox: navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
     }
   },
   components: {
@@ -121,6 +126,7 @@ export default {
       })
     },
     keyDown(event) {
+      if (event.key === 'Control') this.metaDown = true
       if (event.key === 'Meta') this.metaDown = true
       if (event.key === 'Enter' && this.metaDown) this.$nextTick(this.newCard)
       if (event.key === 'i' && this.metaDown) {
@@ -130,6 +136,7 @@ export default {
       }
     },
     keyUp(event) {
+      if (event.key === 'Control') this.metaDown = false
       if (event.key === 'Meta') this.metaDown = false
     },
     focus() {

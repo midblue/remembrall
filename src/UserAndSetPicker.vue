@@ -24,7 +24,7 @@
       <div class="sub">Loading...</div>
     </template>
     <template v-else>
-      <div class="buttonlist fullheight inlineblock" v-if="!isMobile">
+      <div v-if="!isMobile" class="buttonlist fullheight inlineblock">
         <button
           v-for="set in setList"
           :key="set.id"
@@ -47,8 +47,9 @@
             class="sub"
           >
             ({{ dueReviews[set.id] }})
-          </span></button
-        ><button @click="$store.commit('addSet')">+ Add Set</button>
+          </span>
+        </button>
+        <button @click="$store.commit('addSet')">+ Add Set</button>
       </div>
       <div v-else class="buttonlist fullheight" ref="mainButton">
         <button
@@ -57,6 +58,12 @@
           @click="$store.commit('setAppState', 'study')"
         >
           ← Back to Studying
+        </button>
+        <button
+          v-else-if="!setList[currentSetId]"
+          @click="$store.commit('addSet')"
+        >
+          + Add Set
         </button>
         <button
           v-else

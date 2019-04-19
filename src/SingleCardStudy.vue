@@ -26,40 +26,36 @@
     />
 
     <div class="buttonlist primary">
-      <button
-        class="showback"
-        v-if="!showBack"
-        @click="showBackAction"
-        key="showback"
-      >
+      <button class="showback" v-if="!showBack" @click="showBackAction" key="showback">
         Show Back
-        <div><kbd class="keyicon">Space</kbd></div>
+        <div>
+          <kbd class="keyicon">Space</kbd>
+        </div>
       </button>
       <template v-else>
-        <button
-          key="again"
-          v-if="timeBonuses.again !== undefined"
-          @click="answer('again')"
-        >
+        <button key="again" v-if="timeBonuses.again !== undefined" @click="answer('again')">
           Wrong
-          <div><kbd class="keyicon">1</kbd></div></button
-        ><button key="ok" v-if="timeBonuses.ok" @click="answer('ok')">
+          <div>
+            <kbd class="keyicon">1</kbd>
+          </div>
+        </button>
+        <button key="ok" v-if="timeBonuses.ok" @click="answer('ok')">
           Right
           <div>
-            <kbd class="keyicon">2</kbd> <span v-if="!isMobile"> / </span>
+            <kbd class="keyicon">2</kbd>
+            <span v-if="!isMobile">/</span>
             <kbd class="keyicon">Space</kbd>
           </div>
         </button>
       </template>
     </div>
-    <br />
+    <br>
     <div class="centertext">
-      <button
-        @click="$emit('postpone')"
-        style="padding-right: 15%; padding-left: 15%"
-      >
+      <button @click="$emit('postpone')" style="padding-right: 15%; padding-left: 15%">
         Postpone
-        <div><span class="keyicon">P</span></div>
+        <div>
+          <span class="keyicon">P</span>
+        </div>
       </button>
     </div>
   </div>
@@ -117,6 +113,7 @@ export default {
       reviewsSoFar: 0,
       metaDown: false,
       textToSpeak: '',
+      isFirefox: navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
     }
   },
   computed: {
@@ -304,6 +301,7 @@ export default {
       return newTimeMod
     },
     keyDown(event) {
+      if (event.key === 'Control') this.metaDown = true
       if (event.key === 'Meta') this.metaDown = true
       else if (event.key === 'i' && this.metaDown) {
         this.$store.commit('updateCard', {
@@ -333,6 +331,7 @@ export default {
       else if (event.key === 'p') this.$emit('postpone')
     },
     keyUp(event) {
+      if (event.key === 'Control') this.metaDown = false
       if (event.key === 'Meta') this.metaDown = false
     },
   },

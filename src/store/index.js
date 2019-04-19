@@ -346,7 +346,7 @@ export default () => {
           // first ever load
           if (!state.currentUser && empty) {
             console.log('first')
-            alert('new user')
+            // alert('new user')
             // dbManager.newUser(username)
             // if (Object.keys(setObject).length === 0) {
             //   setObject = newSetObject()

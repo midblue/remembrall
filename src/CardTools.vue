@@ -25,9 +25,7 @@
       <div class="panel" :class="{ open, left }">
         <div class="stats sub">
           <template v-if="totalReviews > 0">
-            <div>
-              {{ totalReviews }} review{{ totalReviews === 1 ? '' : 's' }}
-            </div>
+            <div>{{ totalReviews }} review{{ totalReviews === 1 ? '' : 's' }}</div>
             <div>{{ parseInt((ok / totalReviews) * 100) }}% success</div>
             <!-- <div>Next review: {{ msToString(nextReview) }}</div> -->
           </template>
@@ -36,16 +34,14 @@
 
         <div class="button" @click="swapSides">Swap Front/Back</div>
 
-        <div class="button" v-if="imageURL" @click="removeImageURL">
-          Remove Image
-        </div>
+        <div class="button" v-if="imageURL" @click="removeImageURL">Remove Image</div>
         <template v-else>
           <div class="button" @click="addImageURL">Set Image</div>
           <div class="button" @click="autoAddImageURL">Auto-Set Image</div>
         </template>
 
         <div
-          class="button"
+          class="button movetobutton"
           ref="movetobutton"
           v-if="allSets.length > 1"
           @mouseover="!isMobile ? (moveToSetOpen = true) : false"
@@ -65,21 +61,16 @@
               class="button"
               @key="set.id"
               @click="moveToSet(set.id)"
-            >
-              {{ set.name }}
-            </div>
+            >{{ set.name }}</div>
           </div>
         </div>
 
-        <div class="button" @click="suspendCard">
-          {{ suspended ? 'Unsuspend' : 'Suspend' }}
-        </div>
+        <div class="button" @click="suspendCard">{{ suspended ? 'Unsuspend' : 'Suspend' }}</div>
 
         <div class="button" @click="deleteCard">Delete</div>
       </div>
     </div>
   </div>
-  <div
 </template>
 
 <script>
@@ -136,13 +127,10 @@ export default {
   methods: {
     msToString,
     toggle(e) {
-      if (
-        this.$store.state.isMobile &&
-        !e.path.includes(this.$refs.movetobutton)
-      )
+      const path = e.path || (e.composedPath && e.composedPath())
+      if (this.$store.state.isMobile && !path.includes(this.$refs.movetobutton))
         this.open = !this.open
       if (this.open) window.addEventListener('click', this.checkClickToClose)
-      else window.removeEventListener('click', this.checkClickToClose)
     },
     swapSides() {
       this.$store.commit('updateCard', {
@@ -180,7 +168,11 @@ export default {
       this.open = false
     },
     checkClickToClose(e) {
-      if (!e.path.includes(this.$el)) this.open = false
+      const path = e.path || (e.composedPath && e.composedPath())
+      if (!path.includes(this.$el)) {
+        this.open = false
+        window.removeEventListener('click', this.checkClickToClose)
+      }
     },
     addImageURL() {
       const link = window.prompt('Enter an image url!')
