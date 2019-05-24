@@ -33,11 +33,17 @@
       </button>
     </div>
 
-    <center>
-      <span
-        class="sub"
-        style="position: relative; top: -5px;"
-      >Paste an image link to add your own image. Or,</span>
+    <center v-if="front || back">
+      <template v-if="languageTools === 'ja'">
+        <button @click="autoComplete">
+          <div>Auto-Complete Card</div>
+          <kbd class="keyicon">{{ isFirefox ? 'ctrl': '⌘' }}-m</kbd>
+        </button>
+        <br>
+        <br>
+      </template>
+      <span class="sub">Paste an image link to add your own image.</span>
+      <span class="sub">Or,</span>
       <br>
       <button @click="autoSetImage">
         <div>Auto-Set Image</div>
@@ -49,9 +55,10 @@
         class="sub"
         style="position: relative; top: 5px;"
       >(click image to remove it)</div>
+      <br>
+
+      <br>
     </center>
-    <br>
-    <br>
   </div>
 </template>
 
@@ -81,6 +88,10 @@ export default {
     ImageLoader,
   },
   computed: {
+    languageTools() {
+      return this.$store.state.setList[this.$store.state.currentSetId].settings
+        .languageTools
+    },
     cards() {
       return this.$store.state.setList[this.$store.state.currentSetId].cards
     },
@@ -134,6 +145,11 @@ export default {
         event.stopPropagation()
         this.autoSetImage()
       }
+      if (event.key === 'm' && this.metaDown) {
+        event.preventDefault()
+        event.stopPropagation()
+        this.autoComplete()
+      }
     },
     keyUp(event) {
       if (event.key === 'Control') this.metaDown = false
@@ -159,6 +175,91 @@ export default {
       getRandomImage(this.front || this.back).then(image => {
         if (image) this.imageURL = image
       })
+    },
+    autoComplete() {
+      const basedOnFrontText = !!this.front
+      const textToBaseOn = (basedOnFrontText ? this.front : this.back).split(
+        '\n'
+      )[0]
+      if (!textToBaseOn) {
+        return console.log('no basis text')
+      }
+      const japaneseRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf\u3400-\u4dbf]/
+      const isJapanese = japaneseRegex.test(textToBaseOn)
+      const kanjiRegex = /[\u4e00-\u9faf\u3400-\u4dbf]/
+      const hasKanji = kanjiRegex.test(textToBaseOn)
+
+      fetch(
+        `https://cors-anywhere.herokuapp.com/https://jisho.org/api/v1/search/words?keyword=${textToBaseOn}`
+      )
+        .then(res => res.json())
+        .then(data => data.data[0])
+        .then(entry => {
+          if (!entry) {
+            if (basedOnFrontText)
+              return (this.back = `Couldn't find a definition for that!`)
+            return (this.front = `Couldn't find a definition for that!`)
+          }
+          console.log(entry)
+          let front = this.front
+          let back = this.back
+          const definition = entry.senses
+            .slice(0, 2)
+            .reduce(
+              (acc, sense) => [
+                ...acc,
+                ...sense.english_definitions.slice(0, 2),
+              ],
+              []
+            )
+            .join(', ')
+
+          if (basedOnFrontText) {
+            if (isJapanese && hasKanji && entry.japanese[0].reading)
+              back = entry.japanese[0].reading
+            // + (back ? '\n' : '') + back
+            else if (isJapanese && !hasKanji && entry.japanese[0].word)
+              back = entry.japanese[0].word // + (back ? '\n' : '') + back
+            if (isJapanese) {
+              this.imageURL = ''
+              back = back + '\n' + definition
+            } else if (!isJapanese) {
+              this.autoSetImage()
+              front = definition
+              back =
+                (entry.japanese[0].word ? entry.japanese[0].word + '\n' : '') +
+                (entry.japanese[0].reading ? entry.japanese[0].reading : '')
+            }
+          } else if (!basedOnFrontText) {
+            if (isJapanese) {
+              front = definition
+              this.autoSetImage()
+              back =
+                (entry.japanese[0].word ? entry.japanese[0].word + '\n' : '') +
+                (entry.japanese[0].reading ? entry.japanese[0].reading : '') //+
+              // back
+              //   ? '\n' + back.substring(back.indexOf('\n') + 1)
+              //   : ''
+            } else if (!isJapanese) {
+              this.imageURL = ''
+              front = entry.japanese[0].word
+                ? entry.japanese[0].word
+                : entry.japanese[0].reading
+                ? entry.japanese[0].reading
+                : `Whoops, couldn't find that one.`
+              back =
+                (entry.japanese[0].reading
+                  ? entry.japanese[0].reading + '\n'
+                  : '') + definition
+              //+
+              // '\n' +
+              // back
+            }
+          }
+
+          this.front = front
+          this.back = back
+        })
     },
   },
 }

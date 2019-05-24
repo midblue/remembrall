@@ -94,6 +94,7 @@ export default {
   },
   watch: {
     text(newText) {
+      this.isPlaceholder = newText.length === 0
       if (!this.isEditing) {
         this.resetTextTo(newText)
       }

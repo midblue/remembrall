@@ -40,6 +40,8 @@
           <div class="button" @click="autoAddImageURL">Auto-Set Image</div>
         </template>
 
+        <div class="button" v-if="nextReview > Date.now()" @click="reviewNow">Review Now</div>
+
         <div
           class="button movetobutton"
           ref="movetobutton"
@@ -148,6 +150,13 @@ export default {
       })
       this.open = false
       this.realSetId = toId
+    },
+    reviewNow() {
+      this.$store.commit('updateCard', {
+        id: this.id,
+        nextReview: 1,
+      })
+      this.open = false
     },
     suspendCard() {
       this.$store.commit('updateCard', {

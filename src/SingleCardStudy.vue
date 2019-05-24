@@ -248,6 +248,7 @@ export default {
         successRatio: 0.8,
         length: 0.3,
       }
+      // TODO consider making maturity a negative multiplier so it doesn't go 4mo -> 2y -> 10y etc
 
       let newTimeMod = this.timeBonuses[difficulty]
       for (let bonus in bonuses) {
