@@ -1,5 +1,5 @@
 <template>
-  <div class="cardcreator">
+  <div class="cardcreator" :class="{loading: loadingAutocomplete}">
     <div class="cardframe">
       <EditableTextFieldMarkdown
         class="textfield front"
@@ -34,7 +34,7 @@
     </div>
 
     <center v-if="front || back">
-      <template v-if="languageTools === 'ja'">
+      <template v-if="['ja', 'es'].includes(languageTools)">
         <button @click="autoComplete">
           <div>Auto-Complete Card</div>
           <kbd class="keyicon">{{ isFirefox ? 'ctrl': '⌘' }}-m</kbd>
@@ -67,6 +67,7 @@ import FloatingText from './FloatingText'
 import EditableTextFieldMarkdown from './EditableTextFieldMarkdown'
 import ImageLoader from './ImageLoader'
 import { getRandomImage } from './assets/commonFunctions'
+import { autocomplete } from './assets/autocomplete'
 
 export default {
   props: {},
@@ -80,6 +81,7 @@ export default {
       isDuplicate: false,
       setFocus: 'front',
       isFirefox: navigator.userAgent.toLowerCase().indexOf('firefox') > -1,
+      loadingAutocomplete: false,
     }
   },
   components: {
@@ -177,89 +179,30 @@ export default {
       })
     },
     autoComplete() {
+      this.loadingAutocomplete = true
       const basedOnFrontText = !!this.front
       const textToBaseOn = (basedOnFrontText ? this.front : this.back).split(
         '\n'
       )[0]
       if (!textToBaseOn) {
+        this.loadingAutocomplete = false
         return console.log('no basis text')
       }
-      const japaneseRegex = /[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf\u3400-\u4dbf]/
-      const isJapanese = japaneseRegex.test(textToBaseOn)
-      const kanjiRegex = /[\u4e00-\u9faf\u3400-\u4dbf]/
-      const hasKanji = kanjiRegex.test(textToBaseOn)
 
-      fetch(
-        `https://cors-anywhere.herokuapp.com/https://jisho.org/api/v1/search/words?keyword=${textToBaseOn}`
-      )
-        .then(res => res.json())
-        .then(data => data.data[0])
-        .then(entry => {
-          if (!entry) {
-            if (basedOnFrontText)
-              return (this.back = `Couldn't find a definition for that!`)
-            return (this.front = `Couldn't find a definition for that!`)
-          }
-          console.log(entry)
-          let front = this.front
-          let back = this.back
-          const definition = entry.senses
-            .slice(0, 2)
-            .reduce(
-              (acc, sense) => [
-                ...acc,
-                ...sense.english_definitions.slice(0, 2),
-              ],
-              []
-            )
-            .join(', ')
-
-          if (basedOnFrontText) {
-            if (isJapanese && hasKanji && entry.japanese[0].reading)
-              back = entry.japanese[0].reading
-            // + (back ? '\n' : '') + back
-            else if (isJapanese && !hasKanji && entry.japanese[0].word)
-              back = entry.japanese[0].word // + (back ? '\n' : '') + back
-            if (isJapanese) {
-              this.imageURL = ''
-              back = back + '\n' + definition
-            } else if (!isJapanese) {
-              this.autoSetImage()
-              front = definition
-              back =
-                (entry.japanese[0].word ? entry.japanese[0].word + '\n' : '') +
-                (entry.japanese[0].reading ? entry.japanese[0].reading : '')
-            }
-          } else if (!basedOnFrontText) {
-            if (isJapanese) {
-              front = definition
-              this.autoSetImage()
-              back =
-                (entry.japanese[0].word ? entry.japanese[0].word + '\n' : '') +
-                (entry.japanese[0].reading ? entry.japanese[0].reading : '') //+
-              // back
-              //   ? '\n' + back.substring(back.indexOf('\n') + 1)
-              //   : ''
-            } else if (!isJapanese) {
-              this.imageURL = ''
-              front = entry.japanese[0].word
-                ? entry.japanese[0].word
-                : entry.japanese[0].reading
-                ? entry.japanese[0].reading
-                : `Whoops, couldn't find that one.`
-              back =
-                (entry.japanese[0].reading
-                  ? entry.japanese[0].reading + '\n'
-                  : '') + definition
-              //+
-              // '\n' +
-              // back
-            }
-          }
-
-          this.front = front
-          this.back = back
-        })
+      autocomplete({
+        front: this.front,
+        back: this.back,
+        basedOnFrontText,
+        textToBaseOn,
+        language: this.languageTools,
+      }).then(newValues => {
+        console.log(newValues)
+        this.front = newValues.front
+        this.back = newValues.back
+        this.imageURL = ''
+        if (newValues.shouldAutoSetImage) this.autoSetImage()
+        this.loadingAutocomplete = false
+      })
     },
   },
 }
@@ -271,6 +214,11 @@ export default {
   margin: 0 auto;
   opacity: 1;
   transition: all 0.5s;
+
+  &.loading {
+    pointer-events: none;
+    opacity: 0.3;
+  }
 
   & > * {
     display: block;

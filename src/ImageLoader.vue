@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="!hide">
     <svg
       v-if="!loaded"
       width="105"
@@ -16,9 +16,9 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
-      <circle cx="12.5" cy="52.5" r="12.5" fill-opacity=".5">
+      <circle cx="12.5" cy="52.5" r="12.5" fill-opacity="0.5">
         <animate
           attributeName="fill-opacity"
           begin="100ms"
@@ -26,7 +26,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="52.5" cy="12.5" r="12.5">
         <animate
@@ -36,7 +36,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="52.5" cy="52.5" r="12.5">
         <animate
@@ -46,7 +46,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="92.5" cy="12.5" r="12.5">
         <animate
@@ -56,7 +56,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="92.5" cy="52.5" r="12.5">
         <animate
@@ -66,7 +66,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="12.5" cy="92.5" r="12.5">
         <animate
@@ -76,7 +76,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="52.5" cy="92.5" r="12.5">
         <animate
@@ -86,7 +86,7 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
       <circle cx="92.5" cy="92.5" r="12.5">
         <animate
@@ -96,10 +96,10 @@
           values="1;.2;1"
           calcMode="linear"
           repeatCount="indefinite"
-        />
+        ></animate>
       </circle>
     </svg>
-    <img :src="url" v-else />
+    <img :src="url" v-else>
   </div>
 </template>
 
@@ -113,6 +113,7 @@ export default {
   data() {
     return {
       loaded: false,
+      hide: false,
     }
   },
   watch: {
@@ -129,6 +130,10 @@ export default {
       const img = new Image()
       img.onload = () => {
         this.loaded = true
+      }
+      img.onerror = () => {
+        console.log('Failed to load card image', url)
+        this.hide = true
       }
       img.src = url
     },
